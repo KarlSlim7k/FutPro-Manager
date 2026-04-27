@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { MatchSummary } from "@/components/matches/match-summary";
+import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -130,7 +131,13 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             <CardTitle>Captura de resultado</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación. Aquí se registrará el marcador final.</p>
+            <UpdateMatchResultForm
+              leagueSlug={league.slug}
+              matchId={match.id}
+              initialHomeScore={match.home_score}
+              initialAwayScore={match.away_score}
+              initialStatus={match.status}
+            />
           </CardContent>
         </Card>
 
