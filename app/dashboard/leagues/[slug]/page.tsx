@@ -56,7 +56,7 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
   }
 
   const league = data as LeagueDetail;
-  const placeholderModules = ["Temporadas", "Equipos", "Jugadores", "Partidos"];
+  const placeholderModules = ["Equipos", "Jugadores", "Partidos"];
 
   return (
     <section className="space-y-6">
@@ -126,6 +126,23 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Temporadas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Administra periodos competitivos, estado y fechas clave de la liga.
+            </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/seasons`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver temporadas
+            </Link>
+          </CardContent>
+        </Card>
+
         {placeholderModules.map((moduleName) => (
           <Card key={moduleName}>
             <CardHeader>

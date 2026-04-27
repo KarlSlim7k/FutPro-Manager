@@ -5,5 +5,4 @@ node_modules
 .next
 .github
 .vscode
-supabase
 supabase/.temp/

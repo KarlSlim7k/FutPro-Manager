@@ -7,7 +7,14 @@ export type AppRole =
   | "viewer";
 
 export type LeagueStatus = "draft" | "active" | "archived" | "inactive";
-export type SeasonStatus = "draft" | "upcoming" | "active" | "completed" | "archived";
+export const SEASON_STATUS_VALUES = [
+  "draft",
+  "upcoming",
+  "active",
+  "completed",
+  "archived",
+] as const;
+export type SeasonStatus = (typeof SEASON_STATUS_VALUES)[number];
 export type TeamStatus = "active" | "inactive" | "archived";
 export type PlayerStatus = "active" | "inactive" | "injured" | "suspended" | "retired";
 export type PlayerRegistrationStatus = "active" | "inactive" | "released" | "transferred";
