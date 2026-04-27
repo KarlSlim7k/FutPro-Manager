@@ -80,12 +80,20 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/teams`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver a equipos
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={`/dashboard/leagues/${league.slug}/teams`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Volver a equipos
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Editar equipo
+          </Link>
+        </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">{team.name}</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
