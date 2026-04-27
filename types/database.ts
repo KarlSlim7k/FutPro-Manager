@@ -100,6 +100,19 @@ export interface Team {
   updated_at: string;
 }
 
+export interface Venue {
+  id: string;
+  league_id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Player {
   id: string;
   league_id: string;

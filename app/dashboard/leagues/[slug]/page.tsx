@@ -56,7 +56,6 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
   }
 
   const league = data as LeagueDetail;
-  const placeholderModules = ["Partidos"];
 
   return (
     <section className="space-y-6">
@@ -177,18 +176,33 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
           </CardContent>
         </Card>
 
-        {placeholderModules.map((moduleName) => (
-          <Card key={moduleName}>
-            <CardHeader>
-              <CardTitle>{moduleName}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Módulo en preparación. Aquí se mostrará la gestión de {moduleName.toLowerCase()}.
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+        <Card>
+          <CardHeader>
+            <CardTitle>Sedes / Canchas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Administra sedes, ubicación y datos geográficos para la programación de partidos.
+            </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/venues`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver sedes
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Partidos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">
+              Módulo en preparación. Aquí se mostrará la gestión de partidos.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
