@@ -1,15 +1,19 @@
 # AI CONTEXT
 
 ## Project
+
 FutPro Manager
 
 ## Purpose
+
 Sistema SaaS para gestión de ligas amateur de fútbol.
 
 ## Region
+
 Perote, Veracruz, México.
 
 ## Core Concepts
+
 - Liga
 - Temporada
 - Equipo
@@ -19,15 +23,54 @@ Perote, Veracruz, México.
 - Tabla de posiciones
 
 ## System Type
+
 Multi-tenant (multi-liga en una sola app).
 
 ## Priorities
+
 - Simplicidad
 - Escalabilidad
 - Bajo costo
 - UX móvil
 
+## Current Backend Data Layer
+
+- Base de datos: Supabase PostgreSQL.
+- Auth: Supabase Auth (`auth.users`).
+- Migración inicial: `supabase/migrations/0001_initial_schema.sql`.
+- RLS habilitado por tabla de negocio.
+- Perfil se crea automáticamente al registrarse un usuario.
+
+## Domain Tables (MVP)
+
+- profiles
+- leagues
+- league_members
+- seasons
+- teams
+- team_members
+- players
+- player_team_registrations
+- venues
+- matches
+- match_events
+- standings
+- media_uploads
+- audit_logs
+- subscription_plans
+- league_subscriptions
+
+## Access Model Summary
+
+- Rol global en `profiles.global_role`.
+- Roles por liga en `league_members.role`.
+- Roles por equipo en `team_members.role`.
+- Datos públicos: ligas/temporadas/equipos/sedes/partidos/eventos/standings cuando la liga está activa y pública.
+- Datos privados: perfiles, membresías, media, auditoría y suscripciones.
+
 ## Notes for AI Agents
+
 - Evitar overengineering.
-- Priorizar MVP funcional.
-- Mantener estructura clara y modular.
+- Priorizar MVP funcional y seguro.
+- No romper flujo de auth existente.
+- Mantener políticas RLS claras y auditables.
