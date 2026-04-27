@@ -40,6 +40,7 @@ Multi-tenant (multi-liga en una sola app).
 - Migración inicial: `supabase/migrations/0001_initial_schema.sql`.
 - RLS habilitado por tabla de negocio.
 - Perfil se crea automáticamente al registrarse un usuario.
+- Backfill de `profiles` incluido para usuarios auth preexistentes.
 
 ## Domain Tables (MVP)
 
@@ -74,3 +75,4 @@ Multi-tenant (multi-liga en una sola app).
 - Priorizar MVP funcional y seguro.
 - No romper flujo de auth existente.
 - Mantener políticas RLS claras y auditables.
+- El primer `super_admin` se asigna manualmente por SQL administrativo seguro.

@@ -81,6 +81,7 @@ Incluye índices para filtros frecuentes:
 
 - `profiles`, `league_members`, `team_members`, `players`, `player_team_registrations`, `media_uploads`, `audit_logs`, `league_subscriptions`.
 - Escritura gobernada por helpers (`is_super_admin`, `can_manage_league`, `can_manage_team`, `can_manage_match`).
+- En `match_events`, escritura endurecida: `created_by` debe coincidir con `auth.uid()`, el `team_id` debe participar en el partido y, si hay `player_id`, debe existir registro activo del jugador para ese equipo/temporada.
 
 ### Datos de planes
 
@@ -92,3 +93,24 @@ Incluye índices para filtros frecuentes:
 - Asignaciones formales de árbitros por partido (tabla dedicada).
 - Generación automática de standings desde eventos/resultados.
 - Políticas de media pública/privada por tipo de entidad.
+
+## Bootstrap seguro inicial
+
+- La migración incluye backfill de `profiles` para usuarios ya existentes en `auth.users` antes de activar el trigger de altas nuevas.
+- Cualquier usuario autenticado puede crear su liga inicial con `created_by = auth.uid()`; el trigger lo agrega como `league_admin`.
+- El primer `super_admin` **no** se autoasigna. Debe configurarse manualmente con SQL administrativo controlado:
+
+```sql
+update public.profiles
+set global_role = 'super_admin'
+where id = '<USER_UUID>';
+```
+
+## Aplicación de migración (cuando se apruebe)
+
+1. **Supabase SQL Editor:** ejecutar el contenido de `supabase/migrations/0001_initial_schema.sql`.
+2. **Supabase CLI:**
+   1. `supabase link --project-ref <PROJECT_REF>`
+   2. `supabase db push`
+
+No usar `service_role` en frontend; mantenerlo solo en entornos server-side confiables.

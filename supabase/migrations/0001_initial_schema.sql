@@ -230,7 +230,7 @@ create table public.match_events (
   event_type public.match_event_type not null,
   minute int not null check (minute >= 0 and minute <= 130),
   notes text,
-  created_by uuid not null references public.profiles (id) on delete restrict,
+  created_by uuid not null default auth.uid() references public.profiles (id) on delete restrict,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -470,6 +470,21 @@ as $$
   where m.id = target_match_id;
 $$;
 
+create or replace function public.team_participates_in_match(target_match_id uuid, target_team_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.matches m
+    where m.id = target_match_id
+      and (m.home_team_id = target_team_id or m.away_team_id = target_team_id)
+  );
+$$;
+
 create or replace function public.can_access_league(target_league_id uuid)
 returns boolean
 language sql
@@ -674,6 +689,74 @@ begin
 end;
 $$;
 
+create or replace function public.ensure_match_event_consistency()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_match_league_id uuid;
+  v_match_season_id uuid;
+  v_player_league_id uuid;
+begin
+  select m.league_id, m.season_id
+    into v_match_league_id, v_match_season_id
+  from public.matches m
+  where m.id = new.match_id;
+
+  if v_match_league_id is null then
+    raise exception 'match must exist';
+  end if;
+
+  if new.team_id is not null and not public.team_participates_in_match(new.match_id, new.team_id) then
+    raise exception 'team must participate in the match';
+  end if;
+
+  if new.player_id is not null then
+    if new.team_id is null then
+      raise exception 'team_id is required when player_id is present';
+    end if;
+
+    select p.league_id
+      into v_player_league_id
+    from public.players p
+    where p.id = new.player_id;
+
+    if v_player_league_id is null then
+      raise exception 'player must exist';
+    end if;
+
+    if v_player_league_id <> v_match_league_id then
+      raise exception 'player must belong to the same league as the match';
+    end if;
+
+    if not exists (
+      select 1
+      from public.player_team_registrations ptr
+      where ptr.player_id = new.player_id
+        and ptr.team_id = new.team_id
+        and ptr.season_id = v_match_season_id
+        and ptr.status = 'active'
+    ) then
+      raise exception 'player must have an active registration for the team in this season';
+    end if;
+  end if;
+
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null and new.created_by <> auth.uid() and not public.is_super_admin() then
+      raise exception 'created_by must match auth.uid()';
+    end if;
+  elsif tg_op = 'UPDATE' then
+    if new.created_by <> old.created_by and not public.is_super_admin() then
+      raise exception 'created_by cannot be changed';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
 create trigger on_profiles_set_updated_at
 before update on public.profiles
 for each row execute function public.set_updated_at();
@@ -749,6 +832,30 @@ for each row execute function public.ensure_player_registration_consistency();
 create trigger on_matches_consistency
 before insert or update on public.matches
 for each row execute function public.ensure_match_consistency();
+
+create trigger on_match_events_consistency
+before insert or update on public.match_events
+for each row execute function public.ensure_match_event_consistency();
+
+insert into public.profiles (
+  id,
+  full_name,
+  display_name,
+  avatar_url
+)
+select
+  u.id,
+  coalesce(u.raw_user_meta_data ->> 'full_name', u.raw_user_meta_data ->> 'name'),
+  nullif(
+    coalesce(
+      u.raw_user_meta_data ->> 'display_name',
+      split_part(coalesce(u.email, ''), '@', 1)
+    ),
+    ''
+  ),
+  u.raw_user_meta_data ->> 'avatar_url'
+from auth.users u
+on conflict (id) do nothing;
 
 create trigger on_auth_user_created
 after insert on auth.users
@@ -1036,14 +1143,31 @@ using (
   or public.can_access_league(public.get_match_league_id(match_id))
 );
 
-create policy "match_events_write_manage_referee_team_staff"
+create policy "match_events_insert_manage_referee_team_staff"
 on public.match_events
-for all
+for insert
+to authenticated
+with check (
+  created_by = auth.uid()
+  and (
+    public.can_manage_match(match_id)
+    or (
+      team_id is not null
+      and public.team_participates_in_match(match_id, team_id)
+      and public.has_team_role(team_id, array['team_admin', 'coach']::public.app_role[])
+    )
+  )
+);
+
+create policy "match_events_update_manage_referee_team_staff"
+on public.match_events
+for update
 to authenticated
 using (
   public.can_manage_match(match_id)
   or (
     team_id is not null
+    and public.team_participates_in_match(match_id, team_id)
     and public.has_team_role(team_id, array['team_admin', 'coach']::public.app_role[])
   )
 )
@@ -1051,6 +1175,20 @@ with check (
   public.can_manage_match(match_id)
   or (
     team_id is not null
+    and public.team_participates_in_match(match_id, team_id)
+    and public.has_team_role(team_id, array['team_admin', 'coach']::public.app_role[])
+  )
+);
+
+create policy "match_events_delete_manage_referee_team_staff"
+on public.match_events
+for delete
+to authenticated
+using (
+  public.can_manage_match(match_id)
+  or (
+    team_id is not null
+    and public.team_participates_in_match(match_id, team_id)
     and public.has_team_role(team_id, array['team_admin', 'coach']::public.app_role[])
   )
 );
