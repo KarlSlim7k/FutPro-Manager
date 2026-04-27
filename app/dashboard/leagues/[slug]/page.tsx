@@ -56,7 +56,7 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
   }
 
   const league = data as LeagueDetail;
-  const placeholderModules = ["Jugadores", "Partidos"];
+  const placeholderModules = ["Partidos"];
 
   return (
     <section className="space-y-6">
@@ -156,6 +156,23 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
               className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver equipos
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Jugadores</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Consolida fichas base de jugadores y su estado deportivo en la liga.
+            </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/players`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver jugadores
             </Link>
           </CardContent>
         </Card>

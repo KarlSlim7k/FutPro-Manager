@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 
-function buildCards(leaguesCount: number, teamsCount: number) {
+function buildCards(leaguesCount: number, teamsCount: number, playersCount: number) {
   return [
     {
       title: "Ligas activas",
@@ -21,7 +21,7 @@ function buildCards(leaguesCount: number, teamsCount: number) {
     },
     {
       title: "Jugadores",
-      value: "0",
+      value: String(playersCount),
       description: "Consolida fichas, dorsales y estatus de jugadores.",
     },
     {
@@ -34,11 +34,15 @@ function buildCards(leaguesCount: number, teamsCount: number) {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const [{ count: leaguesCount, error: leaguesError }, { count: teamsCount, error: teamsError }] =
-    await Promise.all([
-      supabase.from("leagues").select("id", { count: "exact", head: true }),
-      supabase.from("teams").select("id", { count: "exact", head: true }),
-    ]);
+  const [
+    { count: leaguesCount, error: leaguesError },
+    { count: teamsCount, error: teamsError },
+    { count: playersCount, error: playersError },
+  ] = await Promise.all([
+    supabase.from("leagues").select("id", { count: "exact", head: true }),
+    supabase.from("teams").select("id", { count: "exact", head: true }),
+    supabase.from("players").select("id", { count: "exact", head: true }),
+  ]);
 
   if (leaguesError) {
     throw leaguesError;
@@ -48,7 +52,11 @@ export default async function DashboardPage() {
     throw teamsError;
   }
 
-  const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0);
+  if (playersError) {
+    throw playersError;
+  }
+
+  const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0, playersCount ?? 0);
 
   return (
     <section className="space-y-6">

@@ -17,7 +17,16 @@ export const SEASON_STATUS_VALUES = [
 export type SeasonStatus = (typeof SEASON_STATUS_VALUES)[number];
 export const TEAM_STATUS_VALUES = ["active", "inactive", "archived"] as const;
 export type TeamStatus = (typeof TEAM_STATUS_VALUES)[number];
-export type PlayerStatus = "active" | "inactive" | "injured" | "suspended" | "retired";
+export const PLAYER_STATUS_VALUES = [
+  "active",
+  "inactive",
+  "injured",
+  "suspended",
+  "retired",
+] as const;
+export type PlayerStatus = (typeof PLAYER_STATUS_VALUES)[number];
+export const DOMINANT_FOOT_VALUES = ["left", "right", "both"] as const;
+export type DominantFoot = (typeof DOMINANT_FOOT_VALUES)[number];
 export type PlayerRegistrationStatus = "active" | "inactive" | "released" | "transferred";
 export type MatchStatus = "scheduled" | "in_progress" | "completed" | "postponed" | "cancelled";
 export type MatchEventType =
@@ -92,7 +101,7 @@ export interface Player {
   birth_date: string | null;
   photo_url: string | null;
   preferred_position: string | null;
-  dominant_foot: "left" | "right" | "both" | null;
+  dominant_foot: DominantFoot | null;
   status: PlayerStatus;
   created_at: string;
   updated_at: string;
