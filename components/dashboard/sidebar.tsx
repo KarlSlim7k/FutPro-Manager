@@ -2,10 +2,11 @@ import Link from "next/link";
 
 const menuItems = [
   { label: "Panel de control", href: "/dashboard", enabled: true },
-  { label: "Ligas", href: "#", enabled: false },
+  { label: "Ligas", href: "/dashboard/leagues", enabled: true },
   { label: "Equipos", href: "#", enabled: false },
   { label: "Jugadores", href: "#", enabled: false },
   { label: "Partidos", href: "#", enabled: false },
+  { label: "Tipos", href: "#", enabled: false },
 ];
 
 export function DashboardSidebar() {
