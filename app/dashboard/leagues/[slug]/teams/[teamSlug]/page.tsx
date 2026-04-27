@@ -186,8 +186,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-gray-600">
-              Consulta y administra el catálogo de jugadores de esta liga.
+              Registra jugadores por temporada y consulta la plantilla activa del equipo.
             </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver plantilla por temporada
+            </Link>
             <Link
               href={`/dashboard/leagues/${league.slug}/players`}
               className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"

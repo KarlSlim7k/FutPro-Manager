@@ -160,8 +160,16 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
           <CardHeader>
             <CardTitle>Registro en equipo</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación.</p>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Registra y consulta movimientos del jugador por equipo y temporada.
+            </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/players/${player.id}/registrations`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver historial de registros
+            </Link>
           </CardContent>
         </Card>
 
@@ -169,8 +177,14 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
           <CardHeader>
             <CardTitle>Historial de equipos</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación.</p>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">Consulta equipos y temporadas donde fue registrado.</p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/players/${player.id}/registrations`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ir al historial completo
+            </Link>
           </CardContent>
         </Card>
 

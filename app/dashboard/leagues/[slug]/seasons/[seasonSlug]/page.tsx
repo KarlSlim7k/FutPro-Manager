@@ -135,8 +135,16 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
           <CardHeader>
             <CardTitle>Equipos de la temporada</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación.</p>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Consulta el catálogo de equipos de la liga para gestionar registros por temporada.
+            </p>
+            <Link
+              href={`/dashboard/leagues/${league.slug}/teams`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Ver equipos de la liga
+            </Link>
           </CardContent>
         </Card>
 

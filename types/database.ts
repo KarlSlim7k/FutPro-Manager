@@ -27,7 +27,13 @@ export const PLAYER_STATUS_VALUES = [
 export type PlayerStatus = (typeof PLAYER_STATUS_VALUES)[number];
 export const DOMINANT_FOOT_VALUES = ["left", "right", "both"] as const;
 export type DominantFoot = (typeof DOMINANT_FOOT_VALUES)[number];
-export type PlayerRegistrationStatus = "active" | "inactive" | "released" | "transferred";
+export const PLAYER_REGISTRATION_STATUS_VALUES = [
+  "active",
+  "inactive",
+  "released",
+  "transferred",
+] as const;
+export type PlayerRegistrationStatus = (typeof PLAYER_REGISTRATION_STATUS_VALUES)[number];
 export type MatchStatus = "scheduled" | "in_progress" | "completed" | "postponed" | "cancelled";
 export type MatchEventType =
   | "goal"
@@ -103,6 +109,18 @@ export interface Player {
   preferred_position: string | null;
   dominant_foot: DominantFoot | null;
   status: PlayerStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlayerTeamRegistration {
+  id: string;
+  player_id: string;
+  team_id: string;
+  season_id: string;
+  jersey_number: number | null;
+  status: PlayerRegistrationStatus;
+  registered_at: string;
   created_at: string;
   updated_at: string;
 }
