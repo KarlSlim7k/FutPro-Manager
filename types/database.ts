@@ -177,3 +177,24 @@ export interface MatchEvent {
   created_at: string;
   updated_at: string;
 }
+
+export interface Standing {
+  id: string;
+  league_id: string;
+  season_id: string;
+  team_id: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type StandingWithTeam = Standing & {
+  team: Pick<Team, "id" | "name" | "slug">;
+};
