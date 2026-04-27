@@ -15,7 +15,8 @@ export const SEASON_STATUS_VALUES = [
   "archived",
 ] as const;
 export type SeasonStatus = (typeof SEASON_STATUS_VALUES)[number];
-export type TeamStatus = "active" | "inactive" | "archived";
+export const TEAM_STATUS_VALUES = ["active", "inactive", "archived"] as const;
+export type TeamStatus = (typeof TEAM_STATUS_VALUES)[number];
 export type PlayerStatus = "active" | "inactive" | "injured" | "suspended" | "retired";
 export type PlayerRegistrationStatus = "active" | "inactive" | "released" | "transferred";
 export type MatchStatus = "scheduled" | "in_progress" | "completed" | "postponed" | "cancelled";
