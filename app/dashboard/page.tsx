@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 
-function buildCards(leaguesCount: number, teamsCount: number, playersCount: number) {
+function buildCards(leaguesCount: number, teamsCount: number, playersCount: number, upcomingMatchesCount: number) {
   return [
     {
       title: "Ligas activas",
@@ -26,7 +26,7 @@ function buildCards(leaguesCount: number, teamsCount: number, playersCount: numb
     },
     {
       title: "Partidos próximos",
-      value: "0",
+      value: String(upcomingMatchesCount),
       description: "Visualiza programación y próximos encuentros.",
     },
   ];
@@ -34,14 +34,21 @@ function buildCards(leaguesCount: number, teamsCount: number, playersCount: numb
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const now = new Date().toISOString();
   const [
     { count: leaguesCount, error: leaguesError },
     { count: teamsCount, error: teamsError },
     { count: playersCount, error: playersError },
+    { count: upcomingMatchesCount, error: matchesError },
   ] = await Promise.all([
     supabase.from("leagues").select("id", { count: "exact", head: true }),
     supabase.from("teams").select("id", { count: "exact", head: true }),
     supabase.from("players").select("id", { count: "exact", head: true }),
+    supabase
+      .from("matches")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "scheduled")
+      .gte("scheduled_at", now),
   ]);
 
   if (leaguesError) {
@@ -56,7 +63,10 @@ export default async function DashboardPage() {
     throw playersError;
   }
 
-  const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0, playersCount ?? 0);
+  // Fallback a todos los partidos visibles si el filtro de próximos falla
+  const safeUpcomingMatchesCount = upcomingMatchesCount ?? 0;
+
+  const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0, playersCount ?? 0, safeUpcomingMatchesCount);
 
   return (
     <section className="space-y-6">

@@ -34,7 +34,14 @@ export const PLAYER_REGISTRATION_STATUS_VALUES = [
   "transferred",
 ] as const;
 export type PlayerRegistrationStatus = (typeof PLAYER_REGISTRATION_STATUS_VALUES)[number];
-export type MatchStatus = "scheduled" | "in_progress" | "completed" | "postponed" | "cancelled";
+export const MATCH_STATUS_VALUES = [
+  "scheduled",
+  "in_progress",
+  "completed",
+  "postponed",
+  "cancelled",
+] as const;
+export type MatchStatus = (typeof MATCH_STATUS_VALUES)[number];
 export type MatchEventType =
   | "goal"
   | "own_goal"
