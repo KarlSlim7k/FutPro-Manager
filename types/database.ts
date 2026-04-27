@@ -42,15 +42,18 @@ export const MATCH_STATUS_VALUES = [
   "cancelled",
 ] as const;
 export type MatchStatus = (typeof MATCH_STATUS_VALUES)[number];
-export type MatchEventType =
-  | "goal"
-  | "own_goal"
-  | "assist"
-  | "yellow_card"
-  | "red_card"
-  | "substitution"
-  | "penalty_goal"
-  | "penalty_miss";
+export const MATCH_EVENT_TYPE_VALUES = [
+  "goal",
+  "own_goal",
+  "assist",
+  "yellow_card",
+  "red_card",
+  "substitution",
+  "penalty_goal",
+  "penalty_miss",
+] as const;
+export type MatchEventType = (typeof MATCH_EVENT_TYPE_VALUES)[number];
+
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "cancelled" | "paused";
 
 export interface Profile {
@@ -158,6 +161,19 @@ export interface Match {
   home_score: number;
   away_score: number;
   round_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MatchEvent {
+  id: string;
+  match_id: string;
+  team_id: string | null;
+  player_id: string | null;
+  event_type: MatchEventType;
+  minute: number;
+  notes: string | null;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }

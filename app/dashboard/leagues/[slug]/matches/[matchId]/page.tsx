@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { MatchSummary } from "@/components/matches/match-summary";
 import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
-import type { League, Match, Season, Team, Venue } from "@/types/database";
+import { CreateMatchEventForm } from "@/components/matches/create-match-event-form";
+import { MatchEventList } from "@/components/matches/match-event-list";
+import type { League, Match, Season, Team, Venue, MatchEvent, Player, PlayerTeamRegistration } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
 
@@ -56,12 +58,14 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   const match = matchData as Match;
 
-  // Fetch related names
+  // Fetch related names, events and active player registrations
   const [
     { data: seasonData },
     { data: homeTeamData },
     { data: awayTeamData },
     { data: venueData },
+    { data: eventsData },
+    { data: registrationsData },
   ] = await Promise.all([
     supabase.from("seasons").select("id, name, slug").eq("id", match.season_id).maybeSingle(),
     supabase.from("teams").select("id, name, slug").eq("id", match.home_team_id).maybeSingle(),
@@ -69,12 +73,55 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     match.venue_id
       ? supabase.from("venues").select("id, name").eq("id", match.venue_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase
+      .from("match_events")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("minute", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("player_team_registrations")
+      .select("id, player_id, team_id, jersey_number")
+      .eq("season_id", match.season_id)
+      .in("team_id", [match.home_team_id, match.away_team_id])
+      .eq("status", "active"),
   ]);
 
   const season = seasonData as Pick<Season, "id" | "name" | "slug"> | null;
   const homeTeam = homeTeamData as Pick<Team, "id" | "name" | "slug"> | null;
   const awayTeam = awayTeamData as Pick<Team, "id" | "name" | "slug"> | null;
   const venue = venueData as Pick<Venue, "id" | "name"> | null;
+  const events = (eventsData ?? []) as MatchEvent[];
+
+  type RegistrationRow = { id: string; player_id: string; team_id: string; jersey_number: number | null };
+  const registrations = (registrationsData ?? []) as RegistrationRow[];
+  const playerIds = [...new Set(registrations.map((r) => r.player_id))];
+  const { data: playersData } =
+    playerIds.length > 0
+      ? await supabase.from("players").select("id, full_name, preferred_position").in("id", playerIds)
+      : { data: [] };
+
+  type PlayerRow = { id: string; full_name: string; preferred_position: string | null };
+  const playersFromDb = (playersData ?? []) as PlayerRow[];
+  const playersMap = new Map(playersFromDb.map((p) => [p.id, p]));
+  const playersForForm = registrations.map((reg) => {
+    const player = playersMap.get(reg.player_id);
+    return {
+      id: reg.player_id,
+      team_id: reg.team_id,
+      full_name: player?.full_name ?? "Jugador desconocido",
+      preferred_position: player?.preferred_position ?? null,
+    };
+  });
+
+  const teamsMap: Record<string, { name: string }> = {};
+  if (homeTeam) teamsMap[homeTeam.id] = homeTeam;
+  if (awayTeam) teamsMap[awayTeam.id] = awayTeam;
+
+  const playersMapForList: Record<string, { full_name: string }> = {};
+  playersFromDb.forEach((p) => {
+    playersMapForList[p.id] = p;
+  });
 
   return (
     <section className="space-y-6">
@@ -121,8 +168,22 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <CardHeader>
             <CardTitle>Eventos del partido</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación. Aquí se mostrarán goles, tarjetas y sustituciones.</p>
+          <CardContent className="space-y-6">
+            <CreateMatchEventForm
+              leagueSlug={league.slug}
+              matchId={match.id}
+              homeTeam={{ id: match.home_team_id, name: homeTeam?.name ?? "Local" }}
+              awayTeam={{ id: match.away_team_id, name: awayTeam?.name ?? "Visitante" }}
+              players={playersForForm}
+            />
+            <div className="border-t border-gray-100 pt-4">
+              <h3 className="mb-3 text-sm font-semibold text-gray-900">Registro</h3>
+              <MatchEventList
+                events={events}
+                teamsMap={teamsMap}
+                playersMap={playersMapForList}
+              />
+            </div>
           </CardContent>
         </Card>
 
