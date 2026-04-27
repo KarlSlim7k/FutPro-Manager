@@ -689,6 +689,44 @@ begin
 end;
 $$;
 
+create or replace function public.ensure_match_update_scope()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if tg_op = 'UPDATE'
+    and auth.uid() is not null
+    and not public.is_super_admin()
+    and not public.can_manage_league(old.league_id) then
+    if row(
+      new.league_id,
+      new.season_id,
+      new.home_team_id,
+      new.away_team_id,
+      new.venue_id,
+      new.scheduled_at,
+      new.round_name,
+      new.referee_id
+    ) is distinct from row(
+      old.league_id,
+      old.season_id,
+      old.home_team_id,
+      old.away_team_id,
+      old.venue_id,
+      old.scheduled_at,
+      old.round_name,
+      old.referee_id
+    ) then
+      raise exception 'referee can only update match status and scores';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
 create or replace function public.ensure_match_event_consistency()
 returns trigger
 language plpgsql
@@ -832,6 +870,10 @@ for each row execute function public.ensure_player_registration_consistency();
 create trigger on_matches_consistency
 before insert or update on public.matches
 for each row execute function public.ensure_match_consistency();
+
+create trigger on_matches_restrict_referee_update_scope
+before update on public.matches
+for each row execute function public.ensure_match_update_scope();
 
 create trigger on_match_events_consistency
 before insert or update on public.match_events

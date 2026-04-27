@@ -37,7 +37,8 @@
 2. **Helper functions reutilizables:** `can_access_league`, `can_manage_league`, `can_manage_team`, `can_manage_match`.
 3. **Protección anti-escalamiento:** trigger evita que un usuario cambie su `global_role`.
 4. **Lectura pública controlada:** solo ligas `active` y `is_public = true`.
-5. **Referee en partidos:** puede actualizar partidos/eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`).
+5. **Referee en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`).
+   En `matches`, un referee no admin queda restringido a cambiar `status`, `home_score` y `away_score`.
 6. **Integridad de autoría en eventos:** `match_events.created_by` debe coincidir con el usuario autenticado en inserts y no puede cambiarse en updates (salvo `super_admin`).
 7. **Integridad deportiva en eventos:** `team_id` debe estar en el partido; si hay `player_id`, debe existir registro activo del jugador con ese equipo en la temporada del partido.
 

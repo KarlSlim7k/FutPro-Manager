@@ -82,6 +82,7 @@ Incluye índices para filtros frecuentes:
 - `profiles`, `league_members`, `team_members`, `players`, `player_team_registrations`, `media_uploads`, `audit_logs`, `league_subscriptions`.
 - Escritura gobernada por helpers (`is_super_admin`, `can_manage_league`, `can_manage_team`, `can_manage_match`).
 - En `match_events`, escritura endurecida: `created_by` debe coincidir con `auth.uid()`, el `team_id` debe participar en el partido y, si hay `player_id`, debe existir registro activo del jugador para ese equipo/temporada.
+- En `matches`, un referee no administrador solo puede modificar `status` y marcadores; no puede alterar estructura del partido.
 
 ### Datos de planes
 
