@@ -86,12 +86,20 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/players`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver a jugadores
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={`/dashboard/leagues/${league.slug}/players`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Volver a jugadores
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${league.slug}/players/${player.id}/edit`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Editar jugador
+          </Link>
+        </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">{player.full_name}</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
@@ -158,32 +166,34 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle>Registro en equipo</CardTitle>
+            <CardTitle>Registros en equipos / temporadas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-gray-600">
-              Registra y consulta movimientos del jugador por equipo y temporada.
+              Consulta y administra los movimientos del jugador por equipo y temporada.
             </p>
             <Link
               href={`/dashboard/leagues/${league.slug}/players/${player.id}/registrations`}
               className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
-              Ver historial de registros
+              Ver registros del jugador
             </Link>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Historial de equipos</CardTitle>
+            <CardTitle>Plantillas por equipo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">Consulta equipos y temporadas donde fue registrado.</p>
+            <p className="text-sm text-gray-600">
+              Navega a equipos para revisar sus plantillas por temporada.
+            </p>
             <Link
-              href={`/dashboard/leagues/${league.slug}/players/${player.id}/registrations`}
+              href={`/dashboard/leagues/${league.slug}/teams`}
               className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
-              Ir al historial completo
+              Ver equipos de la liga
             </Link>
           </CardContent>
         </Card>

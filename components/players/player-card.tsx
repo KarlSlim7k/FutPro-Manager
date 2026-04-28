@@ -78,12 +78,20 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
       </div>
 
       <CardContent className="pt-2">
-        <Link
-          href={`/dashboard/leagues/${leagueSlug}/players/${player.id}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Ver detalle
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/dashboard/leagues/${leagueSlug}/players/${player.id}`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Ver detalle
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${leagueSlug}/players/${player.id}/edit`}
+            className="inline-flex items-center text-sm font-medium text-gray-600 transition hover:text-gray-800"
+          >
+            Editar
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );
