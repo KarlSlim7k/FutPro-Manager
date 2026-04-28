@@ -6,3 +6,5 @@ node_modules
 .github
 .vscode
 supabase/.temp/
+.agents
+.claude
