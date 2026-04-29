@@ -88,6 +88,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             Volver a equipos
           </Link>
           <Link
+            href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Ver plantilla
+          </Link>
+          <Link
             href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}
             className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
@@ -200,7 +206,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}
               className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
-              Ver plantilla por temporada
+              Ver plantilla
             </Link>
             <Link
               href={`/dashboard/leagues/${league.slug}/players`}

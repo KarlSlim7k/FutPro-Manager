@@ -88,12 +88,18 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
       </div>
 
       <CardContent className="pt-2">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <Link
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}`}
             className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Ver detalle
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/roster`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Plantilla
           </Link>
           <Link
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/edit`}
