@@ -1,27 +1,25 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
 
-type CreateMatchField =
+export type CreateMatchField =
   | "season_id"
   | "home_team_id"
   | "away_team_id"
   | "venue_id"
   | "scheduled_at"
-  | "status"
   | "round_name";
 
-type CreateMatchActionState = {
+export type CreateMatchActionState = {
   values: {
     season_id: string;
     home_team_id: string;
     away_team_id: string;
     venue_id: string;
     scheduled_at: string;
-    status: string;
     round_name: string;
   };
   fieldErrors: Partial<Record<CreateMatchField, string>>;
@@ -32,15 +30,7 @@ function mapInsertErrorMessage(code?: string, message?: string | null, details?:
   const normalizedErrorText = `${message ?? ""} ${details ?? ""}`.toLowerCase();
 
   if (code === "42501") {
-    return "RLS bloqueó la creación: no tienes permisos para programar partidos en esta liga.";
-  }
-
-  if (code === "23503") {
-    return "Los datos de temporada, equipo o sede no son válidos para esta liga.";
-  }
-
-  if (code === "22P02" || code === "23514") {
-    return "Los datos enviados no cumplen con las reglas del sistema.";
+    return "No tienes permisos para programar partidos en esta liga.";
   }
 
   if (
@@ -48,10 +38,6 @@ function mapInsertErrorMessage(code?: string, message?: string | null, details?:
     normalizedErrorText.includes("permission denied")
   ) {
     return "No tienes permisos para programar partidos en esta liga.";
-  }
-
-  if (normalizedErrorText.includes("trigger")) {
-    return "El sistema rechazó la operación por inconsistencia de datos (liga, temporada, equipos o sede).";
   }
 
   return "No se pudo programar el partido. Inténtalo nuevamente.";
@@ -77,7 +63,6 @@ export async function createMatchAction(
     away_team_id: String(formData.get("away_team_id") ?? "").trim(),
     venue_id: String(formData.get("venue_id") ?? "").trim(),
     scheduled_at: String(formData.get("scheduled_at") ?? "").trim(),
-    status: String(formData.get("status") ?? "").trim(),
     round_name: String(formData.get("round_name") ?? "").trim(),
   };
 
@@ -101,21 +86,25 @@ export async function createMatchAction(
 
   if (!values.scheduled_at) {
     fieldErrors.scheduled_at = "La fecha y hora son obligatorias.";
-  } else {
-    const scheduledDate = new Date(values.scheduled_at);
-    if (Number.isNaN(scheduledDate.getTime())) {
-      fieldErrors.scheduled_at = "La fecha y hora no son válidas.";
-    }
   }
 
-  if (!MATCH_STATUS_VALUES.includes(values.status as MatchStatus)) {
-    fieldErrors.status = "Selecciona un estado válido.";
+  if (values.round_name.length > 80) {
+    fieldErrors.round_name = "La jornada/ronda no puede exceder 80 caracteres.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
     return {
       values,
       fieldErrors,
+      formError: null,
+    };
+  }
+
+  const scheduledAtDate = new Date(values.scheduled_at);
+  if (Number.isNaN(scheduledAtDate.getTime())) {
+    return {
+      values,
+      fieldErrors: { scheduled_at: "La fecha y hora no son válidas." },
       formError: null,
     };
   }
@@ -138,7 +127,6 @@ export async function createMatchAction(
     };
   }
 
-  // Validar que season pertenece a la liga
   const { data: seasonData, error: seasonError } = await supabase
     .from("seasons")
     .select("id")
@@ -158,7 +146,6 @@ export async function createMatchAction(
     };
   }
 
-  // Validar que ambos equipos pertenecen a la liga
   const { data: teamsData, error: teamsError } = await supabase
     .from("teams")
     .select("id")
@@ -180,7 +167,6 @@ export async function createMatchAction(
     };
   }
 
-  // Validar venue si se proporciona
   if (values.venue_id) {
     const { data: venueData, error: venueError } = await supabase
       .from("venues")
@@ -202,15 +188,17 @@ export async function createMatchAction(
     }
   }
 
+  const matchId = randomUUID();
   const { error: insertError } = await supabase.from("matches").insert({
+    id: matchId,
     league_id: league.id,
     season_id: values.season_id,
     home_team_id: values.home_team_id,
     away_team_id: values.away_team_id,
     venue_id: values.venue_id || null,
-    scheduled_at: values.scheduled_at,
-    status: values.status as MatchStatus,
+    scheduled_at: scheduledAtDate.toISOString(),
     round_name: values.round_name || null,
+    status: "scheduled",
     home_score: 0,
     away_score: 0,
   });
@@ -224,5 +212,8 @@ export async function createMatchAction(
   }
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
-  redirect(`/dashboard/leagues/${leagueSlug}/matches`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  revalidatePath("/dashboard");
+
+  redirect(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
 }

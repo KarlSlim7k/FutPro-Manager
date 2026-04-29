@@ -1,17 +1,50 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { MatchSummary } from "@/components/matches/match-summary";
-import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
-import { CreateMatchEventForm } from "@/components/matches/create-match-event-form";
-import { MatchEventList } from "@/components/matches/match-event-list";
-import type { League, Match, Season, Team, Venue, MatchEvent, Player, PlayerTeamRegistration } from "@/types/database";
+import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
+type MatchDetail = Pick<
+  Match,
+  | "id"
+  | "league_id"
+  | "season_id"
+  | "home_team_id"
+  | "away_team_id"
+  | "venue_id"
+  | "scheduled_at"
+  | "status"
+  | "home_score"
+  | "away_score"
+  | "round_name"
+  | "created_at"
+>;
+type SeasonSummary = Pick<Season, "id" | "name">;
+type TeamSummary = Pick<Team, "id" | "name">;
+type VenueSummary = Pick<
+  Venue,
+  "id" | "name" | "address" | "city" | "state" | "latitude" | "longitude"
+>;
 
 interface MatchDetailPageProps {
   params: Promise<{ slug: string; matchId: string }>;
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function getVenueLocation(venue: VenueSummary | null) {
+  if (!venue) {
+    return "Sin sede asignada";
+  }
+
+  return [venue.address, venue.city, venue.state].filter(Boolean).join(", ") || "Ubicación no definida";
 }
 
 export default async function MatchDetailPage({ params }: MatchDetailPageProps) {
@@ -43,7 +76,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("*")
+    .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, created_at")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -56,72 +89,52 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     notFound();
   }
 
-  const match = matchData as Match;
+  const match = matchData as MatchDetail;
 
-  // Fetch related names, events and active player registrations
-  const [
-    { data: seasonData },
-    { data: homeTeamData },
-    { data: awayTeamData },
-    { data: venueData },
-    { data: eventsData },
-    { data: registrationsData },
-  ] = await Promise.all([
-    supabase.from("seasons").select("id, name, slug").eq("id", match.season_id).maybeSingle(),
-    supabase.from("teams").select("id, name, slug").eq("id", match.home_team_id).maybeSingle(),
-    supabase.from("teams").select("id, name, slug").eq("id", match.away_team_id).maybeSingle(),
+  const [seasonResult, homeTeamResult, awayTeamResult, venueResult] = await Promise.all([
+    supabase
+      .from("seasons")
+      .select("id, name")
+      .eq("id", match.season_id)
+      .eq("league_id", league.id)
+      .maybeSingle(),
+    supabase
+      .from("teams")
+      .select("id, name")
+      .eq("id", match.home_team_id)
+      .eq("league_id", league.id)
+      .maybeSingle(),
+    supabase
+      .from("teams")
+      .select("id, name")
+      .eq("id", match.away_team_id)
+      .eq("league_id", league.id)
+      .maybeSingle(),
     match.venue_id
-      ? supabase.from("venues").select("id, name").eq("id", match.venue_id).maybeSingle()
-      : Promise.resolve({ data: null }),
-    supabase
-      .from("match_events")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("minute", { ascending: true })
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("player_team_registrations")
-      .select("id, player_id, team_id, jersey_number")
-      .eq("season_id", match.season_id)
-      .in("team_id", [match.home_team_id, match.away_team_id])
-      .eq("status", "active"),
+      ? supabase
+          .from("venues")
+          .select("id, name, address, city, state, latitude, longitude")
+          .eq("id", match.venue_id)
+          .eq("league_id", league.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
-  const season = seasonData as Pick<Season, "id" | "name" | "slug"> | null;
-  const homeTeam = homeTeamData as Pick<Team, "id" | "name" | "slug"> | null;
-  const awayTeam = awayTeamData as Pick<Team, "id" | "name" | "slug"> | null;
-  const venue = venueData as Pick<Venue, "id" | "name"> | null;
-  const events = (eventsData ?? []) as MatchEvent[];
+  if (seasonResult.error) throw seasonResult.error;
+  if (homeTeamResult.error) throw homeTeamResult.error;
+  if (awayTeamResult.error) throw awayTeamResult.error;
+  if (venueResult.error) throw venueResult.error;
 
-  type RegistrationRow = { id: string; player_id: string; team_id: string; jersey_number: number | null };
-  const registrations = (registrationsData ?? []) as RegistrationRow[];
-  const playerIds = [...new Set(registrations.map((r) => r.player_id))];
-  const { data: playersData } =
-    playerIds.length > 0
-      ? await supabase.from("players").select("id, full_name, preferred_position").in("id", playerIds)
-      : { data: [] };
+  const season = seasonResult.data as SeasonSummary | null;
+  const homeTeam = homeTeamResult.data as TeamSummary | null;
+  const awayTeam = awayTeamResult.data as TeamSummary | null;
+  const venue = venueResult.data as VenueSummary | null;
 
-  type PlayerRow = { id: string; full_name: string; preferred_position: string | null };
-  const playersFromDb = (playersData ?? []) as PlayerRow[];
-  const playersMap = new Map(playersFromDb.map((p) => [p.id, p]));
-  const playersForForm = registrations.map((reg) => {
-    const player = playersMap.get(reg.player_id);
-    return {
-      id: reg.player_id,
-      team_id: reg.team_id,
-      full_name: player?.full_name ?? "Jugador desconocido",
-      preferred_position: player?.preferred_position ?? null,
-    };
-  });
-
-  const teamsMap: Record<string, { name: string }> = {};
-  if (homeTeam) teamsMap[homeTeam.id] = homeTeam;
-  if (awayTeam) teamsMap[awayTeam.id] = awayTeam;
-
-  const playersMapForList: Record<string, { full_name: string }> = {};
-  playersFromDb.forEach((p) => {
-    playersMapForList[p.id] = p;
-  });
+  const hasVenueCoordinates =
+    venue !== null && venue.latitude !== null && venue.longitude !== null;
+  const googleMapsUrl = hasVenueCoordinates
+    ? `https://www.google.com/maps?q=${venue.latitude},${venue.longitude}`
+    : null;
 
   return (
     <section className="space-y-6">
@@ -133,84 +146,87 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           Volver a partidos
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {homeTeam?.name ?? "Local"} vs {awayTeam?.name ?? "Visitante"}
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Detalle de partido</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Liga: <span className="font-medium text-gray-900">{league.name}</span>
+            {homeTeam?.name ?? "Equipo local"} vs {awayTeam?.name ?? "Equipo visitante"}
           </p>
         </div>
       </div>
 
-      <MatchSummary
-        leagueSlug={league.slug}
-        seasonId={season?.id ?? match.season_id}
-        seasonName={season?.name ?? "Desconocida"}
-        seasonSlug={season?.slug ?? ""}
-        homeTeamId={match.home_team_id}
-        homeTeamName={homeTeam?.name ?? "Desconocido"}
-        homeTeamSlug={homeTeam?.slug ?? ""}
-        awayTeamId={match.away_team_id}
-        awayTeamName={awayTeam?.name ?? "Desconocido"}
-        awayTeamSlug={awayTeam?.slug ?? ""}
-        venueId={match.venue_id}
-        venueName={venue?.name ?? null}
-        scheduledAt={match.scheduled_at}
-        status={match.status}
-        homeScore={match.home_score}
-        awayScore={match.away_score}
-        roundName={match.round_name}
-        createdAt={match.created_at}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Información del encuentro</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Liga</p>
+            <p className="mt-1 text-sm text-gray-900">{league.name}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Temporada</p>
+            <p className="mt-1 text-sm text-gray-900">{season?.name ?? "No disponible"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Jornada / Ronda</p>
+            <p className="mt-1 text-sm text-gray-900">{match.round_name || "No definida"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <p className="mt-1">
+              <MatchStatusBadge status={match.status} />
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo local</p>
+            <p className="mt-1 text-sm text-gray-900">{homeTeam?.name ?? "No disponible"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo visitante</p>
+            <p className="mt-1 text-sm text-gray-900">{awayTeam?.name ?? "No disponible"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Marcador actual</p>
+            <p className="mt-1 text-sm text-gray-900">
+              {match.home_score} - {match.away_score}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha y hora programada</p>
+            <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.scheduled_at)}</p>
+          </div>
+          <div className="sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Sede / Cancha</p>
+            <p className="mt-1 text-sm text-gray-900">{venue?.name ?? "Sin sede asignada"}</p>
+            <p className="mt-1 text-sm text-gray-600">{getVenueLocation(venue)}</p>
+            {googleMapsUrl ? (
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+              >
+                Ver en Google Maps
+              </a>
+            ) : null}
+          </div>
+          <div className="sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha de creación</p>
+            <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.created_at)}</p>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Eventos del partido</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <CreateMatchEventForm
-              leagueSlug={league.slug}
-              matchId={match.id}
-              homeTeam={{ id: match.home_team_id, name: homeTeam?.name ?? "Local" }}
-              awayTeam={{ id: match.away_team_id, name: awayTeam?.name ?? "Visitante" }}
-              players={playersForForm}
-            />
-            <div className="border-t border-gray-100 pt-4">
-              <h3 className="mb-3 text-sm font-semibold text-gray-900">Registro</h3>
-              <MatchEventList
-                events={events}
-                teamsMap={teamsMap}
-                playersMap={playersMapForList}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Captura de resultado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UpdateMatchResultForm
-              leagueSlug={league.slug}
-              matchId={match.id}
-              initialHomeScore={match.home_score}
-              initialAwayScore={match.away_score}
-              initialStatus={match.status}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Estadísticas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación. Aquí se mostrarán estadísticas del partido.</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Próximas fases</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-gray-600">
+          <p>Captura de resultado: módulo pendiente.</p>
+          <p>Eventos del partido: módulo pendiente.</p>
+          <p>Alineaciones: módulo pendiente.</p>
+          <p>Estadísticas: módulo pendiente.</p>
+        </CardContent>
+      </Card>
     </section>
   );
 }

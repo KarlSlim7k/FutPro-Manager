@@ -1,69 +1,47 @@
 "use client";
 
 import { useActionState } from "react";
-import { createMatchAction } from "@/app/dashboard/leagues/[slug]/matches/actions";
+import {
+  createMatchAction,
+  type CreateMatchActionState,
+} from "@/app/dashboard/leagues/[slug]/matches/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MATCH_STATUS_VALUES } from "@/types/database";
 
 type SeasonOption = { id: string; name: string };
 type TeamOption = { id: string; name: string };
 type VenueOption = { id: string; name: string };
-
-type CreateMatchFormState = {
-  values: {
-    season_id: string;
-    home_team_id: string;
-    away_team_id: string;
-    venue_id: string;
-    scheduled_at: string;
-    status: string;
-    round_name: string;
-  };
-  fieldErrors: Partial<
-    Record<
-      "season_id" | "home_team_id" | "away_team_id" | "venue_id" | "scheduled_at" | "status" | "round_name",
-      string
-    >
-  >;
-  formError: string | null;
-};
-
-const INITIAL_STATE: CreateMatchFormState = {
-  values: {
-    season_id: "",
-    home_team_id: "",
-    away_team_id: "",
-    venue_id: "",
-    scheduled_at: "",
-    status: "scheduled",
-    round_name: "",
-  },
-  fieldErrors: {},
-  formError: null,
-};
-
-function formatStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    scheduled: "Programado",
-    in_progress: "En juego",
-    completed: "Finalizado",
-    postponed: "Pospuesto",
-    cancelled: "Cancelado",
-  };
-  return labels[status] ?? status;
-}
 
 interface CreateMatchFormProps {
   leagueSlug: string;
   seasons: SeasonOption[];
   teams: TeamOption[];
   venues: VenueOption[];
+  initialSeasonId: string;
 }
 
-export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMatchFormProps) {
+export function CreateMatchForm({
+  leagueSlug,
+  seasons,
+  teams,
+  venues,
+  initialSeasonId,
+}: CreateMatchFormProps) {
   const action = createMatchAction.bind(null, leagueSlug);
-  const [state, formAction, isPending] = useActionState(action, INITIAL_STATE);
+  const initialState: CreateMatchActionState = {
+    values: {
+      season_id: initialSeasonId,
+      home_team_id: "",
+      away_team_id: "",
+      venue_id: "",
+      scheduled_at: "",
+      round_name: "",
+    },
+    fieldErrors: {},
+    formError: null,
+  };
+
+  const [state, formAction, isPending] = useActionState(action, initialState);
 
   const hasMinTeams = teams.length >= 2;
   const hasSeasons = seasons.length > 0;
@@ -78,7 +56,7 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
         <select
           id="match-season"
           name="season_id"
-          defaultValue={state.values.season_id}
+          defaultValue={state.values.season_id || initialSeasonId}
           disabled={isPending || !hasSeasons}
           required
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
@@ -111,7 +89,7 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
             className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
           >
             <option value="" disabled>
-              {hasMinTeams ? "Selecciona equipo local" : "No hay equipos"}
+              {hasMinTeams ? "Selecciona equipo local" : "No hay equipos suficientes"}
             </option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -137,7 +115,7 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
             className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
           >
             <option value="" disabled>
-              {hasMinTeams ? "Selecciona equipo visitante" : "No hay equipos"}
+              {hasMinTeams ? "Selecciona equipo visitante" : "No hay equipos suficientes"}
             </option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -153,7 +131,7 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
 
       <div className="space-y-2">
         <label htmlFor="match-venue" className="text-sm font-medium text-gray-700">
-          Sede (opcional)
+          Sede / Cancha (opcional)
         </label>
         <select
           id="match-venue"
@@ -174,46 +152,21 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
         ) : null}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label htmlFor="match-scheduled-at" className="text-sm font-medium text-gray-700">
-            Fecha y hora
-          </label>
-          <Input
-            id="match-scheduled-at"
-            name="scheduled_at"
-            type="datetime-local"
-            required
-            disabled={isPending}
-            defaultValue={state.values.scheduled_at}
-          />
-          {state.fieldErrors.scheduled_at ? (
-            <p className="text-sm text-red-600">{state.fieldErrors.scheduled_at}</p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="match-status" className="text-sm font-medium text-gray-700">
-            Estado
-          </label>
-          <select
-            id="match-status"
-            name="status"
-            defaultValue={state.values.status}
-            disabled={isPending}
-            required
-            className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
-          >
-            {MATCH_STATUS_VALUES.map((status) => (
-              <option key={status} value={status}>
-                {formatStatusLabel(status)}
-              </option>
-            ))}
-          </select>
-          {state.fieldErrors.status ? (
-            <p className="text-sm text-red-600">{state.fieldErrors.status}</p>
-          ) : null}
-        </div>
+      <div className="space-y-2">
+        <label htmlFor="match-scheduled-at" className="text-sm font-medium text-gray-700">
+          Fecha y hora programada
+        </label>
+        <Input
+          id="match-scheduled-at"
+          name="scheduled_at"
+          type="datetime-local"
+          required
+          disabled={isPending}
+          defaultValue={state.values.scheduled_at}
+        />
+        {state.fieldErrors.scheduled_at ? (
+          <p className="text-sm text-red-600">{state.fieldErrors.scheduled_at}</p>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -223,6 +176,7 @@ export function CreateMatchForm({ leagueSlug, seasons, teams, venues }: CreateMa
         <Input
           id="match-round-name"
           name="round_name"
+          maxLength={80}
           disabled={isPending}
           placeholder="Jornada 1"
           defaultValue={state.values.round_name}
