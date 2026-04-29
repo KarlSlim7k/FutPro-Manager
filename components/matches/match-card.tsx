@@ -71,6 +71,18 @@ export function MatchCard({
           >
             Editar
           </Link>
+          {status === "cancelled" ? (
+            <span className="inline-flex items-center text-sm font-medium text-gray-500">
+              Resultado no disponible
+            </span>
+          ) : (
+            <Link
+              href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/result`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Resultado
+            </Link>
+          )}
         </div>
       </CardContent>
     </Card>
