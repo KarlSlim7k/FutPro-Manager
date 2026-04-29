@@ -15,7 +15,7 @@
 
 - `/login`: acceso y registro de usuarios con Supabase Auth.
 - `/dashboard`: ruta protegida para usuarios autenticados.
-- `middleware.ts`: refresca sesión y aplica redirecciones:
+- `proxy.ts`: refresca sesión y aplica redirecciones:
   - no autenticado en `/dashboard` -> `/login`
   - autenticado en `/login` -> `/dashboard`
 
