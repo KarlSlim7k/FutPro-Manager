@@ -58,12 +58,20 @@ export function MatchCard({
           <span className="font-medium text-gray-900">Marcador actual:</span> {homeScore} - {awayScore}
         </p>
 
-        <Link
-          href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}
-          className="inline-flex items-center pt-1 text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Ver detalle
-        </Link>
+        <div className="flex flex-wrap items-center gap-4 pt-1">
+          <Link
+            href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Ver detalle
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/edit`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Editar
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

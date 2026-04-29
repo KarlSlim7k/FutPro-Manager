@@ -139,12 +139,20 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/matches`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver a partidos
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={`/dashboard/leagues/${league.slug}/matches`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Volver a partidos
+          </Link>
+          <Link
+            href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+          >
+            Editar partido
+          </Link>
+        </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Detalle de partido</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
