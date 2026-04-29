@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TextLink } from "@/components/ui/text-link";
 import type { MatchStatus } from "@/types/database";
 
 type MatchCardProps = {
@@ -59,37 +59,41 @@ export function MatchCard({
         </p>
 
         <div className="flex flex-wrap items-center gap-4 pt-1">
-          <TextLink
+          <Link
             href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Ver detalle
-          </TextLink>
-          <TextLink
+          </Link>
+          <Link
             href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/edit`}
+            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Editar
-          </TextLink>
+          </Link>
           {status === "cancelled" ? (
             <span className="inline-flex items-center text-sm font-medium text-gray-500">
               Resultado no disponible
             </span>
           ) : (
-            <TextLink
+            <Link
               href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/result`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Resultado
-            </TextLink>
+            </Link>
           )}
           {status === "cancelled" ? (
             <span className="inline-flex items-center text-sm font-medium text-gray-500">
               Eventos no disponibles
             </span>
           ) : (
-            <TextLink
+            <Link
               href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Eventos
-            </TextLink>
+            </Link>
           )}
         </div>
       </CardContent>
