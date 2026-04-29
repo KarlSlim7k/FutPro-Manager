@@ -1,36 +1,19 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { createMatchEventAction } from "@/app/dashboard/leagues/[slug]/matches/[matchId]/events/actions";
+import { useActionState } from "react";
+import {
+  createMatchEventAction,
+  type CreateMatchEventActionState,
+} from "@/app/dashboard/leagues/[slug]/matches/[matchId]/events/actions";
+import { getMatchEventTypeLabel } from "@/components/matches/match-event-type-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MATCH_EVENT_TYPE_VALUES } from "@/types/database";
-import type { MatchEventType } from "@/types/database";
-
-function getEventTypeLabel(type: MatchEventType): string {
-  const labels: Record<MatchEventType, string> = {
-    goal: "Gol",
-    own_goal: "Autogol",
-    assist: "Asistencia",
-    yellow_card: "Tarjeta amarilla",
-    red_card: "Tarjeta roja",
-    substitution: "Sustitución",
-    penalty_goal: "Gol de penal",
-    penalty_miss: "Penal fallado",
-  };
-  return labels[type];
-}
-
-type FormState = {
-  values: Record<string, string>;
-  fieldErrors: Partial<Record<string, string>>;
-  formError: string | null;
-  success: boolean;
-};
 
 interface CreateMatchEventFormProps {
   leagueSlug: string;
   matchId: string;
+  isMatchCancelled: boolean;
   homeTeam: { id: string; name: string };
   awayTeam: { id: string; name: string };
   players: Array<{
@@ -44,45 +27,63 @@ interface CreateMatchEventFormProps {
 export function CreateMatchEventForm({
   leagueSlug,
   matchId,
+  isMatchCancelled,
   homeTeam,
   awayTeam,
   players,
 }: CreateMatchEventFormProps) {
   const action = createMatchEventAction.bind(null, leagueSlug, matchId);
-  const [state, formAction, isPending] = useActionState<FormState, FormData>(
+  const initialState: CreateMatchEventActionState = {
+    values: {
+      team_id: "",
+      player_id: "",
+      event_type: "",
+      minute: "",
+      notes: "",
+    },
+    fieldErrors: {},
+    formError: null,
+  };
+
+  const [state, formAction, isPending] = useActionState<CreateMatchEventActionState, FormData>(
     action,
-    {
-      values: {
-        team_id: "",
-        player_id: "",
-        event_type: "",
-        minute: "",
-        notes: "",
-      },
-      fieldErrors: {},
-      formError: null,
-      success: false,
-    }
+    initialState
   );
 
-  const [selectedTeamId, setSelectedTeamId] = useState(state.values.team_id);
-
-  const homePlayers = players.filter((p) => p.team_id === homeTeam.id);
-  const awayPlayers = players.filter((p) => p.team_id === awayTeam.id);
+  const homePlayers = players.filter((player) => player.team_id === homeTeam.id);
+  const awayPlayers = players.filter((player) => player.team_id === awayTeam.id);
+  const hasPlayers = players.length > 0;
+  const canSubmit = !isPending && !isMatchCancelled && hasPlayers;
 
   return (
     <form action={formAction} className="space-y-4">
+      <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+        Los eventos no actualizan automáticamente el marcador ni la tabla de posiciones en esta
+        fase.
+      </p>
+
+      {isMatchCancelled ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          No se pueden registrar eventos en un partido cancelado.
+        </p>
+      ) : null}
+
+      {!hasPlayers ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          No hay jugadores registrados activos para este partido en la temporada seleccionada.
+        </p>
+      ) : null}
+
       <div className="space-y-2">
-        <label htmlFor="team_id" className="text-sm font-medium text-gray-700">
+        <label htmlFor="match-event-team-id" className="text-sm font-medium text-gray-700">
           Equipo
         </label>
         <select
-          id="team_id"
+          id="match-event-team-id"
           name="team_id"
           required
-          disabled={isPending}
+          disabled={!canSubmit}
           defaultValue={state.values.team_id}
-          onChange={(e) => setSelectedTeamId(e.target.value)}
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
           <option value="">Selecciona un equipo</option>
@@ -95,37 +96,38 @@ export function CreateMatchEventForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="player_id" className="text-sm font-medium text-gray-700">
-          Jugador (opcional)
+        <label htmlFor="match-event-player-id" className="text-sm font-medium text-gray-700">
+          Jugador
         </label>
         <select
-          id="player_id"
+          id="match-event-player-id"
           name="player_id"
-          disabled={isPending}
+          required
+          disabled={!canSubmit}
           defaultValue={state.values.player_id}
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
-          <option value="">Sin jugador</option>
-          {homePlayers.length > 0 && (
+          <option value="">Selecciona un jugador</option>
+          {homePlayers.length > 0 ? (
             <optgroup label={homeTeam.name}>
-              {homePlayers.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.full_name}
-                  {p.preferred_position ? ` — ${p.preferred_position}` : ""}
+              {homePlayers.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.full_name}
+                  {player.preferred_position ? ` - ${player.preferred_position}` : ""}
                 </option>
               ))}
             </optgroup>
-          )}
-          {awayPlayers.length > 0 && (
+          ) : null}
+          {awayPlayers.length > 0 ? (
             <optgroup label={awayTeam.name}>
-              {awayPlayers.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.full_name}
-                  {p.preferred_position ? ` — ${p.preferred_position}` : ""}
+              {awayPlayers.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.full_name}
+                  {player.preferred_position ? ` - ${player.preferred_position}` : ""}
                 </option>
               ))}
             </optgroup>
-          )}
+          ) : null}
         </select>
         {state.fieldErrors.player_id ? (
           <p className="text-sm text-red-600">{state.fieldErrors.player_id}</p>
@@ -133,21 +135,21 @@ export function CreateMatchEventForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="event_type" className="text-sm font-medium text-gray-700">
+        <label htmlFor="match-event-type" className="text-sm font-medium text-gray-700">
           Tipo de evento
         </label>
         <select
-          id="event_type"
+          id="match-event-type"
           name="event_type"
           required
-          disabled={isPending}
+          disabled={!canSubmit}
           defaultValue={state.values.event_type}
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
           <option value="">Selecciona tipo</option>
-          {MATCH_EVENT_TYPE_VALUES.map((type) => (
-            <option key={type} value={type}>
-              {getEventTypeLabel(type)}
+          {MATCH_EVENT_TYPE_VALUES.map((eventType) => (
+            <option key={eventType} value={eventType}>
+              {getMatchEventTypeLabel(eventType)}
             </option>
           ))}
         </select>
@@ -157,17 +159,19 @@ export function CreateMatchEventForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="minute" className="text-sm font-medium text-gray-700">
+        <label htmlFor="match-event-minute" className="text-sm font-medium text-gray-700">
           Minuto
         </label>
         <Input
-          id="minute"
+          id="match-event-minute"
           name="minute"
           type="number"
           min={0}
           max={130}
+          step={1}
+          inputMode="numeric"
           required
-          disabled={isPending}
+          disabled={!canSubmit}
           defaultValue={state.values.minute}
         />
         {state.fieldErrors.minute ? (
@@ -176,17 +180,18 @@ export function CreateMatchEventForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="notes" className="text-sm font-medium text-gray-700">
+        <label htmlFor="match-event-notes" className="text-sm font-medium text-gray-700">
           Notas (opcional)
         </label>
         <textarea
-          id="notes"
+          id="match-event-notes"
           name="notes"
           rows={3}
-          maxLength={500}
-          disabled={isPending}
+          maxLength={280}
+          disabled={!canSubmit}
           defaultValue={state.values.notes}
           className="flex w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+          placeholder="Describe el evento (opcional)"
         />
         {state.fieldErrors.notes ? (
           <p className="text-sm text-red-600">{state.fieldErrors.notes}</p>
@@ -199,14 +204,8 @@ export function CreateMatchEventForm({
         </p>
       ) : null}
 
-      {state.success ? (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          Evento registrado correctamente.
-        </p>
-      ) : null}
-
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Registrando..." : "Registrar evento"}
+      <Button type="submit" disabled={!canSubmit}>
+        {isPending ? "Registrando evento..." : "Registrar evento"}
       </Button>
     </form>
   );

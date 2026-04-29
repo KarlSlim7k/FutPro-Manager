@@ -164,6 +164,18 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
               Capturar resultado
             </Link>
           )}
+          {match.status === "cancelled" ? (
+            <span className="inline-flex items-center text-sm font-medium text-gray-500">
+              Eventos no disponibles para partidos cancelados.
+            </span>
+          ) : (
+            <Link
+              href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}
+              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+            >
+              Eventos
+            </Link>
+          )}
         </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Detalle de partido</h1>
@@ -242,7 +254,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-gray-600">
           <p>Captura de resultado: disponible.</p>
-          <p>Eventos del partido: módulo pendiente.</p>
+          <p>Eventos del partido: disponible.</p>
           <p>Alineaciones: módulo pendiente.</p>
           <p>Estadísticas: módulo pendiente.</p>
         </CardContent>

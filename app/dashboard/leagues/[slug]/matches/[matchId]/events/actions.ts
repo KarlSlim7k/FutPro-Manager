@@ -5,66 +5,32 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_EVENT_TYPE_VALUES, type MatchEventType } from "@/types/database";
 
-type CreateEventField = "team_id" | "player_id" | "event_type" | "minute" | "notes";
+type CreateMatchEventField = "team_id" | "player_id" | "event_type" | "minute" | "notes";
 
-type CreateEventActionState = {
-  values: Record<string, string>;
-  fieldErrors: Partial<Record<CreateEventField, string>>;
+export type CreateMatchEventActionState = {
+  values: {
+    team_id: string;
+    player_id: string;
+    event_type: string;
+    minute: string;
+    notes: string;
+  };
+  fieldErrors: Partial<Record<CreateMatchEventField, string>>;
   formError: string | null;
-  success: boolean;
 };
 
-function mapCreateEventErrorMessage(
-  code?: string,
-  message?: string | null,
-  details?: string | null
-) {
-  const normalized = `${message ?? ""} ${details ?? ""}`.toLowerCase();
+function mapCreateEventErrorMessage(code?: string, message?: string | null, details?: string | null) {
+  const normalizedErrorText = `${message ?? ""} ${details ?? ""}`.toLowerCase();
 
-  if (
-    code === "42501" ||
-    normalized.includes("row-level security") ||
-    normalized.includes("permission denied")
-  ) {
+  if (code === "42501") {
     return "No tienes permisos para registrar eventos en este partido.";
   }
 
-  if (normalized.includes("team must participate in the match")) {
-    return "El equipo seleccionado no participa en este partido.";
-  }
-
-  if (normalized.includes("player must have an active registration")) {
-    return "El jugador seleccionado no está registrado activo en ese equipo para la temporada del partido.";
-  }
-
-  if (normalized.includes("player must belong to the same league")) {
-    return "El jugador no pertenece a la liga de este partido.";
-  }
-
-  if (normalized.includes("team_id is required when player_id is present")) {
-    return "Debes seleccionar un equipo para asociar al jugador.";
-  }
-
-  if (normalized.includes("match must exist")) {
-    return "Partido no encontrado o sin acceso.";
-  }
-
-  if (normalized.includes("created_by must match auth.uid()")) {
-    return "Error de autenticación al registrar el evento.";
-  }
-
   if (
-    normalized.includes("check constraint") &&
-    normalized.includes("minute")
+    normalizedErrorText.includes("row-level security") ||
+    normalizedErrorText.includes("permission denied")
   ) {
-    return "El minuto debe estar entre 0 y 130.";
-  }
-
-  if (
-    normalized.includes("trigger") ||
-    normalized.includes("consistency")
-  ) {
-    return "El evento no es válido para este partido. Revisa equipo, jugador y temporada.";
+    return "No tienes permisos para registrar eventos en este partido.";
   }
 
   return "No se pudo registrar el evento. Inténtalo nuevamente.";
@@ -73,9 +39,9 @@ function mapCreateEventErrorMessage(
 export async function createMatchEventAction(
   leagueSlug: string,
   matchId: string,
-  _prevState: CreateEventActionState,
+  _prevState: CreateMatchEventActionState,
   formData: FormData
-): Promise<CreateEventActionState> {
+): Promise<CreateMatchEventActionState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -85,7 +51,7 @@ export async function createMatchEventAction(
     redirect("/login");
   }
 
-  const values = {
+  const values: CreateMatchEventActionState["values"] = {
     team_id: String(formData.get("team_id") ?? "").trim(),
     player_id: String(formData.get("player_id") ?? "").trim(),
     event_type: String(formData.get("event_type") ?? "").trim(),
@@ -93,14 +59,18 @@ export async function createMatchEventAction(
     notes: String(formData.get("notes") ?? "").trim(),
   };
 
-  const fieldErrors: Partial<Record<CreateEventField, string>> = {};
+  const fieldErrors: Partial<Record<CreateMatchEventField, string>> = {};
 
   if (!values.team_id) {
-    fieldErrors.team_id = "Selecciona un equipo.";
+    fieldErrors.team_id = "El equipo es obligatorio.";
+  }
+
+  if (!values.player_id) {
+    fieldErrors.player_id = "El jugador es obligatorio.";
   }
 
   if (!values.event_type) {
-    fieldErrors.event_type = "Selecciona un tipo de evento.";
+    fieldErrors.event_type = "El tipo de evento es obligatorio.";
   } else if (!MATCH_EVENT_TYPE_VALUES.includes(values.event_type as MatchEventType)) {
     fieldErrors.event_type = "Tipo de evento no válido.";
   }
@@ -108,14 +78,18 @@ export async function createMatchEventAction(
   if (values.minute === "") {
     fieldErrors.minute = "El minuto es obligatorio.";
   } else {
-    const num = Number(values.minute);
-    if (!Number.isInteger(num) || num < 0 || num > 130) {
-      fieldErrors.minute = "El minuto debe ser un número entre 0 y 130.";
+    if (!/^\d+$/.test(values.minute)) {
+      fieldErrors.minute = "El minuto debe ser un número entero entre 0 y 130.";
+    } else {
+      const minute = Number.parseInt(values.minute, 10);
+      if (!Number.isInteger(minute) || minute < 0 || minute > 130) {
+        fieldErrors.minute = "El minuto debe ser un número entero entre 0 y 130.";
+      }
     }
   }
 
-  if (values.notes.length > 500) {
-    fieldErrors.notes = "Las notas no pueden exceder 500 caracteres.";
+  if (values.notes.length > 280) {
+    fieldErrors.notes = "Las notas no pueden exceder 280 caracteres.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -123,11 +97,10 @@ export async function createMatchEventAction(
       values,
       fieldErrors,
       formError: null,
-      success: false,
     };
   }
 
-  const { data: league, error: leagueError } = await supabase
+  const { data: leagueData, error: leagueError } = await supabase
     .from("leagues")
     .select("id")
     .eq("slug", leagueSlug)
@@ -137,20 +110,19 @@ export async function createMatchEventAction(
     throw leagueError;
   }
 
-  if (!league) {
+  if (!leagueData) {
     return {
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso.",
-      success: false,
     };
   }
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, season_id, home_team_id, away_team_id")
+    .select("id, season_id, home_team_id, away_team_id, status")
     .eq("id", matchId)
-    .eq("league_id", league.id)
+    .eq("league_id", leagueData.id)
     .maybeSingle();
 
   if (matchError) {
@@ -162,92 +134,97 @@ export async function createMatchEventAction(
       values,
       fieldErrors: {},
       formError: "Partido no encontrado o sin acceso.",
-      success: false,
+    };
+  }
+
+  if (matchData.status === "cancelled") {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No se pueden registrar eventos en un partido cancelado.",
     };
   }
 
   const participatingTeamIds = [matchData.home_team_id, matchData.away_team_id];
   if (!participatingTeamIds.includes(values.team_id)) {
     return {
-      values,
+      values: {
+        ...values,
+        player_id: "",
+      },
       fieldErrors: { team_id: "El equipo seleccionado no participa en este partido." },
       formError: null,
-      success: false,
     };
   }
 
-  if (values.player_id) {
-    const { data: registration, error: registrationError } = await supabase
-      .from("player_team_registrations")
-      .select("id")
-      .eq("player_id", values.player_id)
-      .eq("team_id", values.team_id)
-      .eq("season_id", matchData.season_id)
-      .eq("status", "active")
-      .maybeSingle();
+  const { data: registrationData, error: registrationError } = await supabase
+    .from("player_team_registrations")
+    .select("id")
+    .eq("player_id", values.player_id)
+    .eq("team_id", values.team_id)
+    .eq("season_id", matchData.season_id)
+    .eq("status", "active")
+    .maybeSingle();
 
-    if (registrationError) {
-      throw registrationError;
-    }
-
-    if (!registration) {
-      return {
-        values,
-        fieldErrors: {
-          player_id:
-            "El jugador seleccionado no está registrado activo en ese equipo para la temporada del partido.",
-        },
-        formError: null,
-        success: false,
-      };
-    }
+  if (registrationError) {
+    throw registrationError;
   }
 
-  const insertData: {
+  if (!registrationData) {
+    return {
+      values,
+      fieldErrors: {
+        player_id:
+          "El jugador seleccionado no está registrado en ese equipo para la temporada del partido.",
+      },
+      formError: null,
+    };
+  }
+
+  const insertPayload: {
     match_id: string;
     team_id: string;
+    player_id: string;
     event_type: MatchEventType;
     minute: number;
     notes: string | null;
-    player_id: string | null;
+    created_by: string;
   } = {
-    match_id: matchId,
+    match_id: matchData.id,
     team_id: values.team_id,
+    player_id: values.player_id,
     event_type: values.event_type as MatchEventType,
-    minute: Number(values.minute),
+    minute: Number.parseInt(values.minute, 10),
     notes: values.notes || null,
-    player_id: values.player_id || null,
+    created_by: user.id,
   };
 
-  const { error: insertError } = await supabase
+  const { data: insertedRows, error: insertError } = await supabase
     .from("match_events")
-    .insert(insertData);
+    .insert(insertPayload)
+    .select("id");
 
   if (insertError) {
     return {
       values,
       fieldErrors: {},
-      formError: mapCreateEventErrorMessage(
-        insertError.code,
-        insertError.message,
-        insertError.details
-      ),
-      success: false,
+      formError: mapCreateEventErrorMessage(insertError.code, insertError.message, insertError.details),
     };
   }
 
-  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
+  if (!insertedRows?.[0]) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para registrar eventos en este partido.",
+    };
+  }
 
-  return {
-    values: {
-      team_id: "",
-      player_id: "",
-      event_type: "",
-      minute: "",
-      notes: "",
-    },
-    fieldErrors: {},
-    formError: null,
-    success: true,
-  };
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  revalidatePath("/dashboard");
+
+  redirect(`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`);
 }

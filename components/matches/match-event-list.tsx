@@ -15,7 +15,7 @@ export function MatchEventList({ events, teamsMap, playersMap }: MatchEventListP
 
   if (sortedEvents.length === 0) {
     return (
-      <p className="text-sm text-gray-600">No hay eventos registrados para este partido.</p>
+      <p className="text-sm text-gray-600">Este partido aún no tiene eventos registrados.</p>
     );
   }
 
