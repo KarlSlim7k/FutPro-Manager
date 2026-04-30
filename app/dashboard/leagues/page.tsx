@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { LeagueCard } from "@/components/leagues/league-card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League } from "@/types/database";
 
@@ -33,29 +34,21 @@ export default async function LeaguesPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Ligas</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Visualiza las ligas disponibles para tu usuario según las políticas RLS.
-          </p>
-        </div>
-        <Button variant="secondary" disabled>
-          Crear liga (próximamente)
-        </Button>
-      </div>
+      <PageHeader
+        title="Ligas"
+        description="Visualiza las ligas disponibles para tu usuario según las políticas RLS."
+        action={
+          <Button variant="secondary" disabled>
+            Crear liga (próximamente)
+          </Button>
+        }
+      />
 
       {leagues.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin ligas disponibles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">
-              No tienes ligas visibles por ahora. Cuando tengas acceso, aparecerán aquí.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Sin ligas disponibles"
+          description="No tienes ligas visibles por ahora. Cuando tengas acceso, aparecerán aquí."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {leagues.map((league) => (

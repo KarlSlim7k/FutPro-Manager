@@ -1,6 +1,7 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlayerRegistrationCard, type PlayerRegistrationRow } from "@/components/registrations/player-registration-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 
 interface PlayerRegistrationTableProps {
   leagueSlug: string;
@@ -34,14 +35,7 @@ export function PlayerRegistrationTable({
 }: PlayerRegistrationTableProps) {
   if (registrations.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{emptyTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600">{emptyDescription}</p>
-        </CardContent>
-      </Card>
+      <EmptyState title={emptyTitle} description={emptyDescription} />
     );
   }
 
@@ -63,14 +57,34 @@ export function PlayerRegistrationTable({
       <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
         <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
           <thead className="bg-gray-50">
-            <tr className="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-              {showPlayerColumn ? <th className="px-4 py-3">Jugador</th> : null}
-              {showTeamColumn ? <th className="px-4 py-3">Equipo</th> : null}
-              <th className="px-4 py-3">Temporada</th>
-              {showPositionColumn ? <th className="px-4 py-3">Posición</th> : null}
-              <th className="px-4 py-3">Número</th>
-              <th className="px-4 py-3">Estatus</th>
-              <th className="px-4 py-3">Registrado</th>
+            <tr className="text-left text-gray-500">
+              {showPlayerColumn ? (
+                <th className="px-4 py-3">
+                  <Eyebrow as="span">Jugador</Eyebrow>
+                </th>
+              ) : null}
+              {showTeamColumn ? (
+                <th className="px-4 py-3">
+                  <Eyebrow as="span">Equipo</Eyebrow>
+                </th>
+              ) : null}
+              <th className="px-4 py-3">
+                <Eyebrow as="span">Temporada</Eyebrow>
+              </th>
+              {showPositionColumn ? (
+                <th className="px-4 py-3">
+                  <Eyebrow as="span">Posición</Eyebrow>
+                </th>
+              ) : null}
+              <th className="px-4 py-3">
+                <Eyebrow as="span">Número</Eyebrow>
+              </th>
+              <th className="px-4 py-3">
+                <Eyebrow as="span">Estatus</Eyebrow>
+              </th>
+              <th className="px-4 py-3">
+                <Eyebrow as="span">Registrado</Eyebrow>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -79,12 +93,11 @@ export function PlayerRegistrationTable({
                 {showPlayerColumn ? (
                   <td className="px-4 py-3">
                     {registration.player ? (
-                      <Link
+                      <TextLink
                         href={`/dashboard/leagues/${leagueSlug}/players/${registration.player.id}`}
-                        className="font-medium text-emerald-700 hover:text-emerald-600"
                       >
                         {registration.player.full_name}
-                      </Link>
+                      </TextLink>
                     ) : (
                       "No disponible"
                     )}
@@ -93,12 +106,11 @@ export function PlayerRegistrationTable({
                 {showTeamColumn ? (
                   <td className="px-4 py-3">
                     {registration.team ? (
-                      <Link
+                      <TextLink
                         href={`/dashboard/leagues/${leagueSlug}/teams/${registration.team.slug}`}
-                        className="font-medium text-emerald-700 hover:text-emerald-600"
                       >
                         {registration.team.name}
-                      </Link>
+                      </TextLink>
                     ) : (
                       "No disponible"
                     )}
@@ -106,12 +118,11 @@ export function PlayerRegistrationTable({
                 ) : null}
                 <td className="px-4 py-3">
                   {registration.season ? (
-                    <Link
+                    <TextLink
                       href={`/dashboard/leagues/${leagueSlug}/seasons/${registration.season.slug}`}
-                      className="font-medium text-emerald-700 hover:text-emerald-600"
                     >
                       {registration.season.name}
-                    </Link>
+                    </TextLink>
                   ) : (
                     "No disponible"
                   )}

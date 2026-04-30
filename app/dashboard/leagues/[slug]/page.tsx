@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League } from "@/types/database";
 
@@ -60,12 +61,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
+        <TextLink
           href="/dashboard/leagues"
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
         >
           Volver a ligas
-        </Link>
+        </TextLink>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">{league.name}</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">/{league.slug}</p>
@@ -78,47 +78,43 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Nombre</p>
+            <Eyebrow>Nombre</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Slug</p>
+            <Eyebrow>Slug</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.slug}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Región</p>
+            <Eyebrow>Región</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.region || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ciudad</p>
+            <Eyebrow>Ciudad</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.city || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.state || "No definido"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">País</p>
+            <Eyebrow>País</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.country}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Status</p>
+            <Eyebrow>Status</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatStatus(league.status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Visibilidad pública
-            </p>
+            <Eyebrow>Visibilidad pública</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.is_public ? "Sí" : "No"}</p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ubicación</p>
+            <Eyebrow>Ubicación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{getLocation(league) || "Sin ubicación"}</p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Fecha de creación
-            </p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDate(league.created_at)}</p>
           </div>
         </CardContent>
@@ -133,12 +129,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <p className="text-sm text-gray-600">
               Administra periodos competitivos, estado y fechas clave de la liga.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/seasons`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver temporadas
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -150,12 +145,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <p className="text-sm text-gray-600">
               Administra equipos, identidad visual y estado competitivo de la liga.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/teams`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver equipos
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -167,12 +161,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <p className="text-sm text-gray-600">
               Consolida fichas base de jugadores y su estado deportivo en la liga.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/players`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver jugadores
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -184,12 +177,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <p className="text-sm text-gray-600">
               Administra sedes, ubicación y datos geográficos para la programación de partidos.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/venues`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver sedes
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -201,12 +193,11 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <p className="text-sm text-gray-600">
               Administra la programación de partidos, calendario y estatus de los encuentros.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/matches`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver partidos
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
       </div>

@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   },
   description:
     "Plataforma SaaS para administrar ligas, equipos, jugadores y partidos de fútbol amateur.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

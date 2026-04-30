@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CreateTeamForm } from "@/components/teams/create-team-form";
 import { TeamCard } from "@/components/teams/team-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormSectionCard } from "@/components/ui/form-section-card";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
 
@@ -57,41 +58,27 @@ export default async function LeagueTeamsPage({ params }: LeagueTeamsPageProps) 
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al detalle de liga
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Equipos</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Gestiona los equipos de <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}`}
+        backLabel="Volver al detalle de liga"
+        title="Equipos"
+        description={
+          <>
+            Gestiona los equipos de{" "}
+            <span className="font-medium text-gray-900">{league.name}</span>.
+          </>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo equipo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreateTeamForm leagueSlug={league.slug} />
-        </CardContent>
-      </Card>
+      <FormSectionCard title="Nuevo equipo">
+        <CreateTeamForm leagueSlug={league.slug} />
+      </FormSectionCard>
 
       {teams.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin equipos registrados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">
-              Esta liga aún no tiene equipos visibles para tu usuario.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Sin equipos registrados"
+          description="Esta liga aún no tiene equipos visibles para tu usuario."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {teams.map((team) => (

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FutPro Manager icon">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <path d="M20 14h24l4 9-16 27L16 23z" fill="#ffffff" opacity="0.94" />
+  <circle cx="32" cy="31" r="9" fill="#0f172a" />
+  <circle cx="32" cy="31" r="7" fill="#ffffff" />
+  <circle cx="32" cy="31" r="2.5" fill="#0f172a" />
+  <path d="M18 49h28" stroke="#d1fae5" stroke-width="3.2" stroke-linecap="round" />
+  <path d="M46 49l-4-4m4 4l-4 4" stroke="#d1fae5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CreateVenueForm } from "@/components/venues/create-venue-form";
 import { VenueCard } from "@/components/venues/venue-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormSectionCard } from "@/components/ui/form-section-card";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Venue } from "@/types/database";
 
@@ -54,41 +55,27 @@ export default async function LeagueVenuesPage({ params }: LeagueVenuesPageProps
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al detalle de liga
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Sedes / Canchas</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Administra sedes de <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}`}
+        backLabel="Volver al detalle de liga"
+        title="Sedes / Canchas"
+        description={
+          <>
+            Administra sedes de{" "}
+            <span className="font-medium text-gray-900">{league.name}</span>.
+          </>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nueva sede</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreateVenueForm leagueSlug={league.slug} />
-        </CardContent>
-      </Card>
+      <FormSectionCard title="Nueva sede">
+        <CreateVenueForm leagueSlug={league.slug} />
+      </FormSectionCard>
 
       {venues.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin sedes registradas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">
-              Esta liga aún no tiene sedes visibles para tu usuario.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Sin sedes registradas"
+          description="Esta liga aún no tiene sedes visibles para tu usuario."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {venues.map((venue) => (

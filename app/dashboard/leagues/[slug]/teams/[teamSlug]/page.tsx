@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
 
@@ -79,34 +81,26 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-4">
-          <Link
-            href={`/dashboard/leagues/${league.slug}/teams`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Volver a equipos
-          </Link>
-          <Link
-            href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Ver plantilla
-          </Link>
-          <Link
-            href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Editar equipo
-          </Link>
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{team.name}</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/teams`}
+        backLabel="Volver a equipos"
+        title={team.name}
+        description={
+          <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span>
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        action={
+          <div className="flex flex-wrap items-center gap-4">
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}>
+              Ver plantilla
+            </TextLink>
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}>
+              Editar equipo
+            </TextLink>
+          </div>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -114,25 +108,23 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Nombre</p>
+            <Eyebrow>Nombre</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{team.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Slug</p>
+            <Eyebrow>Slug</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{team.slug}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatStatus(team.status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Fecha de creación
-            </p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(team.created_at)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Logo</p>
+            <Eyebrow>Logo</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {team.logo_url ? (
                 <a
@@ -149,15 +141,13 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Año de fundación
-            </p>
+            <Eyebrow>Año de fundación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {team.founded_year ? String(team.founded_year) : "No definido"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Color primario</p>
+            <Eyebrow>Color primario</Eyebrow>
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-900">
               {team.primary_color ? (
                 <>
@@ -173,9 +163,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Color secundario
-            </p>
+            <Eyebrow>Color secundario</Eyebrow>
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-900">
               {team.secondary_color ? (
                 <>
@@ -202,18 +190,16 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <p className="text-sm text-gray-600">
               Registra jugadores por temporada y consulta la plantilla activa del equipo.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver plantilla
-            </Link>
-            <Link
+            </TextLink>
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/players`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver jugadores de la liga
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -234,12 +220,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <p className="text-sm text-gray-600">
               Consulta la programación de partidos de la liga.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/matches`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver partidos
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 

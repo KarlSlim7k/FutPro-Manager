@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EditMatchForm } from "@/components/matches/edit-match-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -109,12 +110,11 @@ export default async function EditMatchPage({ params }: EditMatchPageProps) {
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
+        <TextLink
           href={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
         >
           Volver al detalle del partido
-        </Link>
+        </TextLink>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Editar partido</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
@@ -129,31 +129,31 @@ export default async function EditMatchPage({ params }: EditMatchPageProps) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Temporada</p>
+            <Eyebrow>Temporada</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{season?.name ?? "No disponible"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado actual</p>
+            <Eyebrow>Estado actual</Eyebrow>
             <p className="mt-1">
               <MatchStatusBadge status={match.status} />
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo local</p>
+            <Eyebrow>Equipo local</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{homeTeamName}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo visitante</p>
+            <Eyebrow>Equipo visitante</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{awayTeamName}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Marcador actual</p>
+            <Eyebrow>Marcador actual</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {match.home_score} - {match.away_score}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha programada actual</p>
+            <Eyebrow>Fecha programada actual</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.scheduled_at)}</p>
           </div>
         </CardContent>

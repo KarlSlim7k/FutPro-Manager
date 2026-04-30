@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { StandingsTable } from "@/components/standings/standings-table";
 import { RecalculateStandingsForm } from "@/components/standings/recalculate-standings-form";
@@ -89,23 +89,17 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/seasons/${season.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver a temporada
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Tabla de posiciones
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/seasons/${season.slug}`}
+        backLabel="Volver a temporada"
+        title="Tabla de posiciones"
+        description={
+          <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span> · Temporada:{" "}
             <span className="font-medium text-gray-900">{season.name}</span>
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>

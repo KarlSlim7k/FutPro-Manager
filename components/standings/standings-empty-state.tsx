@@ -1,13 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function StandingsEmptyState() {
   return (
-    <Card>
-      <CardContent className="py-8">
-        <p className="text-center text-sm text-gray-600">
-          No hay datos en la tabla de posiciones todavía. Presiona "Recalcular tabla" para generarla.
-        </p>
-      </CardContent>
-    </Card>
+    <EmptyState
+      title="Sin datos en la tabla"
+      description='No hay datos en la tabla de posiciones todavía. Presiona "Recalcular tabla" para generarla.'
+      className="py-8 text-center"
+    />
   );
 }

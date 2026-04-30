@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eyebrow } from "@/components/ui/eyebrow";
 
 const features = [
   "Gestión centralizada de ligas y temporadas",
@@ -12,14 +13,14 @@ export default function Home() {
       <section className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+            <Eyebrow tone="brand" className="text-sm tracking-[0.18em]">
               FutPro Manager
-            </p>
+            </Eyebrow>
             <p className="text-xs text-gray-500">Perote, Veracruz</p>
           </div>
           <Link
             href="/login"
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700"
+            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
           >
             Iniciar sesión
           </Link>
@@ -38,13 +39,19 @@ export default function Home() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
               >
                 Iniciar sesión
               </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              >
+                Crear cuenta
+              </Link>
               <a
                 href="#sistema"
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition hover:border-gray-400"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition hover:border-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
               >
                 Conocer el sistema
               </a>
@@ -55,9 +62,9 @@ export default function Home() {
             id="sistema"
             className="rounded-2xl border border-gray-200 bg-white p-6 shadow-xl shadow-gray-200/60 sm:p-8"
           >
-            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-emerald-700">
+            <Eyebrow tone="brand" className="text-sm tracking-[0.15em]">
               Plataforma SaaS
-            </p>
+            </Eyebrow>
             <h2 className="mt-3 text-2xl font-semibold text-gray-900">
               Control operativo para ligas locales
             </h2>

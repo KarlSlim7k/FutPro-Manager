@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 import type { Standing } from "@/types/database";
 
 type StandingsTableProps = {
@@ -19,21 +20,41 @@ export function StandingsTable({ standings, teamMap, leagueSlug }: StandingsTabl
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-            <th className="px-3 py-3">Pos</th>
-            <th className="px-3 py-3">Equipo</th>
-            <th className="px-3 py-3 text-center">PJ</th>
-            <th className="px-3 py-3 text-center">G</th>
-            <th className="px-3 py-3 text-center">E</th>
-            <th className="px-3 py-3 text-center">P</th>
-            <th className="px-3 py-3 text-center">GF</th>
-            <th className="px-3 py-3 text-center">GC</th>
-            <th className="px-3 py-3 text-center">DIF</th>
-            <th className="px-3 py-3 text-center font-bold text-gray-900">PTS</th>
-          </tr>
-        </thead>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-3 py-3">
+                <Eyebrow as="span">Pos</Eyebrow>
+              </th>
+              <th className="px-3 py-3">
+                <Eyebrow as="span">Equipo</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">PJ</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">G</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">E</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">P</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">GF</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">GC</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span">DIF</Eyebrow>
+              </th>
+              <th className="px-3 py-3 text-center">
+                <Eyebrow as="span" className="font-bold text-gray-900">PTS</Eyebrow>
+              </th>
+            </tr>
+          </thead>
         <tbody className="divide-y divide-gray-100">
           {sorted.map((row, index) => {
             const team = teamMap.get(row.team_id);
@@ -45,12 +66,11 @@ export function StandingsTable({ standings, teamMap, leagueSlug }: StandingsTabl
                 <td className="px-3 py-3 text-gray-600">{index + 1}</td>
                 <td className="px-3 py-3 font-medium text-gray-900">
                   {team ? (
-                    <Link
+                    <TextLink
                       href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}`}
-                      className="text-emerald-700 hover:text-emerald-600"
                     >
                       {team.name}
-                    </Link>
+                    </TextLink>
                   ) : (
                     "Equipo desconocido"
                   )}

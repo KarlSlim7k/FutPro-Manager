@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
+import { Eyebrow } from "@/components/ui/eyebrow";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function LoginPage() {
@@ -17,9 +18,9 @@ export default async function LoginPage() {
     <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950 px-4 py-8 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-2 lg:items-center">
         <section>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-300">
+          <Eyebrow tone="inverse" className="text-sm tracking-[0.16em]">
             FutPro Manager
-          </p>
+          </Eyebrow>
           <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
             Panel SaaS para ligas amateur
           </h1>

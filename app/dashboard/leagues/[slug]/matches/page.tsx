@@ -1,9 +1,13 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CreateMatchForm } from "@/components/matches/create-match-form";
 import { MatchCard } from "@/components/matches/match-card";
 import { MatchSeasonSelector } from "@/components/matches/match-season-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormSectionCard } from "@/components/ui/form-section-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionHeader } from "@/components/ui/section-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -91,37 +95,27 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
   if (!selectedSeason) {
     return (
       <section className="space-y-6">
-        <div className="space-y-3">
-          <Link
-            href={`/dashboard/leagues/${league.slug}`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Volver al detalle de liga
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Partidos</h1>
-            <p className="mt-2 text-sm text-gray-600 sm:text-base">
-              Programa y consulta los partidos de <span className="font-medium text-gray-900">{league.name}</span>.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          backHref={`/dashboard/leagues/${league.slug}`}
+          backLabel="Volver al detalle de liga"
+          title="Partidos"
+          description={
+            <>
+              Programa y consulta los partidos de{" "}
+              <span className="font-medium text-gray-900">{league.name}</span>.
+            </>
+          }
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin temporadas registradas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">
-              Necesitas al menos una temporada para comenzar a programar partidos.
-            </p>
-            <Link
-              href={`/dashboard/leagues/${league.slug}/seasons`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-            >
+        <EmptyState
+          title="Sin temporadas registradas"
+          description="Necesitas al menos una temporada para comenzar a programar partidos."
+          action={
+            <TextLink href={`/dashboard/leagues/${league.slug}/seasons`}>
               Ir al módulo de temporadas
-            </Link>
-          </CardContent>
-        </Card>
+            </TextLink>
+          }
+        />
       </section>
     );
   }
@@ -147,20 +141,17 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al detalle de liga
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Partidos</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Programa y consulta los partidos de <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}`}
+        backLabel="Volver al detalle de liga"
+        title="Partidos"
+        description={
+          <>
+            Programa y consulta los partidos de{" "}
+            <span className="font-medium text-gray-900">{league.name}</span>.
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -180,19 +171,17 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
-          <h2 className="text-lg font-semibold text-gray-900">Calendario</h2>
+          <SectionHeader
+            title="Calendario"
+            className="gap-0"
+            titleClassName="text-lg font-semibold"
+          />
 
           {matches.length === 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Sin partidos programados</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario.
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              title="Sin partidos programados"
+              description="Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
+            />
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {matches.map((match) => (
@@ -215,20 +204,15 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
         </div>
 
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Programar partido</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CreateMatchForm
-                leagueSlug={league.slug}
-                seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
-                teams={teamsForScheduling.map((team) => ({ id: team.id, name: team.name }))}
-                venues={venues.map((venue) => ({ id: venue.id, name: venue.name }))}
-                initialSeasonId={selectedSeason.id}
-              />
-            </CardContent>
-          </Card>
+          <FormSectionCard title="Programar partido">
+            <CreateMatchForm
+              leagueSlug={league.slug}
+              seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
+              teams={teamsForScheduling.map((team) => ({ id: team.id, name: team.name }))}
+              venues={venues.map((venue) => ({ id: venue.id, name: venue.name }))}
+              initialSeasonId={selectedSeason.id}
+            />
+          </FormSectionCard>
 
           {activeTeams.length < 2 && teams.length >= 2 ? (
             <Card>

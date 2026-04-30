@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Venue } from "@/types/database";
 
@@ -72,12 +73,11 @@ export default async function VenueDetailPage({ params }: VenueDetailPageProps) 
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <Link
+        <TextLink
           href={`/dashboard/leagues/${league.slug}/venues`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
         >
           Volver a sedes
-        </Link>
+        </TextLink>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">{venue.name}</h1>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
@@ -92,47 +92,47 @@ export default async function VenueDetailPage({ params }: VenueDetailPageProps) 
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Nombre</p>
+            <Eyebrow>Nombre</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{venue.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Dirección</p>
+            <Eyebrow>Dirección</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{venue.address || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ciudad</p>
+            <Eyebrow>Ciudad</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{venue.city || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{venue.state || "No definido"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Latitud</p>
+            <Eyebrow>Latitud</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {venue.latitude !== null ? String(venue.latitude) : "No definida"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Longitud</p>
+            <Eyebrow>Longitud</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {venue.longitude !== null ? String(venue.longitude) : "No definida"}
             </p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Google Maps</p>
+            <Eyebrow>Google Maps</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {mapsUrl ? (
-                <a href={mapsUrl} target="_blank" rel="noreferrer" className="font-medium text-emerald-700 hover:text-emerald-600">
+                <TextLink href={mapsUrl} target="_blank" rel="noreferrer">
                   Ver ubicación en mapa
-                </a>
+                </TextLink>
               ) : (
                 "No disponible (falta latitud/longitud)"
               )}
             </p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha de creación</p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(venue.created_at)}</p>
           </div>
         </CardContent>
@@ -146,12 +146,11 @@ export default async function VenueDetailPage({ params }: VenueDetailPageProps) 
           <p className="text-sm text-gray-600">
             Módulo en preparación. Aquí se mostrarán los partidos asociados a esta sede.
           </p>
-          <Link
+          <TextLink
             href={`/dashboard/leagues/${league.slug}/matches`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Ver partidos de la liga
-          </Link>
+          </TextLink>
         </CardContent>
       </Card>
     </section>

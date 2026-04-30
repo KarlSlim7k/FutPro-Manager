@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CreatePlayerForm } from "@/components/players/create-player-form";
 import { PlayerCard } from "@/components/players/player-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormSectionCard } from "@/components/ui/form-section-card";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Player } from "@/types/database";
 
@@ -57,41 +58,27 @@ export default async function LeaguePlayersPage({ params }: LeaguePlayersPagePro
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al detalle de liga
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Jugadores</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Administra jugadores de <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}`}
+        backLabel="Volver al detalle de liga"
+        title="Jugadores"
+        description={
+          <>
+            Administra jugadores de{" "}
+            <span className="font-medium text-gray-900">{league.name}</span>.
+          </>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo jugador</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreatePlayerForm leagueSlug={league.slug} />
-        </CardContent>
-      </Card>
+      <FormSectionCard title="Nuevo jugador">
+        <CreatePlayerForm leagueSlug={league.slug} />
+      </FormSectionCard>
 
       {players.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin jugadores registrados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">
-              Esta liga aún no tiene jugadores visibles para tu usuario.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title="Sin jugadores registrados"
+          description="Esta liga aún no tiene jugadores visibles para tu usuario."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {players.map((player) => (

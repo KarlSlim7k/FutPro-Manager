@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Season } from "@/types/database";
 
@@ -77,20 +79,16 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/seasons`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver a temporadas
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{season.name}</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/seasons`}
+        backLabel="Volver a temporadas"
+        title={season.name}
+        description={
+          <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span>
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -98,33 +96,27 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Nombre</p>
+            <Eyebrow>Nombre</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{season.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Slug</p>
+            <Eyebrow>Slug</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{season.slug}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatStatus(season.status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Fecha de creación
-            </p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(season.created_at)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Fecha de inicio
-            </p>
+            <Eyebrow>Fecha de inicio</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDate(season.start_date)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Fecha de fin
-            </p>
+            <Eyebrow>Fecha de fin</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDate(season.end_date)}</p>
           </div>
         </CardContent>
@@ -139,12 +131,11 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
             <p className="text-sm text-gray-600">
               Consulta el catálogo de equipos de la liga para gestionar registros por temporada.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/teams`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver equipos de la liga
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -156,12 +147,11 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
             <p className="text-sm text-gray-600">
               Consulta la programación de partidos de la liga.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/matches`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver partidos
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -173,12 +163,11 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
             <p className="text-sm text-gray-600">
               Consulta la clasificación actual de los equipos en esta temporada.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/seasons/${season.slug}/standings`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver tabla de posiciones
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
       </div>

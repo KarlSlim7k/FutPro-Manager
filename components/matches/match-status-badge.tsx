@@ -1,7 +1,13 @@
+import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import type { MatchStatus } from "@/types/database";
 
 type MatchStatusBadgeProps = {
   status: MatchStatus;
+};
+
+type BadgeStyle = {
+  variant: StatusBadgeVariant;
+  className?: string;
 };
 
 function formatStatusLabel(status: MatchStatus) {
@@ -16,22 +22,22 @@ function formatStatusLabel(status: MatchStatus) {
 }
 
 export function MatchStatusBadge({ status }: MatchStatusBadgeProps) {
-  const className =
-    status === "completed"
-      ? "bg-emerald-100 text-emerald-800"
-      : status === "in_progress"
-      ? "bg-blue-100 text-blue-800"
-      : status === "cancelled"
-      ? "bg-red-100 text-red-800"
-      : status === "postponed"
-      ? "bg-amber-100 text-amber-800"
-      : "bg-gray-100 text-gray-800";
+  const styles: Record<MatchStatus, BadgeStyle> = {
+    completed: { variant: "success" },
+    in_progress: { variant: "info" },
+    cancelled: { variant: "danger" },
+    postponed: { variant: "warning" },
+    scheduled: { variant: "neutral", className: "text-gray-800" },
+  };
+
+  const badgeStyle = styles[status];
 
   return (
-    <span
-      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${className}`}
+    <StatusBadge
+      variant={badgeStyle.variant}
+      className={`px-2 py-0.5 ${badgeStyle.className ?? ""}`}
     >
       {formatStatusLabel(status)}
-    </span>
+    </StatusBadge>
   );
 }

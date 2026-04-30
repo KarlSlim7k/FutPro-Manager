@@ -1,6 +1,7 @@
-import Link from "next/link";
 import type { League } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { TextLink } from "@/components/ui/text-link";
 
 type LeagueCardData = Pick<
   League,
@@ -31,9 +32,7 @@ export function LeagueCard({ league }: LeagueCardProps) {
       <div>
         <CardHeader>
           <CardTitle className="line-clamp-2 text-lg">{league.name}</CardTitle>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-            /{league.slug}
-          </p>
+          <Eyebrow className="font-medium">/{league.slug}</Eyebrow>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-gray-600">{getLocation(league) || "Sin ubicación"}</p>
@@ -49,12 +48,11 @@ export function LeagueCard({ league }: LeagueCardProps) {
         </CardContent>
       </div>
       <CardContent className="pt-2">
-        <Link
+        <TextLink
           href={`/dashboard/leagues/${league.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
         >
           Ver detalle
-        </Link>
+        </TextLink>
       </CardContent>
     </Card>
   );

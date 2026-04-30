@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
+import { TextLink } from "@/components/ui/text-link";
 import type {
   PlayerRegistrationStatus,
   PlayerStatus,
@@ -40,11 +41,16 @@ interface PlayerRegistrationCardProps {
   showPositionColumn?: boolean;
 }
 
-const registrationStatusStyles: Record<PlayerRegistrationStatus, string> = {
-  active: "bg-emerald-100 text-emerald-800",
-  inactive: "bg-gray-200 text-gray-700",
-  released: "bg-red-100 text-red-700",
-  transferred: "bg-blue-100 text-blue-700",
+type BadgeStyle = {
+  variant: StatusBadgeVariant;
+  className?: string;
+};
+
+const registrationStatusStyles: Record<PlayerRegistrationStatus, BadgeStyle> = {
+  active: { variant: "success" },
+  inactive: { variant: "neutral", className: "bg-gray-200 text-gray-700" },
+  released: { variant: "danger", className: "text-red-700" },
+  transferred: { variant: "info", className: "text-blue-700" },
 };
 
 function formatLabel(value: string) {
@@ -76,11 +82,12 @@ export function PlayerRegistrationCard({
           <CardTitle className="text-base">
             {showPlayerColumn && player ? player.full_name : showTeamColumn && team ? team.name : "Registro"}
           </CardTitle>
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${registrationStatusStyles[registration.status]}`}
+          <StatusBadge
+            variant={registrationStatusStyles[registration.status].variant}
+            className={`px-3 py-1 ${registrationStatusStyles[registration.status].className ?? ""}`}
           >
             {formatLabel(registration.status)}
-          </span>
+          </StatusBadge>
         </div>
       </CardHeader>
       <CardContent className="space-y-2 text-sm text-gray-700">
@@ -88,12 +95,11 @@ export function PlayerRegistrationCard({
           <p>
             Jugador:{" "}
             {player ? (
-              <Link
+              <TextLink
                 href={`/dashboard/leagues/${leagueSlug}/players/${player.id}`}
-                className="font-medium text-emerald-700 hover:text-emerald-600"
               >
                 {player.full_name}
-              </Link>
+              </TextLink>
             ) : (
               "No disponible"
             )}
@@ -104,12 +110,11 @@ export function PlayerRegistrationCard({
           <p>
             Equipo:{" "}
             {team ? (
-              <Link
+              <TextLink
                 href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}`}
-                className="font-medium text-emerald-700 hover:text-emerald-600"
               >
                 {team.name}
-              </Link>
+              </TextLink>
             ) : (
               "No disponible"
             )}
@@ -119,12 +124,11 @@ export function PlayerRegistrationCard({
         <p>
           Temporada:{" "}
           {season ? (
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${leagueSlug}/seasons/${season.slug}`}
-              className="font-medium text-emerald-700 hover:text-emerald-600"
             >
               {season.name}
-            </Link>
+            </TextLink>
           ) : (
             "No disponible"
           )}

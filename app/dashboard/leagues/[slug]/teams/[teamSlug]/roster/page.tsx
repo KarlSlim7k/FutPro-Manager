@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type {
   League,
@@ -31,19 +36,24 @@ interface TeamRosterPageProps {
   searchParams: Promise<{ seasonId?: string | string[] }>;
 }
 
-const registrationStatusStyles: Record<PlayerRegistrationStatus, string> = {
-  active: "bg-emerald-100 text-emerald-800",
-  inactive: "bg-gray-200 text-gray-700",
-  released: "bg-red-100 text-red-700",
-  transferred: "bg-blue-100 text-blue-700",
+type BadgeStyle = {
+  variant: StatusBadgeVariant;
+  className?: string;
 };
 
-const playerStatusStyles: Record<Player["status"], string> = {
-  active: "bg-emerald-100 text-emerald-800",
-  inactive: "bg-gray-200 text-gray-700",
-  injured: "bg-red-100 text-red-800",
-  suspended: "bg-amber-100 text-amber-800",
-  retired: "bg-slate-200 text-slate-700",
+const registrationStatusStyles: Record<PlayerRegistrationStatus, BadgeStyle> = {
+  active: { variant: "success" },
+  inactive: { variant: "neutral", className: "bg-gray-200 text-gray-700" },
+  released: { variant: "danger", className: "text-red-700" },
+  transferred: { variant: "info", className: "text-blue-700" },
+};
+
+const playerStatusStyles: Record<Player["status"], BadgeStyle> = {
+  active: { variant: "success" },
+  inactive: { variant: "neutral", className: "bg-gray-200 text-gray-700" },
+  injured: { variant: "danger" },
+  suspended: { variant: "warning" },
+  retired: { variant: "neutral", className: "bg-slate-200 text-slate-700" },
 };
 
 function formatLabel(value: string) {
@@ -129,20 +139,17 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
   if (!selectedSeason) {
     return (
       <section className="space-y-6">
-        <div className="space-y-3">
-          <Link
-            href={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Volver al detalle del equipo
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Plantilla</h1>
-            <p className="mt-2 text-sm text-gray-600 sm:text-base">
-              Consulta los jugadores registrados de <span className="font-medium text-gray-900">{team.name}</span> por temporada.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          backHref={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
+          backLabel="Volver al detalle del equipo"
+          title="Plantilla"
+          description={
+            <>
+              Consulta los jugadores registrados de{" "}
+              <span className="font-medium text-gray-900">{team.name}</span> por temporada.
+            </>
+          }
+        />
 
         <Card>
           <CardHeader>
@@ -150,32 +157,25 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Liga</p>
+              <Eyebrow>Liga</Eyebrow>
               <p className="mt-1 text-sm text-gray-900">{league.name}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo</p>
+              <Eyebrow>Equipo</Eyebrow>
               <p className="mt-1 text-sm text-gray-900">{team.name}</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin temporadas registradas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">
-              Esta liga aún no tiene temporadas registradas. Crea una temporada antes de consultar plantillas.
-            </p>
-            <Link
-              href={`/dashboard/leagues/${league.slug}/seasons`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-            >
+        <EmptyState
+          title="Sin temporadas registradas"
+          description="Esta liga aún no tiene temporadas registradas. Crea una temporada antes de consultar plantillas."
+          action={
+            <TextLink href={`/dashboard/leagues/${league.slug}/seasons`}>
               Ir al módulo de temporadas
-            </Link>
-          </CardContent>
-        </Card>
+            </TextLink>
+          }
+        />
       </section>
     );
   }
@@ -222,20 +222,17 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al detalle del equipo
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Plantilla</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Consulta los jugadores registrados de <span className="font-medium text-gray-900">{team.name}</span> por temporada.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
+        backLabel="Volver al detalle del equipo"
+        title="Plantilla"
+        description={
+          <>
+            Consulta los jugadores registrados de{" "}
+            <span className="font-medium text-gray-900">{team.name}</span> por temporada.
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -243,33 +240,33 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Liga</p>
+            <Eyebrow>Liga</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo</p>
+            <Eyebrow>Equipo</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{team.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Temporada seleccionada</p>
+            <Eyebrow>Temporada seleccionada</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{selectedSeason.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado de temporada</p>
+            <Eyebrow>Estado de temporada</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatLabel(selectedSeason.status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Rango</p>
+            <Eyebrow>Rango</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {formatDate(selectedSeason.start_date)} - {formatDate(selectedSeason.end_date)}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">seasonId activo</p>
+            <Eyebrow>seasonId activo</Eyebrow>
             <p className="mt-1 break-all text-sm text-gray-900">{selectedSeason.id}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Jugadores registrados</p>
+            <Eyebrow>Jugadores registrados</Eyebrow>
             <p className="mt-1 text-sm font-medium text-gray-900">{rosterRegistrations.length}</p>
           </div>
         </CardContent>
@@ -304,25 +301,20 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
       </Card>
 
       {rosterRegistrations.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sin jugadores registrados</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">
-              Este equipo aún no tiene jugadores registrados en la temporada seleccionada.
-            </p>
-            <p className="text-sm text-gray-600">
-              Ve al módulo de jugadores para registrar jugadores en equipos y temporadas.
-            </p>
-            <Link
-              href={`/dashboard/leagues/${league.slug}/players`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-            >
+        <EmptyState
+          title="Sin jugadores registrados"
+          description={
+            <>
+              <p>Este equipo aún no tiene jugadores registrados en la temporada seleccionada.</p>
+              <p className="mt-2">Ve al módulo de jugadores para registrar jugadores en equipos y temporadas.</p>
+            </>
+          }
+          action={
+            <TextLink href={`/dashboard/leagues/${league.slug}/players`}>
               Ir al módulo de jugadores
-            </Link>
-          </CardContent>
-        </Card>
+            </TextLink>
+          }
+        />
       ) : (
         <Card>
           <CardHeader>
@@ -336,32 +328,33 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                     <div className="flex items-start justify-between gap-3">
                       <p className="font-semibold text-gray-900">
                         {registration.player ? (
-                          <Link
+                          <TextLink
                             href={`/dashboard/leagues/${league.slug}/players/${registration.player.id}`}
-                            className="text-emerald-700 hover:text-emerald-600"
                           >
                             {registration.player.full_name}
-                          </Link>
+                          </TextLink>
                         ) : (
                           "Jugador no disponible"
                         )}
                       </p>
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${registrationStatusStyles[registration.status]}`}
+                      <StatusBadge
+                        variant={registrationStatusStyles[registration.status].variant}
+                        className={`px-2.5 py-1 ${registrationStatusStyles[registration.status].className ?? ""}`}
                       >
                         {formatLabel(registration.status)}
-                      </span>
+                      </StatusBadge>
                     </div>
                     <p>Número: {registration.jersey_number ?? "Sin número"}</p>
                     <p>Posición: {registration.player?.preferred_position || "No definida"}</p>
                     <p>
                       Estado del jugador:{" "}
                       {registration.player ? (
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${playerStatusStyles[registration.player.status]}`}
+                        <StatusBadge
+                          variant={playerStatusStyles[registration.player.status].variant}
+                          className={`px-2.5 py-1 ${playerStatusStyles[registration.player.status].className ?? ""}`}
                         >
                           {formatLabel(registration.player.status)}
-                        </span>
+                        </StatusBadge>
                       ) : (
                         "No disponible"
                       )}
@@ -375,13 +368,25 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
             <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
               <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
                 <thead className="bg-gray-50">
-                  <tr className="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    <th className="px-4 py-3">Jugador</th>
-                    <th className="px-4 py-3">Número</th>
-                    <th className="px-4 py-3">Estado registro</th>
-                    <th className="px-4 py-3">Fecha registro</th>
-                    <th className="px-4 py-3">Posición</th>
-                    <th className="px-4 py-3">Estado jugador</th>
+                  <tr className="text-left text-gray-500">
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Jugador</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Número</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Estado registro</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Fecha registro</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Posición</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Estado jugador</Eyebrow>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -389,33 +394,34 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                     <tr key={registration.id}>
                       <td className="px-4 py-3">
                         {registration.player ? (
-                          <Link
+                          <TextLink
                             href={`/dashboard/leagues/${league.slug}/players/${registration.player.id}`}
-                            className="font-medium text-emerald-700 hover:text-emerald-600"
                           >
                             {registration.player.full_name}
-                          </Link>
+                          </TextLink>
                         ) : (
                           "No disponible"
                         )}
                       </td>
                       <td className="px-4 py-3">{registration.jersey_number ?? "Sin número"}</td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${registrationStatusStyles[registration.status]}`}
+                        <StatusBadge
+                          variant={registrationStatusStyles[registration.status].variant}
+                          className={`px-2.5 py-1 ${registrationStatusStyles[registration.status].className ?? ""}`}
                         >
                           {formatLabel(registration.status)}
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="px-4 py-3">{formatDateTime(registration.registered_at)}</td>
                       <td className="px-4 py-3">{registration.player?.preferred_position || "No definida"}</td>
                       <td className="px-4 py-3">
                         {registration.player ? (
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${playerStatusStyles[registration.player.status]}`}
+                          <StatusBadge
+                            variant={playerStatusStyles[registration.player.status].variant}
+                            className={`px-2.5 py-1 ${playerStatusStyles[registration.player.status].className ?? ""}`}
                           >
                             {formatLabel(registration.player.status)}
-                          </span>
+                          </StatusBadge>
                         ) : (
                           "No disponible"
                         )}

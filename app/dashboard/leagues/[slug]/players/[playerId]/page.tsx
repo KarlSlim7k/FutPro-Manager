@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { DominantFoot, League, Player, PlayerStatus } from "@/types/database";
 
@@ -85,28 +87,23 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-4">
-          <Link
-            href={`/dashboard/leagues/${league.slug}/players`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Volver a jugadores
-          </Link>
-          <Link
-            href={`/dashboard/leagues/${league.slug}/players/${player.id}/edit`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Editar jugador
-          </Link>
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{player.full_name}</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/players`}
+        backLabel="Volver a jugadores"
+        title={player.full_name}
+        description={
+          <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span>
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        action={
+          <div className="flex flex-wrap items-center gap-4">
+            <TextLink href={`/dashboard/leagues/${league.slug}/players/${player.id}/edit`}>
+              Editar jugador
+            </TextLink>
+          </div>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -114,33 +111,29 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Nombre completo</p>
+            <Eyebrow>Nombre completo</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{player.full_name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatStatus(player.status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha de nacimiento</p>
+            <Eyebrow>Fecha de nacimiento</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatBirthDate(player.birth_date)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Posición preferida
-            </p>
+            <Eyebrow>Posición preferida</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{player.preferred_position || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Perfil dominante
-            </p>
+            <Eyebrow>Perfil dominante</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {player.dominant_foot ? dominantFootLabels[player.dominant_foot] : "No definido"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Foto</p>
+            <Eyebrow>Foto</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {player.photo_url ? (
                 <a
@@ -157,7 +150,7 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
             </p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha de creación</p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(player.created_at)}</p>
           </div>
         </CardContent>
@@ -172,12 +165,11 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
             <p className="text-sm text-gray-600">
               Consulta y administra los movimientos del jugador por equipo y temporada.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/players/${player.id}/registrations`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver registros del jugador
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 
@@ -189,12 +181,11 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
             <p className="text-sm text-gray-600">
               Navega a equipos para revisar sus plantillas por temporada.
             </p>
-            <Link
+            <TextLink
               href={`/dashboard/leagues/${league.slug}/teams`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
             >
               Ver equipos de la liga
-            </Link>
+            </TextLink>
           </CardContent>
         </Card>
 

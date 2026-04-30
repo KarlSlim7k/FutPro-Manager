@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TextLink } from "@/components/ui/text-link";
 import type { Venue } from "@/types/database";
 
 type VenueCardData = Pick<Venue, "id" | "name" | "address" | "city" | "state" | "latitude" | "longitude">;
@@ -33,12 +33,11 @@ export function VenueCard({ leagueSlug, venue }: VenueCardProps) {
       </div>
 
       <CardContent className="pt-2">
-        <Link
+        <TextLink
           href={`/dashboard/leagues/${leagueSlug}/venues/${venue.id}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
         >
           Ver detalle
-        </Link>
+        </TextLink>
       </CardContent>
     </Card>
   );

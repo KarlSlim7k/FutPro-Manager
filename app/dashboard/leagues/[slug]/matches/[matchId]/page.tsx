@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -138,52 +140,37 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-4">
-          <Link
-            href={`/dashboard/leagues/${league.slug}/matches`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Volver a partidos
-          </Link>
-          <Link
-            href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-          >
-            Editar partido
-          </Link>
-          {match.status === "cancelled" ? (
-            <span className="inline-flex items-center text-sm font-medium text-gray-500">
-              Resultado no disponible para partidos cancelados.
-            </span>
-          ) : (
-            <Link
-              href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-            >
-              Capturar resultado
-            </Link>
-          )}
-          {match.status === "cancelled" ? (
-            <span className="inline-flex items-center text-sm font-medium text-gray-500">
-              Eventos no disponibles para partidos cancelados.
-            </span>
-          ) : (
-            <Link
-              href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}
-              className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-            >
-              Eventos
-            </Link>
-          )}
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Detalle de partido</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            {homeTeam?.name ?? "Equipo local"} vs {awayTeam?.name ?? "Equipo visitante"}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/matches`}
+        backLabel="Volver a partidos"
+        title="Detalle de partido"
+        description={`${homeTeam?.name ?? "Equipo local"} vs ${awayTeam?.name ?? "Equipo visitante"}`}
+        action={
+          <div className="flex flex-wrap items-center gap-4">
+            <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}>
+              Editar partido
+            </TextLink>
+            {match.status === "cancelled" ? (
+              <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                Resultado no disponible para partidos cancelados.
+              </span>
+            ) : (
+              <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}>
+                Capturar resultado
+              </TextLink>
+            )}
+            {match.status === "cancelled" ? (
+              <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                Eventos no disponibles para partidos cancelados.
+              </span>
+            ) : (
+              <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}>
+                Eventos
+              </TextLink>
+            )}
+          </div>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -191,58 +178,58 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Liga</p>
+            <Eyebrow>Liga</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{league.name}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Temporada</p>
+            <Eyebrow>Temporada</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{season?.name ?? "No disponible"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Jornada / Ronda</p>
+            <Eyebrow>Jornada / Ronda</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{match.round_name || "No definida"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</p>
+            <Eyebrow>Estado</Eyebrow>
             <p className="mt-1">
               <MatchStatusBadge status={match.status} />
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo local</p>
+            <Eyebrow>Equipo local</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{homeTeam?.name ?? "No disponible"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Equipo visitante</p>
+            <Eyebrow>Equipo visitante</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{awayTeam?.name ?? "No disponible"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Marcador actual</p>
+            <Eyebrow>Marcador actual</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {match.home_score} - {match.away_score}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha y hora programada</p>
+            <Eyebrow>Fecha y hora programada</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.scheduled_at)}</p>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Sede / Cancha</p>
+            <Eyebrow>Sede / Cancha</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{venue?.name ?? "Sin sede asignada"}</p>
             <p className="mt-1 text-sm text-gray-600">{getVenueLocation(venue)}</p>
             {googleMapsUrl ? (
-              <a
+              <TextLink
                 href={googleMapsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
+                className="mt-2"
               >
                 Ver en Google Maps
-              </a>
+              </TextLink>
             ) : null}
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha de creación</p>
+            <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.created_at)}</p>
           </div>
         </CardContent>

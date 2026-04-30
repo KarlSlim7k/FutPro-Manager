@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eyebrow } from "@/components/ui/eyebrow";
 
 const menuItems = [
   { label: "Panel de control", href: "/dashboard", enabled: true },
@@ -13,9 +14,9 @@ export function DashboardSidebar() {
   return (
     <aside className="w-full border-b border-gray-200 bg-gray-950 text-gray-100 md:min-h-screen md:w-64 md:border-b-0 md:border-r md:border-gray-800">
       <div className="px-5 py-4 md:px-6 md:py-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+        <Eyebrow className="tracking-[0.18em] text-emerald-400">
           FutPro Manager
-        </p>
+        </Eyebrow>
         <h2 className="mt-2 text-lg font-semibold text-white">Dashboard</h2>
       </div>
 

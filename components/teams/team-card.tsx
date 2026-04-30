@@ -1,5 +1,7 @@
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
+import { TextLink } from "@/components/ui/text-link";
 import type { Team } from "@/types/database";
 
 type TeamCardData = Pick<
@@ -12,10 +14,10 @@ interface TeamCardProps {
   team: TeamCardData;
 }
 
-const statusStyles: Record<Team["status"], string> = {
-  active: "bg-emerald-100 text-emerald-800",
-  inactive: "bg-gray-200 text-gray-700",
-  archived: "bg-amber-100 text-amber-800",
+const statusVariants: Record<Team["status"], StatusBadgeVariant> = {
+  active: "success",
+  inactive: "neutral",
+  archived: "warning",
 };
 
 function formatStatus(status: Team["status"]) {
@@ -30,11 +32,11 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <CardTitle className="line-clamp-2 text-lg">{team.name}</CardTitle>
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">/{team.slug}</p>
+              <Eyebrow className="font-medium">/{team.slug}</Eyebrow>
             </div>
-            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[team.status]}`}>
+            <StatusBadge variant={statusVariants[team.status]}>
               {formatStatus(team.status)}
-            </span>
+            </StatusBadge>
           </div>
         </CardHeader>
 
@@ -89,24 +91,22 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
 
       <CardContent className="pt-2">
         <div className="flex flex-wrap items-center gap-4">
-          <Link
+          <TextLink
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Ver detalle
-          </Link>
-          <Link
+          </TextLink>
+          <TextLink
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/roster`}
-            className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
           >
             Plantilla
-          </Link>
-          <Link
+          </TextLink>
+          <TextLink
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/edit`}
-            className="inline-flex items-center text-sm font-medium text-gray-600 transition hover:text-gray-800"
+            variant="muted"
           >
             Editar
-          </Link>
+          </TextLink>
         </div>
       </CardContent>
     </Card>

@@ -1,3 +1,4 @@
+import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import type { MatchEventType } from "@/types/database";
 
 const eventTypeLabels: Record<MatchEventType, string> = {
@@ -11,15 +12,20 @@ const eventTypeLabels: Record<MatchEventType, string> = {
   penalty_miss: "Penal fallado",
 };
 
-const eventTypeStyles: Record<MatchEventType, string> = {
-  goal: "bg-emerald-100 text-emerald-800",
-  own_goal: "bg-orange-100 text-orange-800",
-  assist: "bg-slate-100 text-slate-700",
-  yellow_card: "bg-yellow-100 text-yellow-800",
-  red_card: "bg-red-100 text-red-800",
-  substitution: "bg-blue-100 text-blue-800",
-  penalty_goal: "bg-emerald-100 text-emerald-800",
-  penalty_miss: "bg-amber-100 text-amber-800",
+type BadgeStyle = {
+  variant: StatusBadgeVariant;
+  className?: string;
+};
+
+const eventTypeStyles: Record<MatchEventType, BadgeStyle> = {
+  goal: { variant: "success" },
+  own_goal: { variant: "warning", className: "bg-orange-100 text-orange-800" },
+  assist: { variant: "neutral", className: "bg-slate-100 text-slate-700" },
+  yellow_card: { variant: "warning", className: "bg-yellow-100 text-yellow-800" },
+  red_card: { variant: "danger" },
+  substitution: { variant: "info" },
+  penalty_goal: { variant: "success" },
+  penalty_miss: { variant: "warning" },
 };
 
 export function getMatchEventTypeLabel(type: MatchEventType) {
@@ -31,9 +37,14 @@ interface MatchEventTypeBadgeProps {
 }
 
 export function MatchEventTypeBadge({ type }: MatchEventTypeBadgeProps) {
+  const badgeStyle = eventTypeStyles[type];
+
   return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${eventTypeStyles[type]}`}>
+    <StatusBadge
+      variant={badgeStyle.variant}
+      className={`px-2 py-0.5 ${badgeStyle.className ?? ""}`}
+    >
       {eventTypeLabels[type]}
-    </span>
+    </StatusBadge>
   );
 }

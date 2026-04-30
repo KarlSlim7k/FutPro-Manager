@@ -40,9 +40,11 @@ function mapRecalculateErrorMessage(
 export async function recalculateStandingsAction(
   leagueSlug: string,
   seasonSlug: string,
-  _prevState: RecalculateActionState,
-  _formData: FormData
+  prevState: RecalculateActionState,
+  formData: FormData
 ): Promise<RecalculateActionState> {
+  void prevState;
+  void formData;
   const supabase = await createClient();
   const {
     data: { user },
