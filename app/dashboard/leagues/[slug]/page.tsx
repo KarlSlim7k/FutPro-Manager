@@ -200,6 +200,22 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             </TextLink>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Tabla de posiciones</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Consulta la clasificación de equipos por temporada, puntos y diferencia de goles.
+            </p>
+            <TextLink
+              href={`/dashboard/leagues/${league.slug}/standings`}
+            >
+              Ver tabla de posiciones
+            </TextLink>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
