@@ -1,8 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { ExternalTextLink } from "@/components/ui/external-text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
 
@@ -91,14 +93,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           </>
         }
         action={
-          <div className="flex flex-wrap items-center gap-4">
+          <ToolbarActions>
             <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}>
               Ver plantilla
             </TextLink>
             <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}>
               Editar equipo
             </TextLink>
-          </div>
+          </ToolbarActions>
         }
       />
 
@@ -127,14 +129,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <Eyebrow>Logo</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {team.logo_url ? (
-                <a
+                <ExternalTextLink
                   href={team.logo_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-emerald-700 hover:text-emerald-600"
+                  className="font-medium"
                 >
                   Ver logo
-                </a>
+                </ExternalTextLink>
               ) : (
                 "No definido"
               )}

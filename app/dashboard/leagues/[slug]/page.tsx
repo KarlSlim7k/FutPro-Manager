@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League } from "@/types/database";
@@ -60,17 +61,12 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <TextLink
-          href="/dashboard/leagues"
-        >
-          Volver a ligas
-        </TextLink>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{league.name}</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">/{league.slug}</p>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/dashboard/leagues"
+        backLabel="Volver a ligas"
+        title={league.name}
+        description={`/${league.slug}`}
+      />
 
       <Card>
         <CardHeader>

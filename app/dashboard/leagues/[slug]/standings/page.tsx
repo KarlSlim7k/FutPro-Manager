@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Season, Standing } from "@/types/database";
 
@@ -240,10 +241,10 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
             </>
           }
           action={
-            <div className="flex flex-wrap items-center gap-4">
+            <ToolbarActions>
               <TextLink href={`/dashboard/leagues/${league.slug}/matches`}>Ver partidos</TextLink>
               <TextLink href={`/dashboard/leagues/${league.slug}/teams`}>Ver equipos</TextLink>
-            </div>
+            </ToolbarActions>
           }
         />
       ) : (

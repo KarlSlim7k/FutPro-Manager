@@ -26,7 +26,7 @@ export function DashboardSidebar() {
             <Link
               key={item.label}
               href={item.href}
-              className="inline-flex min-w-max items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 md:flex md:w-full"
+              className="inline-flex min-w-max items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 md:flex md:w-full"
             >
               {item.label}
             </Link>

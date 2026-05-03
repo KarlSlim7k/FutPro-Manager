@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { ExternalTextLink } from "@/components/ui/external-text-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Venue } from "@/types/database";
@@ -72,19 +74,16 @@ export default async function VenueDetailPage({ params }: VenueDetailPageProps) 
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <TextLink
-          href={`/dashboard/leagues/${league.slug}/venues`}
-        >
-          Volver a sedes
-        </TextLink>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{venue.name}</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/venues`}
+        backLabel="Volver a sedes"
+        title={venue.name}
+        description={
+          <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span>
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -123,9 +122,9 @@ export default async function VenueDetailPage({ params }: VenueDetailPageProps) 
             <Eyebrow>Google Maps</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">
               {mapsUrl ? (
-                <TextLink href={mapsUrl} target="_blank" rel="noreferrer">
+                <ExternalTextLink href={mapsUrl}>
                   Ver ubicación en mapa
-                </TextLink>
+                </ExternalTextLink>
               ) : (
                 "No disponible (falta latitud/longitud)"
               )}

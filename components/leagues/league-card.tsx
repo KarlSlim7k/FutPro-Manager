@@ -1,6 +1,7 @@
 import type { League } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { TextLink } from "@/components/ui/text-link";
 
 type LeagueCardData = Pick<
@@ -37,12 +38,12 @@ export function LeagueCard({ league }: LeagueCardProps) {
         <CardContent className="space-y-3">
           <p className="text-sm text-gray-600">{getLocation(league) || "Sin ubicación"}</p>
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
+            <StatusBadge variant="neutral">
               Estado: {formatStatus(league.status)}
-            </span>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-medium text-emerald-800">
+            </StatusBadge>
+            <StatusBadge variant={league.is_public ? "success" : "info"}>
               {league.is_public ? "Pública" : "Privada"}
-            </span>
+            </StatusBadge>
           </div>
           <p className="text-xs text-gray-500">Creada: {formatDate(league.created_at)}</p>
         </CardContent>

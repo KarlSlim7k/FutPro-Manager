@@ -23,11 +23,11 @@ export function MatchEventCard({ event, teamName, playerName }: MatchEventCardPr
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <MatchEventTypeBadge type={event.event_type} />
-          <span className="text-xs font-medium text-gray-600">{teamName ?? "Equipo no disponible"}</span>
+          <span className="break-words text-xs font-medium text-gray-600">{teamName ?? "Equipo no disponible"}</span>
         </div>
-        <p className="mt-1 text-sm font-medium text-gray-900">{playerName ?? "Jugador no disponible"}</p>
+        <p className="mt-1 break-words text-sm font-medium text-gray-900">{playerName ?? "Jugador no disponible"}</p>
         {event.notes ? (
-          <p className="mt-1 text-sm text-gray-600">{event.notes}</p>
+          <p className="mt-1 break-words text-sm text-gray-600">{event.notes}</p>
         ) : null}
         <p className="mt-2 text-xs text-gray-500">Registrado: {formatDateTime(event.created_at)}</p>
       </div>

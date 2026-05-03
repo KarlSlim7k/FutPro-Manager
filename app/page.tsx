@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
       <section className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <Eyebrow tone="brand" className="text-sm tracking-[0.18em]">
               FutPro Manager

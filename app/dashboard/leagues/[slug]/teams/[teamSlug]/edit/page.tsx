@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EditTeamForm } from "@/components/teams/edit-team-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
 
@@ -61,21 +61,17 @@ export default async function EditTeamPage({ params }: EditTeamPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <Link
-          href={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
-          className="inline-flex items-center text-sm font-medium text-emerald-700 transition hover:text-emerald-600"
-        >
-          Volver al equipo
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Editar equipo</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/teams/${team.slug}`}
+        backLabel="Volver al equipo"
+        title="Editar equipo"
+        description={
+          <>
             Actualiza la información de <span className="font-medium text-gray-900">{team.name}</span> en{" "}
             <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>

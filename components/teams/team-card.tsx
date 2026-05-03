@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { ExternalTextLink } from "@/components/ui/external-text-link";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import type { Team } from "@/types/database";
 
 type TeamCardData = Pick<
@@ -30,7 +32,7 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
       <div>
         <CardHeader className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <CardTitle className="line-clamp-2 text-lg">{team.name}</CardTitle>
               <Eyebrow className="font-medium">/{team.slug}</Eyebrow>
             </div>
@@ -44,14 +46,13 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
           {team.logo_url ? (
             <p className="text-sm text-gray-600">
               Logo:{" "}
-              <a
+              <ExternalTextLink
                 href={team.logo_url}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-emerald-700 hover:text-emerald-600"
+                className="text-sm font-medium"
+                aria-label={`Abrir logo de ${team.name} en una nueva pestaña`}
               >
                 Disponible
-              </a>
+              </ExternalTextLink>
             </p>
           ) : (
             <p className="text-sm text-gray-600">Logo: No definido</p>
@@ -90,7 +91,7 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
       </div>
 
       <CardContent className="pt-2">
-        <div className="flex flex-wrap items-center gap-4">
+        <ToolbarActions>
           <TextLink
             href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}`}
           >
@@ -107,7 +108,7 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
           >
             Editar
           </TextLink>
-        </div>
+        </ToolbarActions>
       </CardContent>
     </Card>
   );

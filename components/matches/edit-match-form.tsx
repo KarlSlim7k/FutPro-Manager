@@ -96,7 +96,7 @@ export function EditMatchForm({ leagueSlug, matchId, currentMatch, venues }: Edi
           name="venue_id"
           defaultValue={state.values.venue_id}
           disabled={isPending || !isEditableMatch}
-          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
           <option value="">Sin sede asignada</option>
           {venues.map((venue) => (
@@ -137,7 +137,7 @@ export function EditMatchForm({ leagueSlug, matchId, currentMatch, venues }: Edi
           defaultValue={state.values.status}
           disabled={isPending || !isEditableMatch}
           required
-          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
           {EDITABLE_MATCH_STATUS_VALUES.map((status) => (
             <option key={status} value={status}>

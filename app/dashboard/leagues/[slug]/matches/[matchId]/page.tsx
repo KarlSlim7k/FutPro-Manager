@@ -2,8 +2,10 @@ import { notFound, redirect } from "next/navigation";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { ExternalTextLink } from "@/components/ui/external-text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -146,7 +148,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         title="Detalle de partido"
         description={`${homeTeam?.name ?? "Equipo local"} vs ${awayTeam?.name ?? "Equipo visitante"}`}
         action={
-          <div className="flex flex-wrap items-center gap-4">
+          <ToolbarActions>
             <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}>
               Editar partido
             </TextLink>
@@ -168,7 +170,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
                 Eventos
               </TextLink>
             )}
-          </div>
+          </ToolbarActions>
         }
       />
 
@@ -218,14 +220,12 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             <p className="mt-1 text-sm text-gray-900">{venue?.name ?? "Sin sede asignada"}</p>
             <p className="mt-1 text-sm text-gray-600">{getVenueLocation(venue)}</p>
             {googleMapsUrl ? (
-              <TextLink
+              <ExternalTextLink
                 href={googleMapsUrl}
-                target="_blank"
-                rel="noreferrer"
                 className="mt-2"
               >
                 Ver en Google Maps
-              </TextLink>
+              </ExternalTextLink>
             ) : null}
           </div>
           <div className="sm:col-span-2">

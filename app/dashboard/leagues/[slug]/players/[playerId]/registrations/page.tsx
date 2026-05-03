@@ -3,7 +3,7 @@ import { PlayerRegistrationTable } from "@/components/registrations/player-regis
 import type { PlayerRegistrationRow } from "@/components/registrations/player-registration-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { TextLink } from "@/components/ui/text-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type {
   League,
@@ -134,20 +134,17 @@ export default async function PlayerRegistrationsPage({ params }: PlayerRegistra
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <TextLink
-          href={`/dashboard/leagues/${league.slug}/players/${player.id}`}
-        >
-          Volver al detalle del jugador
-        </TextLink>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Historial de registros</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/players/${player.id}`}
+        backLabel="Volver al detalle del jugador"
+        title="Historial de registros"
+        description={
+          <>
             Movimientos de <span className="font-medium text-gray-900">{player.full_name}</span> en{" "}
             <span className="font-medium text-gray-900">{league.name}</span>.
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader>

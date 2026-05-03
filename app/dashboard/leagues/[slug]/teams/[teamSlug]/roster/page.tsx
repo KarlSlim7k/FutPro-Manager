@@ -286,7 +286,7 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                 <Link
                   key={seasonItem.id}
                   href={`${rosterBasePath}?seasonId=${seasonItem.id}`}
-                  className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium transition ${
+                  className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 ${
                     isActiveSeason
                       ? "border-emerald-700 bg-emerald-700 text-white"
                       : "border-gray-300 bg-white text-gray-700 hover:border-emerald-600 hover:text-emerald-700"

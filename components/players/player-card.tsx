@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalTextLink } from "@/components/ui/external-text-link";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import type { DominantFoot, Player, PlayerStatus } from "@/types/database";
 
 type PlayerCardData = Pick<
@@ -45,7 +47,7 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
       <div>
         <CardHeader className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <CardTitle className="line-clamp-2 text-lg">{player.full_name}</CardTitle>
+            <CardTitle className="min-w-0 line-clamp-2 text-lg">{player.full_name}</CardTitle>
             <StatusBadge variant={statusVariants[player.status]}>
               {formatStatus(player.status)}
             </StatusBadge>
@@ -61,14 +63,13 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
           <p className="text-sm text-gray-600">
             Foto:{" "}
             {player.photo_url ? (
-              <a
+              <ExternalTextLink
                 href={player.photo_url}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-emerald-700 hover:text-emerald-600"
+                className="text-sm font-medium"
+                aria-label={`Abrir foto de ${player.full_name} en una nueva pestaña`}
               >
                 Disponible
-              </a>
+              </ExternalTextLink>
             ) : (
               "No definida"
             )}
@@ -77,7 +78,7 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
       </div>
 
       <CardContent className="pt-2">
-        <div className="flex items-center gap-4">
+        <ToolbarActions>
           <TextLink
             href={`/dashboard/leagues/${leagueSlug}/players/${player.id}`}
           >
@@ -89,7 +90,7 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
           >
             Editar
           </TextLink>
-        </div>
+        </ToolbarActions>
       </CardContent>
     </Card>
   );

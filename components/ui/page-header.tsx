@@ -28,6 +28,7 @@ export function PageHeader({
       <SectionHeader
         eyebrow={eyebrow}
         title={title}
+        titleAs="h1"
         description={description}
         action={action}
       />

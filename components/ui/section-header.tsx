@@ -7,6 +7,7 @@ export interface SectionHeaderProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
+  titleAs?: "h1" | "h2" | "h3";
   className?: string;
   titleClassName?: string;
   descriptionClassName?: string;
@@ -17,10 +18,13 @@ export function SectionHeader({
   title,
   description,
   action,
+  titleAs = "h2",
   className,
   titleClassName,
   descriptionClassName,
 }: SectionHeaderProps) {
+  const TitleTag = titleAs;
+
   return (
     <div
       className={cn(
@@ -36,14 +40,14 @@ export function SectionHeader({
             eyebrow
           )
         ) : null}
-        <h2
+        <TitleTag
           className={cn(
-            "text-3xl font-bold tracking-tight text-gray-900",
+            "text-3xl font-bold tracking-tight text-gray-900 break-words",
             titleClassName
           )}
         >
           {title}
-        </h2>
+        </TitleTag>
         {description ? (
           <p
             className={cn(
@@ -55,7 +59,7 @@ export function SectionHeader({
           </p>
         ) : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="w-full sm:w-auto sm:shrink-0">{action}</div> : null}
     </div>
   );
 }

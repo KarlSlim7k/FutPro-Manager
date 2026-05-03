@@ -1,6 +1,7 @@
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TextLink } from "@/components/ui/text-link";
+import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import type { MatchStatus } from "@/types/database";
 
 type MatchCardProps = {
@@ -58,7 +59,7 @@ export function MatchCard({
           <span className="font-medium text-gray-900">Marcador actual:</span> {homeScore} - {awayScore}
         </p>
 
-        <div className="flex flex-wrap items-center gap-4 pt-1">
+        <ToolbarActions className="pt-1">
           <TextLink
             href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}
           >
@@ -91,7 +92,7 @@ export function MatchCard({
               Eventos
             </TextLink>
           )}
-        </div>
+        </ToolbarActions>
       </CardContent>
     </Card>
   );

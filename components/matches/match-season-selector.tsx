@@ -25,10 +25,10 @@ export function MatchSeasonSelector({
           <Link
             key={season.id}
             href={`/dashboard/leagues/${leagueSlug}/matches?seasonId=${season.id}`}
-            className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition ${
+            className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 ${
               isActive
-                ? "border-emerald-600 bg-emerald-600 text-white"
-                : "border-gray-300 bg-white text-gray-700 hover:border-emerald-500 hover:text-emerald-700"
+                ? "border-emerald-700 bg-emerald-700 text-white"
+                : "border-gray-300 bg-white text-gray-700 hover:border-emerald-600 hover:text-emerald-700"
             }`}
           >
             {season.name}

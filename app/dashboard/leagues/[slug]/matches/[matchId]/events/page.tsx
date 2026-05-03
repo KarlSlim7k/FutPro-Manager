@@ -3,8 +3,9 @@ import { CreateMatchEventForm } from "@/components/matches/create-match-event-fo
 import { MatchEventCard } from "@/components/matches/match-event-card";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { TextLink } from "@/components/ui/text-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, MatchEvent, Player, PlayerTeamRegistration, Season, Team, Venue } from "@/types/database";
 
@@ -175,19 +176,12 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <TextLink
-          href={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
-        >
-          Volver al detalle del partido
-        </TextLink>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Eventos del partido</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            {homeTeam.name} vs {awayTeam.name}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
+        backLabel="Volver al detalle del partido"
+        title="Eventos del partido"
+        description={`${homeTeam.name} vs ${awayTeam.name}`}
+      />
 
       <Card>
         <CardHeader>
@@ -243,7 +237,11 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (
-            <p className="text-sm text-gray-600">Este partido aún no tiene eventos registrados.</p>
+            <EmptyState
+              title="Sin eventos registrados"
+              description="Este partido aún no tiene eventos registrados."
+              className="border-0 bg-transparent p-0"
+            />
           ) : (
             <div className="space-y-3">
               {events.map((event) => (

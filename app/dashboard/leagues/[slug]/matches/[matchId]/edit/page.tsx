@@ -3,7 +3,7 @@ import { EditMatchForm } from "@/components/matches/edit-match-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { TextLink } from "@/components/ui/text-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -109,19 +109,12 @@ export default async function EditMatchPage({ params }: EditMatchPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <TextLink
-          href={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
-        >
-          Volver al detalle del partido
-        </TextLink>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Editar partido</h1>
-          <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            {homeTeamName} vs {awayTeamName}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
+        backLabel="Volver al detalle del partido"
+        title="Editar partido"
+        description={`${homeTeamName} vs ${awayTeamName}`}
+      />
 
       <Card>
         <CardHeader>

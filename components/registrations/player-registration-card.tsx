@@ -79,7 +79,7 @@ export function PlayerRegistrationCard({
     <Card>
       <CardHeader className="space-y-2">
         <div className="flex items-start justify-between gap-3">
-          <CardTitle className="text-base">
+          <CardTitle className="min-w-0 break-words text-base">
             {showPlayerColumn && player ? player.full_name : showTeamColumn && team ? team.name : "Registro"}
           </CardTitle>
           <StatusBadge
@@ -90,7 +90,7 @@ export function PlayerRegistrationCard({
           </StatusBadge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 text-sm text-gray-700">
+      <CardContent className="space-y-2 break-words text-sm text-gray-700">
         {showPlayerColumn ? (
           <p>
             Jugador:{" "}
