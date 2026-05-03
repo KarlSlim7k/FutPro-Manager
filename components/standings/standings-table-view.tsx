@@ -1,25 +1,10 @@
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 
-type StandingTableRow = {
-  team_id: string;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  goals_for: number;
-  goals_against: number;
-  goal_difference: number;
-  points: number;
-  team: {
-    id: string;
-    name: string;
-    slug: string | null;
-  } | null;
-};
+import type { StandingRowViewModel } from "@/components/standings/types";
 
 interface StandingsTableViewProps {
-  rows: StandingTableRow[];
+  rows: StandingRowViewModel[];
   leagueSlug: string;
 }
 

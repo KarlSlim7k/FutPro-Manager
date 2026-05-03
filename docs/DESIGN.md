@@ -60,3 +60,8 @@ Mantener una UI consistente, legible y escalable para el MVP sin introducir ries
 - [ ] Revisar links externos.
 - [ ] Ejecutar `npm run lint`.
 - [ ] Ejecutar `npm run build`.
+
+
+## Nota módulo standings
+
+- El módulo incorpora tabla desktop + cards mobile para la misma fuente de datos, manteniendo paridad de contenido y priorizando legibilidad en pantallas pequeñas.

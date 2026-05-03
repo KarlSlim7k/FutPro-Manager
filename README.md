@@ -63,7 +63,10 @@ La documentación técnica y de contexto para desarrollo se encuentra en la carp
 - [`docs/DESIGN.md`](./docs/DESIGN.md) - lineamientos de diseño y experiencia de usuario.
 - [`docs/ROLES_AND_PERMISSIONS.md`](./docs/ROLES_AND_PERMISSIONS.md) - roles, permisos y alcance.
 - [`docs/RULES.md`](./docs/RULES.md) - reglas de desarrollo y convenciones del proyecto.
-- [`docs/ROADMAP.md`](./docs/ROADMAP.md) - fases del producto.
+- [`docs/ROADMAP.md`](./docs/ROADMAP.md) - roadmap de producto y UI/UX.
+- [`docs/IMPLEMENTATION_STATUS.md`](./docs/IMPLEMENTATION_STATUS.md) - estado real de implementación por módulo.
+
+**Nota:** Para conocer qué está implementado, qué está parcial y qué falta, revisar `docs/IMPLEMENTATION_STATUS.md`.
 
 ---
 
