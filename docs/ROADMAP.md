@@ -25,10 +25,11 @@
 - Eventos: registro operativo por partido.
 - Pendiente: flujos avanzados de asignación arbitral y trazabilidad.
 
-### Fase 4 - Tabla de posiciones (Parcial)
+### Fase 4 - Tabla de posiciones (Implementación funcional, con mejoras pendientes)
 - Vista de standings implementada y conectada a datos reales.
 - Existe recálculo manual por temporada en dashboard.
-- **Pendiente:** generación/actualización automática integral desde flujo de partidos/resultados/eventos.
+- Existe recálculo automático al guardar resultados que impactan estado `completed`.
+- **Pendiente:** automatización avanzada por eventos/auditoría y soporte de jobs/background para mayor robustez.
 
 ### Fase 5 - Vista pública (Pendiente)
 - Portal público de ligas/temporadas/equipos/partidos/standings.

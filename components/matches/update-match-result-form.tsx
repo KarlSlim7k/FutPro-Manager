@@ -16,6 +16,7 @@ type UpdateResultFormState = {
   fieldErrors: Partial<Record<"home_score" | "away_score" | "status", string>>;
   formError: string | null;
   success: boolean;
+  standingsWarning: string | null;
 };
 
 function formatStatusLabel(status: MatchStatus) {
@@ -56,6 +57,7 @@ export function UpdateMatchResultForm({
       fieldErrors: {},
       formError: null,
       success: false,
+      standingsWarning: null,
     }
   );
 
@@ -133,6 +135,12 @@ export function UpdateMatchResultForm({
       {state.success ? (
         <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
           Resultado guardado correctamente.
+        </p>
+      ) : null}
+
+      {state.success && state.standingsWarning ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          {state.standingsWarning}
         </p>
       ) : null}
 

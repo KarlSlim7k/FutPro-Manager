@@ -85,10 +85,12 @@ Arquitectura actual:
 7. Ordenamiento final por puntos, diferencia, goles a favor y nombre.
 8. Render dual para desktop/mobile (`standings-table-view` y `standing-mobile-card`).
 9. Ruta adicional de temporada con recálculo manual (`/seasons/[seasonSlug]/standings`).
+10. Utilidad server-side compartida de recálculo que se reutiliza tanto en el botón manual como en el guardado de resultado de partido.
+11. Recalculo automático al guardar resultados que entran/salen de estado `completed` (por temporada).
 
 Pendiente:
 
-- Automatización completa del cálculo/actualización de standings en flujo operativo integral.
+- Automatización avanzada por eventos, auditoría de recalculos y jobs/background para cargas mayores.
 
 ## Decisiones técnicas importantes
 

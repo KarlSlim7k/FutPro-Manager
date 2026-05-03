@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 
 type UpdateMatchResultField = "home_score" | "away_score";
@@ -13,6 +14,8 @@ export type UpdateMatchResultActionState = {
   };
   fieldErrors: Partial<Record<UpdateMatchResultField, string>>;
   formError: string | null;
+  success: boolean;
+  standingsWarning: string | null;
 };
 
 function mapUpdateErrorMessage(code?: string, message?: string | null, details?: string | null) {
@@ -87,6 +90,8 @@ export async function updateMatchResultAction(
       values,
       fieldErrors,
       formError: null,
+      success: false,
+      standingsWarning: null,
     };
   }
 
@@ -108,12 +113,14 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso para capturar resultados.",
+      success: false,
+      standingsWarning: null,
     };
   }
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, status, home_team_id, away_team_id")
+    .select("id, season_id, status, home_team_id, away_team_id")
     .eq("id", matchId)
     .eq("league_id", leagueData.id)
     .maybeSingle();
@@ -127,6 +134,8 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "Partido no encontrado o sin acceso para capturar resultado.",
+      success: false,
+      standingsWarning: null,
     };
   }
 
@@ -135,6 +144,8 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "No se puede capturar resultado de un partido cancelado.",
+      success: false,
+      standingsWarning: null,
     };
   }
 
@@ -153,7 +164,20 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "No se puede capturar resultado porque el partido no tiene ambos equipos válidos.",
+      success: false,
+      standingsWarning: null,
     };
+  }
+
+  const { data: seasonData, error: seasonError } = await supabase
+    .from("seasons")
+    .select("slug")
+    .eq("id", matchData.season_id)
+    .eq("league_id", leagueData.id)
+    .maybeSingle();
+
+  if (seasonError) {
+    throw seasonError;
   }
 
   const { data: updatedRows, error: updateError } = await supabase
@@ -172,6 +196,8 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: mapUpdateErrorMessage(updateError.code, updateError.message, updateError.details),
+      success: false,
+      standingsWarning: null,
     };
   }
 
@@ -180,13 +206,37 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "No tienes permisos para capturar el resultado de este partido.",
+      success: false,
+      standingsWarning: null,
     };
   }
 
+  const recalculateResult = await recalculateStandingsForSeason({
+    supabase,
+    leagueId: leagueData.id,
+    seasonId: matchData.season_id,
+  });
+
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/standings`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  if (seasonData?.slug) {
+    revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}`);
+    revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}/standings`);
+  }
   revalidatePath("/dashboard");
+
+  if (!recalculateResult.success) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: null,
+      success: true,
+      standingsWarning:
+        "Resultado guardado correctamente, pero no se pudo actualizar la tabla de posiciones automáticamente. Puedes recalcularla manualmente desde la temporada.",
+    };
+  }
 
   redirect(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
 }

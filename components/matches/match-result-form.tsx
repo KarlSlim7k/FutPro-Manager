@@ -41,6 +41,8 @@ export function MatchResultForm({
     },
     fieldErrors: {},
     formError: null,
+    success: false,
+    standingsWarning: null,
   };
 
   const [state, formAction, isPending] = useActionState<UpdateMatchResultActionState, FormData>(
@@ -51,8 +53,8 @@ export function MatchResultForm({
   return (
     <form action={formAction} className="space-y-4">
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-        Esta acción marcará el partido como completado. Los eventos y tabla de posiciones se
-        implementarán en una fase posterior.
+        Esta acción marcará el partido como completado y recalculará automáticamente la tabla de
+        posiciones de la temporada.
       </div>
 
       {matchStatus === "completed" ? (
@@ -125,6 +127,18 @@ export function MatchResultForm({
       {state.formError ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {state.formError}
+        </p>
+      ) : null}
+
+      {state.success ? (
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Resultado guardado correctamente.
+        </p>
+      ) : null}
+
+      {state.success && state.standingsWarning ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          {state.standingsWarning}
         </p>
       ) : null}
 

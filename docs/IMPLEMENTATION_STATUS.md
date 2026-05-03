@@ -7,8 +7,8 @@ El MVP de FutPro Manager ya cuenta con autenticación, rutas protegidas de dashb
 Estado actual del MVP:
 
 - **Funcionando**: login, protección de rutas, navegación de dashboard, CRUD base de ligas/temporadas/equipos/jugadores/sedes/partidos, captura de resultado y eventos, y consulta de standings.
-- **Parcialmente listo**: standings (ya visible y con recálculo desde partidos completados en ruta de temporada, pero no completamente automatizado como proceso transparente ligado al cierre de captura en todos los flujos).
-- **Falta para MVP operativo completo**: consolidar automatización/flujo final de standings, robustecer roles avanzados en UI, vista pública integral y cobertura de QA end-to-end.
+- **Parcialmente listo**: standings (vista activa, recálculo manual y recálculo automático al guardar resultados que impactan `completed`; pendientes avanzados de automatización/eventos).
+- **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI, vista pública integral y cobertura de QA end-to-end.
 - **Solo en base técnica (schema/RLS)**: media uploads, auditoría y suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
 
 ## Leyenda de estado
@@ -70,11 +70,10 @@ Estado actual del MVP:
 - **Pendiente:** mayor trazabilidad y auditoría de cambios en UI.
 
 ### Tabla de posiciones
-- **Estado:** Parcial.
+- **Estado:** Implementado (con mejoras pendientes).
 - **Evidencia en repo:** `app/dashboard/leagues/[slug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/actions.ts`, `components/standings/*`.
-- **Funcionalidad existente:** consulta por temporada desde datos reales (`leagues`, `seasons`, `standings`, `teams`), vista desktop/mobile y recálculo manual basado en partidos completados.
-- **Pendiente:** automatizar de extremo a extremo la generación/actualización de standings dentro del flujo operativo sin depender de disparo manual.
-- **Nota obligatoria:** la vista de standings ya lee datos reales de Supabase, pero la generación automática de standings desde partidos/resultados/eventos queda pendiente.
+- **Funcionalidad existente:** consulta por temporada desde datos reales (`leagues`, `seasons`, `standings`, `teams`), vista desktop/mobile, recálculo manual y recálculo automático al guardar resultados de partidos cuando el estado queda en `completed` o deja de estarlo.
+- **Pendiente:** automatización avanzada por eventos, auditoría de recalculos y estrategia de jobs/background para cargas mayores.
 
 ### Roles y permisos
 - **Estado:** Base técnica existente.
@@ -108,7 +107,7 @@ Estado actual del MVP:
 
 ## Pendientes críticos antes del MVP
 
-1. Cerrar flujo operativo de standings con automatización consistente (no solo recálculo manual).
+1. Consolidar automatización avanzada de standings (event-driven/auditable) y estrategia de ejecución en background.
 2. Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).
 3. Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).
 4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados.
@@ -124,7 +123,7 @@ Estado actual del MVP:
 
 - Posible desfase entre schema y cobertura UI real por módulo.
 - Existen módulos documentados/estructurados en BD que aún no tienen flujo funcional completo.
-- Standings visibles, pero automatización total de actualización aún pendiente.
+- El recálculo automático actual depende del flujo de guardado de resultados; aún no existe pipeline event-driven/background con auditoría.
 - Roles/RLS existentes sin necesariamente tener consola UI completa de administración.
 - Necesidad de pruebas manuales mobile/desktop y regresión transversal tras cambios.
 

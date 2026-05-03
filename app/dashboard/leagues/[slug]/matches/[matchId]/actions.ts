@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
 
@@ -16,6 +17,7 @@ type UpdateResultActionState = {
   fieldErrors: Partial<Record<UpdateResultField, string>>;
   formError: string | null;
   success: boolean;
+  standingsWarning: string | null;
 };
 
 function mapUpdateErrorMessage(
@@ -97,6 +99,7 @@ export async function updateMatchResultAction(
       fieldErrors,
       formError: null,
       success: false,
+      standingsWarning: null,
     };
   }
 
@@ -116,12 +119,13 @@ export async function updateMatchResultAction(
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso.",
       success: false,
+      standingsWarning: null,
     };
   }
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id")
+    .select("id, season_id, status")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -136,7 +140,19 @@ export async function updateMatchResultAction(
       fieldErrors: {},
       formError: "Partido no encontrado o sin acceso.",
       success: false,
+      standingsWarning: null,
     };
+  }
+
+  const { data: seasonData, error: seasonError } = await supabase
+    .from("seasons")
+    .select("slug")
+    .eq("id", matchData.season_id)
+    .eq("league_id", league.id)
+    .maybeSingle();
+
+  if (seasonError) {
+    throw seasonError;
   }
 
   const { error: updateError } = await supabase
@@ -158,11 +174,35 @@ export async function updateMatchResultAction(
         updateError.details
       ),
       success: false,
+      standingsWarning: null,
     };
+  }
+
+  const shouldRecalculateStandings =
+    values.status === "completed" || matchData.status === "completed";
+  let standingsWarning: string | null = null;
+
+  if (shouldRecalculateStandings) {
+    const recalculateResult = await recalculateStandingsForSeason({
+      supabase,
+      leagueId: league.id,
+      seasonId: matchData.season_id,
+    });
+
+    if (!recalculateResult.success) {
+      standingsWarning =
+        "Resultado guardado correctamente, pero no se pudo actualizar la tabla de posiciones automáticamente. Puedes recalcularla manualmente desde la temporada.";
+    }
   }
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/standings`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  if (seasonData?.slug) {
+    revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}`);
+    revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}/standings`);
+  }
   revalidatePath("/dashboard");
 
   return {
@@ -170,5 +210,6 @@ export async function updateMatchResultAction(
     fieldErrors: {},
     formError: null,
     success: true,
+    standingsWarning,
   };
 }
