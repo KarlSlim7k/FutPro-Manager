@@ -48,3 +48,8 @@
 - Tabla de asignaciones de árbitro con historial.
 - Roles de staff adicionales.
 - Jerarquía avanzada de permisos por torneo/categoría.
+
+
+## Nota de alcance UI vs schema
+
+El modelo de roles/permisos está definido en schema + RLS, pero algunas capacidades avanzadas pueden existir primero a nivel de base de datos y no necesariamente tener aún una pantalla administrativa completa en UI.

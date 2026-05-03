@@ -69,8 +69,17 @@ Multi-tenant (multi-liga en una sola app).
 - Datos públicos: ligas/temporadas/equipos/sedes/partidos/eventos/standings cuando la liga está activa y pública.
 - Datos privados: perfiles, membresías, media, auditoría y suscripciones.
 
+## Fuentes de verdad de documentación
+
+- Estado del producto: `docs/IMPLEMENTATION_STATUS.md`.
+- Reglas operativas y de agentes: `docs/RULES.md`.
+- Arquitectura técnica: `docs/ARCHITECTURE.md`.
+
 ## Notes for AI Agents
 
+- Primero inspeccionar rutas/componentes/lógica real antes de concluir estado funcional.
+- No asumir que un módulo está implementado solo porque existe en schema.
+- Verificar evidencia en `app/`, `components/`, `actions` y consultas Supabase.
 - Evitar overengineering.
 - Priorizar MVP funcional y seguro.
 - No romper flujo de auth existente.
