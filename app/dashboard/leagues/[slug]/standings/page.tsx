@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { StandingMobileCard } from "@/components/standings/standing-mobile-card";
 import { StandingsSeasonSelector } from "@/components/standings/standings-season-selector";
 import { StandingsTableView } from "@/components/standings/standings-table-view";
+import type { StandingRowViewModel, StandingTeamSummary } from "@/components/standings/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -28,16 +29,6 @@ type StandingItem = Pick<
   | "updated_at"
 >;
 
-type TeamSummary = {
-  id: string;
-  name: string;
-  slug: string | null;
-};
-
-type StandingRow = StandingItem & {
-  team: TeamSummary | null;
-};
-
 interface LeagueStandingsPageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ seasonId?: string | string[] }>;
@@ -49,6 +40,13 @@ function formatLabel(value: string) {
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 export default async function LeagueStandingsPage({ params, searchParams }: LeagueStandingsPageProps) {
@@ -92,9 +90,8 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
   }
 
   const seasons = (seasonsData ?? []) as SeasonItem[];
-  const selectedSeason = seasons.find((seasonItem) => seasonItem.id === seasonId) ?? seasons[0] ?? null;
 
-  if (!selectedSeason) {
+  if (seasons.length === 0) {
     return (
       <section className="space-y-6">
         <PageHeader
@@ -122,6 +119,17 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
     );
   }
 
+  const fallbackSeason = seasons[0];
+
+  if (seasonId) {
+    const hasSeason = seasons.some((seasonItem) => seasonItem.id === seasonId);
+    if (!hasSeason) {
+      redirect(`/dashboard/leagues/${league.slug}/standings?seasonId=${fallbackSeason.id}`);
+    }
+  }
+
+  const selectedSeason = seasonId ? seasons.find((seasonItem) => seasonItem.id === seasonId)! : fallbackSeason;
+
   const { data: standingsData, error: standingsError } = await supabase
     .from("standings")
     .select("id, team_id, played, won, drawn, lost, goals_for, goals_against, goal_difference, points, updated_at")
@@ -138,7 +146,7 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
   const standings = (standingsData ?? []) as StandingItem[];
   const teamIds = [...new Set(standings.map((standing) => standing.team_id))];
 
-  let teams: TeamSummary[] = [];
+  let teams: StandingTeamSummary[] = [];
   if (teamIds.length > 0) {
     const { data: teamsData, error: teamsError } = await supabase
       .from("teams")
@@ -150,12 +158,12 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
       throw teamsError;
     }
 
-    teams = (teamsData ?? []) as TeamSummary[];
+    teams = (teamsData ?? []) as StandingTeamSummary[];
   }
 
   const teamMap = new Map(teams.map((team) => [team.id, team]));
 
-  const sortedStandings: StandingRow[] = standings
+  const sortedStandings: StandingRowViewModel[] = standings
     .map((standing) => ({
       ...standing,
       team: teamMap.get(standing.team_id) ?? null,
@@ -169,7 +177,15 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
       return aName.localeCompare(bName, "es", { sensitivity: "base" });
     });
 
-  const standingsBasePath = `/dashboard/leagues/${league.slug}/standings`;
+  const latestUpdatedAt = sortedStandings.reduce<Date | null>((latest, row) => {
+    if (!row.updated_at) return latest;
+    const parsed = new Date(row.updated_at);
+    if (Number.isNaN(parsed.getTime())) return latest;
+    if (!latest || parsed.getTime() > latest.getTime()) {
+      return parsed;
+    }
+    return latest;
+  }, null);
 
   return (
     <section className="space-y-6">
@@ -203,31 +219,39 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
         <CardHeader>
           <CardTitle>Resumen</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <Eyebrow>Temporada seleccionada</Eyebrow>
-            <p className="mt-1 text-sm text-gray-900">{selectedSeason.name}</p>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <Eyebrow>Temporada seleccionada</Eyebrow>
+              <p className="mt-1 text-sm text-gray-900">{selectedSeason.name}</p>
+            </div>
+            <div>
+              <Eyebrow>Estado de temporada</Eyebrow>
+              <p className="mt-1 text-sm text-gray-900">{formatLabel(selectedSeason.status)}</p>
+            </div>
+            <div>
+              <Eyebrow>Rango</Eyebrow>
+              <p className="mt-1 text-sm text-gray-900">
+                {formatDate(selectedSeason.start_date)} - {formatDate(selectedSeason.end_date)}
+              </p>
+            </div>
+            <div>
+              <Eyebrow>Equipos en tabla</Eyebrow>
+              <p className="mt-1 text-sm font-medium text-gray-900">{sortedStandings.length}</p>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <Eyebrow>Última actualización</Eyebrow>
+              <p className="mt-1 text-sm text-gray-900">
+                {latestUpdatedAt ? formatDateTime(latestUpdatedAt.toISOString()) : "Sin registros"}
+              </p>
+            </div>
           </div>
-          <div>
-            <Eyebrow>Estado de temporada</Eyebrow>
-            <p className="mt-1 text-sm text-gray-900">{formatLabel(selectedSeason.status)}</p>
-          </div>
-          <div>
-            <Eyebrow>Rango</Eyebrow>
-            <p className="mt-1 text-sm text-gray-900">
-              {formatDate(selectedSeason.start_date)} - {formatDate(selectedSeason.end_date)}
-            </p>
-          </div>
-          <div>
-            <Eyebrow>Equipos en tabla</Eyebrow>
-            <p className="mt-1 text-sm font-medium text-gray-900">{sortedStandings.length}</p>
-          </div>
-          <div className="sm:col-span-2 lg:col-span-4">
-            <Eyebrow>URL activa</Eyebrow>
-            <p className="mt-1 break-all text-sm text-gray-900">
-              {standingsBasePath}?seasonId={selectedSeason.id}
-            </p>
-          </div>
+
+          <ToolbarActions>
+            <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
+              Recalcular tabla
+            </TextLink>
+          </ToolbarActions>
         </CardContent>
       </Card>
 
@@ -244,6 +268,9 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
             <ToolbarActions>
               <TextLink href={`/dashboard/leagues/${league.slug}/matches`}>Ver partidos</TextLink>
               <TextLink href={`/dashboard/leagues/${league.slug}/teams`}>Ver equipos</TextLink>
+              <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
+                Recalcular tabla
+              </TextLink>
             </ToolbarActions>
           }
         />
