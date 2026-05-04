@@ -82,10 +82,10 @@ Estado actual del MVP:
 - **Pendiente:** UI completa de administración de permisos/roles y flujos avanzados por rol.
 
 ### Vista pública
-- **Estado:** Pendiente.
-- **Evidencia en repo:** existe landing (`app/page.tsx`) y modelo de datos público en docs/schema, sin portal público deportivo completo.
-- **Funcionalidad existente:** entrada pública básica del sitio.
-- **Pendiente:** páginas públicas de ligas, equipos, partidos, standings y navegación para aficionados.
+- **Estado:** Parcial (vista pública mínima implementada).
+- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `components/public/*`.
+- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada y calendario de partidos; navegación pública entre vistas; empty states; metadata dinámico básico.
+- **Pendiente:** detalle público de equipo, detalle público de partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 
 ### Media uploads
 - **Estado:** Base técnica existente.
@@ -108,7 +108,7 @@ Estado actual del MVP:
 ## Pendientes críticos antes del MVP
 
 1. Consolidar automatización avanzada de standings (event-driven/auditable) y estrategia de ejecución en background.
-2. Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).
+2. ~~Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).~~ ✅ Implementado.
 3. Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).
 4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados.
 

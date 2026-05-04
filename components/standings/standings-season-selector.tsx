@@ -7,12 +7,14 @@ interface StandingsSeasonSelectorProps {
   leagueSlug: string;
   seasons: SeasonOption[];
   selectedSeasonId: string;
+  basePath?: string;
 }
 
 export function StandingsSeasonSelector({
   leagueSlug,
   seasons,
   selectedSeasonId,
+  basePath = "/dashboard/leagues",
 }: StandingsSeasonSelectorProps) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -22,7 +24,7 @@ export function StandingsSeasonSelector({
         return (
           <Link
             key={season.id}
-            href={`/dashboard/leagues/${leagueSlug}/standings?seasonId=${season.id}`}
+            href={`${basePath}/${leagueSlug}/standings?seasonId=${season.id}`}
             className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 ${
               isActive
                 ? "border-emerald-700 bg-emerald-700 text-white"

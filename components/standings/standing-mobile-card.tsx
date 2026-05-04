@@ -7,12 +7,14 @@ interface StandingMobileCardProps {
   row: StandingRowViewModel;
   position: number;
   leagueSlug: string;
+  basePath?: string;
 }
 
 export function StandingMobileCard({
   row,
   position,
   leagueSlug,
+  basePath = "/dashboard/leagues",
 }: StandingMobileCardProps) {
   const teamName = row.team?.name ?? "Equipo desconocido";
   const teamSlug = row.team?.slug ?? null;
@@ -25,7 +27,7 @@ export function StandingMobileCard({
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">#{position}</p>
             <p className="break-words text-sm font-semibold text-gray-900">
               {teamSlug ? (
-                <TextLink href={`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}`}>{teamName}</TextLink>
+                <TextLink href={`${basePath}/${leagueSlug}/teams/${teamSlug}`}>{teamName}</TextLink>
               ) : (
                 teamName
               )}

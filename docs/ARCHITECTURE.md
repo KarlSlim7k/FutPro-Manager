@@ -30,6 +30,9 @@ FutPro Manager usa una arquitectura web full-stack sobre Next.js (App Router) y 
 ### Rutas públicas
 
 - `/` (landing pública)
+- `/liga/[slug]` (resumen de liga pública)
+- `/liga/[slug]/standings` (tabla de posiciones pública)
+- `/liga/[slug]/matches` (calendario de partidos público)
 
 ### Rutas de auth
 
@@ -57,6 +60,7 @@ FutPro Manager usa una arquitectura web full-stack sobre Next.js (App Router) y 
 - Las consultas se ejecutan con el usuario autenticado (contexto de sesión), no con service role en frontend.
 - RLS define autorización real de lectura/escritura por tabla.
 - Tipos de `types/database.ts` modelan entidades de dominio y favorecen tipado consistente con Supabase.
+- Las rutas públicas (`/liga/*`) no exigen sesión autenticada y delegan la autorización de lectura en RLS (filtrando ligas `is_public = true` y `status = 'active'`).
 
 ## Multi-tenancy
 

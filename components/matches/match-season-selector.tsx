@@ -9,12 +9,14 @@ interface MatchSeasonSelectorProps {
   leagueSlug: string;
   seasons: MatchSeasonOption[];
   selectedSeasonId: string;
+  basePath?: string;
 }
 
 export function MatchSeasonSelector({
   leagueSlug,
   seasons,
   selectedSeasonId,
+  basePath = "/dashboard/leagues",
 }: MatchSeasonSelectorProps) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -24,7 +26,7 @@ export function MatchSeasonSelector({
         return (
           <Link
             key={season.id}
-            href={`/dashboard/leagues/${leagueSlug}/matches?seasonId=${season.id}`}
+            href={`${basePath}/${leagueSlug}/matches?seasonId=${season.id}`}
             className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 ${
               isActive
                 ? "border-emerald-700 bg-emerald-700 text-white"

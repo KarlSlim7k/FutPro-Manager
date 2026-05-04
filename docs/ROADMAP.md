@@ -31,9 +31,10 @@
 - Existe recálculo automático al guardar resultados que impactan estado `completed`.
 - **Pendiente:** automatización avanzada por eventos/auditoría y soporte de jobs/background para mayor robustez.
 
-### Fase 5 - Vista pública (Pendiente)
-- Portal público de ligas/temporadas/equipos/partidos/standings.
-- Navegación de consulta para aficionados.
+### Fase 5 - Vista pública (Parcialmente completado)
+- ✅ Portal público mínimo: resumen de liga, tabla de posiciones y calendario de partidos.
+- ✅ Navegación de consulta para aficionados entre vistas públicas.
+- Pendiente: detalle público de equipo/partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 
 ### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica existente, UI pendiente)
 - Modelo base en schema/RLS.

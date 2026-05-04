@@ -55,6 +55,12 @@ export default function Home() {
               >
                 Conocer el sistema
               </a>
+              <Link
+                href="/liga/liga-municipal-perote"
+                className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              >
+                Consultar Liga Municipal Perote
+              </Link>
             </div>
           </div>
 
