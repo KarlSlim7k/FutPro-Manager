@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: PublicTeamDetailPageProps): P
 
   const { data: leagueData } = await supabase
     .from("leagues")
-    .select("name")
+    .select("id, name")
     .eq("slug", slug)
     .eq("is_public", true)
     .eq("status", "active")
@@ -106,6 +106,7 @@ export async function generateMetadata({ params }: PublicTeamDetailPageProps): P
   const { data: teamData } = await supabase
     .from("teams")
     .select("name")
+    .eq("league_id", leagueData.id)
     .eq("slug", teamSlug)
     .maybeSingle();
 
