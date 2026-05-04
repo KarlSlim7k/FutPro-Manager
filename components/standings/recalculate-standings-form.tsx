@@ -39,7 +39,7 @@ export function RecalculateStandingsForm({
         <p className="text-sm text-gray-600">
           La tabla se calcula usando partidos con estado <span className="font-medium text-gray-900">completed</span>.
         </p>
-        <Button type="submit" disabled={isPending} variant="primary" size="sm">
+        <Button type="submit" disabled={isPending} variant="primary" size="sm" className="w-full sm:w-auto">
           {isPending ? "Recalculando..." : "Recalcular tabla"}
         </Button>
       </div>

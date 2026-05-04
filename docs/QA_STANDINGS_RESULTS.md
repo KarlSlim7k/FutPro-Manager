@@ -92,3 +92,7 @@ Caso A/D (`scheduled -> completed` en `/result`):
 ## Resultado final de QA manual
 
 El flujo de resultados y standings queda validado manualmente para el MVP con usuario autorizado.
+
+---
+
+Ver también [`docs/QA_RESPONSIVE_PERMISSIONS.md`](./QA_RESPONSIVE_PERMISSIONS.md) para la validación visual y multi-rol posterior.

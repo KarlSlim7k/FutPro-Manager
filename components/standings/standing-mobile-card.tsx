@@ -21,9 +21,9 @@ export function StandingMobileCard({
     <Card>
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">#{position}</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="break-words text-sm font-semibold text-gray-900">
               {teamSlug ? (
                 <TextLink href={`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}`}>{teamName}</TextLink>
               ) : (

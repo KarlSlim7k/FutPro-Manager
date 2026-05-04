@@ -129,6 +129,6 @@ Estado actual del MVP:
 
 ## Última actualización
 
-- Fecha: 2026-05-03
-- Branch: (ver `git branch --show-current`)
-- Commit: (actualizar con `git rev-parse --short HEAD` en cada cambio relevante)
+- Fecha: 2026-05-04
+- Branch: main
+- Commit: `c4df8abe` (+ fixes menores de responsive/permisos QA)
