@@ -2,71 +2,93 @@
 
 ## Contexto
 
-QA funcional guiado y revisión técnica del flujo de resultados/standings después del cambio:
+Ejecución de QA funcional autenticado para validar la regresión:
 
-- Commit objetivo: `594cdbe673d628641f905f77cfe2174b71f699ac`
-- Cambio reportado: auto-recálculo de standings al guardar resultados que impactan partidos `completed`.
-- Restricciones respetadas: sin cambios de schema/RLS/migraciones ni escrituras directas por MCP.
+`completed -> non-completed -> completed`
 
-## Alcance
+- Commit objetivo informado: `3a7eb85740b2b19b5a494a64bc81576361856d4e`
+- Restricciones respetadas: sin cambios de schema/RLS, sin migraciones, sin SQL raw, sin escrituras vía MCP.
 
-- Revisión estática de lógica y wiring entre server actions, formularios y páginas de standings.
-- Validación read-only de consistencia de datos en Supabase.
-- Validaciones técnicas del proyecto (`npm run lint`, `npm run build`).
-- Validación ejecutada de redirección para usuario no autenticado.
+## Entorno y datos usados
 
-## Entorno revisado
-
-- Branch: `main`
-- Commit: `594cdbe` (HEAD actual)
-- Deploy/Vercel: desplegado según contexto del usuario (no verificado desde CLI)
-- Fecha: 2026-05-03
+- Entorno: local dev conectado a Supabase real (`http://127.0.0.1:3200`)
+- Fecha: 2026-05-03 / 2026-05-04
+- Usuario probado: `karol.delgado001@***` (rol detectado en liga: `league_admin`)
+- Liga: `liga-municipal-perote`
+- Temporada: `temporada-2026` (`5cf746db-7385-43e5-9730-ef6397b09811`)
+- Partido usado para regresión:
+  - `/dashboard/leagues/liga-municipal-perote/matches/87089467-edc4-4344-9842-e28f8a713189`
+  - `/dashboard/leagues/liga-municipal-perote/matches/87089467-edc4-4344-9842-e28f8a713189/result`
 
 ## Matriz de pruebas
 
-| Caso | Estado | Evidencia | Notas |
-| ---- | ------ | --------- | ----- |
-| A. scheduled -> completed actualiza standings | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/result/actions.ts`, `lib/standings/recalculate-standings.ts` | La acción guarda marcador con `status: "completed"` y llama `recalculateStandingsForSeason`. |
-| B. completed cambia marcador y recalcula | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/result/actions.ts`, `lib/standings/recalculate-standings.ts` | Recalcula desde todos los partidos `completed`, evitando acumulaciones incrementales incorrectas. |
-| C. completed -> otro status retira impacto | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `components/matches/update-match-result-form.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/actions.ts` | El detalle del partido ahora expone un formulario administrativo activo para marcador + estado cuando el partido está `completed`. |
-| D. recálculo manual | Code-reviewed only | `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/actions.ts`, `components/standings/recalculate-standings-form.tsx` | Botón/manual action funcional por código, con mensajes de éxito/error. |
-| E. `seasonId` inválido en standings | Code-reviewed only | `app/dashboard/leagues/[slug]/standings/page.tsx` | Hay redirección explícita a temporada fallback válida cuando `seasonId` no existe para la liga. |
-| F. empty states | Code-reviewed only | `app/dashboard/leagues/[slug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/page.tsx` | Revisados estados para liga sin temporadas y temporada sin standings. Se corrigió copy desactualizado. |
-| G. responsive (desktop/mobile) | Code-reviewed only | `app/dashboard/leagues/[slug]/standings/page.tsx`, `components/standings/standings-table-view.tsx`, `components/standings/standing-mobile-card.tsx` | Render dual y misma información base (tabla desktop + cards mobile). |
-| H. permisos/RLS | Blocked | `curl -I http://127.0.0.1:3100/dashboard` -> `307 location: /login`; revisión de acciones con `auth.getUser()` | Validado subcaso no autenticado. Bloqueado admin/sin permisos por falta de sesión de prueba con roles diferenciados. |
+| Caso | Estado | Evidencia ejecutada | Observación |
+| ---- | ------ | ------------------- | ----------- |
+| A. Partido no `completed` pasa a `completed` | Passed | Ruta: `/dashboard/leagues/liga-municipal-perote/matches/87089467-edc4-4344-9842-e28f8a713189/result` | Antes: `scheduled` 6-4. Después: `completed` 6-5. Standings sube de PJ=1 a PJ=2 para ambos equipos y coincide con cálculo esperado. |
+| B. Partido `completed` cambia marcador | Passed | Ruta: `/dashboard/leagues/liga-municipal-perote/matches/87089467-edc4-4344-9842-e28f8a713189` (form administrativo) | Antes: 5-4. Después: 6-4. Standings se actualiza (GF/GC/DG), sin duplicar PJ ni acumular puntos previos. |
+| C. `completed -> non-completed` retira impacto | Passed | Ruta: `/dashboard/leagues/liga-municipal-perote/matches/87089467-edc4-4344-9842-e28f8a713189` (status `scheduled`) | Al pasar a `scheduled`, la tabla deja de contar ese partido: PJ baja de 2 a 1 y puntos/goles bajan correctamente. |
+| D. `non-completed -> completed` vuelve a contar | Passed | Mismo partido del caso C en `/result` | Vuelve a `completed` y standings regresa a incluir el partido sin duplicación de PJ/puntos. |
+| E. Recálculo manual por temporada | Passed | Ruta: `/dashboard/leagues/liga-municipal-perote/seasons/temporada-2026/standings` | Recalcular funciona como respaldo. `updated_at` de standings avanza y datos permanecen consistentes. |
+| F. `seasonId` inválido | Passed | Ruta: `/dashboard/leagues/liga-municipal-perote/standings?seasonId=invalido` | Redirección 307 a `?seasonId=5cf746db-7385-43e5-9730-ef6397b09811` (válido). |
+| G. Responsive (desktop/mobile) | Blocked | Requiere validación visual real de viewport | Entorno CLI sin navegador visual para comprobar legibilidad/overflow real en mobile/desktop. |
+| H1. Usuario autorizado | Passed | Mismas rutas de A/B/C/D/E | Usuario con rol operativo pudo guardar resultado, ajustar administrativo y recalcular. |
+| H2. Usuario sin permisos | Blocked | No se contó con segunda cuenta sin permisos | Falta sesión multi-rol para validar error controlado de no autorizado. |
+| H3. No autenticado | Passed | Ruta: `/dashboard` | Redirección 307 a `/login`. |
 
-## Resultados
+## Evidencia resumida antes/después (standings)
 
-- **Lógica de cálculo compartida:** centralizada en `lib/standings/recalculate-standings.ts`, sin duplicación de algoritmo en acciones.
-- **Service role:** no encontrado en el flujo revisado; se usa `createClient()` con publishable key (`lib/supabase/server.ts`).
-- **RLS/Auth path:** las acciones relevantes verifican usuario y usan cliente Supabase con contexto de sesión.
-- **Errores de recálculo:** no bloquean guardado de resultado; se retorna `standingsWarning` en UI cuando falla recálculo automático.
-- **Consistencia de datos (read-only MCP):**
-  - `standings`: 2 filas en la temporada `5cf746db-7385-43e5-9730-ef6397b09811`.
-  - `matches completed`: 2 partidos en la misma temporada.
-  - Sin duplicados `season_id + team_id`.
-  - Re-cálculo SQL esperado vs filas guardadas: valores coinciden en PJ/G/E/P/GF/GC/DG/PTS para ambos equipos.
+Equipos:
+- `Club Perote FC`
+- `Club Pescados FC`
+
+Caso B (corrección de marcador `completed`):
+- Antes: ambos con PJ 2, PTS 3, GF/GC 6/6.
+- Después (6-4):  
+  - Perote: PJ 2, GF/GC 7/6, DG +1, PTS 3  
+  - Pescados: PJ 2, GF/GC 6/7, DG -1, PTS 3
+
+Caso C (`completed -> scheduled`):
+- Antes: ambos PJ 2.
+- Después: standings queda con solo 1 partido `completed`:
+  - Pescados: PJ 1, G 1, PTS 3
+  - Perote: PJ 1, P 1, PTS 0
+
+Caso A/D (`scheduled -> completed` en `/result`):
+- Antes: partido en `scheduled`, standings PJ 1 por equipo.
+- Después: partido en `completed` 6-5, standings vuelve a PJ 2 por equipo.
+
+## Verificación read-only de consistencia (sin SQL raw)
+
+### Consultas MCP read-only
+
+- `supabase-list_tables` (schema `public`):
+  - `matches`: 2 filas, RLS habilitado.
+  - `standings`: 2 filas, RLS habilitado.
+- `supabase-list_migrations`:
+  - `0001_initial_schema`
+
+### Consistencia de datos observada
+
+- Duplicados por `season_id + team_id` en `standings`: **0**
+- Comparación standings guardado vs cálculo esperado desde partidos `completed`:
+  - Estado inicial: **coincide**
+  - Estado final: **coincide**
+
+## Validaciones técnicas
+
+- `npm run lint`: Passed
+- `npm run build`: Passed
+- Pruebas automatizadas configuradas en scripts del proyecto: no detectadas.
 
 ## Bugs encontrados
 
-1. **[Mayor - corregido] Falta de flujo UI activo para `completed -> non-completed`**  
-   Se corrigió conectando `UpdateMatchResultForm` en la ruta activa de detalle del partido (`/dashboard/leagues/[slug]/matches/[matchId]`) cuando el estado es `completed`, reutilizando la action administrativa que recalcula standings.
-2. **[Menor - corregido] Mensaje desactualizado en empty state de standings**  
-   Decía que la generación automática sería “fase posterior”, cuando ya existe auto-recálculo.
+- No se detectaron bugs funcionales nuevos en los casos ejecutados A/B/C/D/E/F/H1/H3.
 
-## Pendientes de validación manual
+## Riesgos restantes
 
-- Ejecución real E2E de casos A/B/C/D con usuario `league_admin` en entorno desplegado (incluyendo transición `completed -> scheduled/postponed/cancelled` desde el detalle del partido).
-- Caso H con usuario sin permisos explícitos para confirmar mensaje controlado por RLS.
-- Caso G en dispositivos reales (mobile/desktop) y navegadores objetivo.
+1. Falta validación visual responsive real (Caso G).
+2. Falta validación con cuenta sin permisos (Caso H2).
 
-## Riesgos
+## Resultado final de QA manual
 
-- Falta validación manual autenticada para confirmar el comportamiento final del nuevo flujo en entorno real.
-- Sin sesiones de prueba por rol, la validación de permisos queda parcial.
-
-## Recomendaciones siguientes
-
-1. Ejecutar ronda QA manual autenticada con al menos: `league_admin`, usuario sin permisos y usuario no autenticado.
-2. Validar explícitamente la regresión `completed -> non-completed -> completed` en un mismo partido y revisar standings antes/después.
-3. Mantener verificación de consistencia season/team en `standings` como checklist de regresión post-release.
+El flujo de resultados y standings queda validado manualmente para el MVP con usuario autorizado.
