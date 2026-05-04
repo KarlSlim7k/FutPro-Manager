@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -63,6 +64,12 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
   }
 
   const league = leagueData as LeagueSummary;
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
 
   const [
     { data: seasonsData, error: seasonsError },
@@ -180,7 +187,11 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
           {matches.length === 0 ? (
             <EmptyState
               title="Sin partidos programados"
-              description="Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
+              description={
+                permissions.canManageMatches
+                  ? "Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
+                  : "Aún no hay partidos para la temporada seleccionada."
+              }
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -197,6 +208,9 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
                   homeScore={match.home_score}
                   awayScore={match.away_score}
                   roundName={match.round_name}
+                  canEdit={permissions.canManageMatches}
+                  canUpdateResult={permissions.canUpdateResults}
+                  canManageEvents={permissions.canManageEvents}
                 />
               ))}
             </div>
@@ -204,15 +218,25 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
         </div>
 
         <div className="space-y-4">
-          <FormSectionCard title="Programar partido">
-            <CreateMatchForm
-              leagueSlug={league.slug}
-              seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
-              teams={teamsForScheduling.map((team) => ({ id: team.id, name: team.name }))}
-              venues={venues.map((venue) => ({ id: venue.id, name: venue.name }))}
-              initialSeasonId={selectedSeason.id}
-            />
-          </FormSectionCard>
+          {permissions.canManageMatches ? (
+            <FormSectionCard title="Programar partido">
+              <CreateMatchForm
+                leagueSlug={league.slug}
+                seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
+                teams={teamsForScheduling.map((team) => ({ id: team.id, name: team.name }))}
+                venues={venues.map((venue) => ({ id: venue.id, name: venue.name }))}
+                initialSeasonId={selectedSeason.id}
+              />
+            </FormSectionCard>
+          ) : (
+            <Card>
+              <CardContent className="py-6">
+                <p className="text-sm text-gray-600">
+                  Tienes acceso de consulta a los partidos de esta liga. Las acciones administrativas están disponibles para administradores de liga.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {activeTeams.length < 2 && teams.length >= 2 ? (
             <Card>

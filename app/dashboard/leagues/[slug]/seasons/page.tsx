@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { CreateSeasonForm } from "@/components/seasons/create-season-form";
 import { SeasonCard } from "@/components/seasons/season-card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FormSectionCard } from "@/components/ui/form-section-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Season } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -41,6 +43,12 @@ export default async function LeagueSeasonsPage({ params }: LeagueSeasonsPagePro
 
   const league = leagueData as LeagueSummary;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
   const { data: seasonData, error: seasonsError } = await supabase
     .from("seasons")
     .select("id, name, slug, status, start_date, end_date")
@@ -67,9 +75,19 @@ export default async function LeagueSeasonsPage({ params }: LeagueSeasonsPagePro
         }
       />
 
-      <FormSectionCard title="Nueva temporada">
-        <CreateSeasonForm leagueSlug={league.slug} />
-      </FormSectionCard>
+      {permissions.canManageCatalog ? (
+        <FormSectionCard title="Nueva temporada">
+          <CreateSeasonForm leagueSlug={league.slug} />
+        </FormSectionCard>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta a las temporadas de esta liga. Las acciones administrativas están disponibles para administradores de liga.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {seasons.length === 0 ? (
         <EmptyState

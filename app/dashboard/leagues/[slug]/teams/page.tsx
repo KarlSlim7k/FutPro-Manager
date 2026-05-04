@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { CreateTeamForm } from "@/components/teams/create-team-form";
 import { TeamCard } from "@/components/teams/team-card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FormSectionCard } from "@/components/ui/form-section-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Team } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -44,6 +46,12 @@ export default async function LeagueTeamsPage({ params }: LeagueTeamsPageProps) 
 
   const league = leagueData as LeagueSummary;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
   const { data: teamData, error: teamsError } = await supabase
     .from("teams")
     .select("id, name, slug, status, logo_url, primary_color, secondary_color, founded_year")
@@ -70,9 +78,19 @@ export default async function LeagueTeamsPage({ params }: LeagueTeamsPageProps) 
         }
       />
 
-      <FormSectionCard title="Nuevo equipo">
-        <CreateTeamForm leagueSlug={league.slug} />
-      </FormSectionCard>
+      {permissions.canManageCatalog ? (
+        <FormSectionCard title="Nuevo equipo">
+          <CreateTeamForm leagueSlug={league.slug} />
+        </FormSectionCard>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta a los equipos de esta liga. Las acciones administrativas están disponibles para administradores de liga.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {teams.length === 0 ? (
         <EmptyState

@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -78,6 +79,12 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   }
 
   const league = leagueData as LeagueSummary;
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
@@ -150,27 +157,33 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         description={`${homeTeam?.name ?? "Equipo local"} vs ${awayTeam?.name ?? "Equipo visitante"}`}
         action={
           <ToolbarActions>
-            <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}>
-              Editar partido
-            </TextLink>
+            {permissions.canManageMatches ? (
+              <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/edit`}>
+                Editar partido
+              </TextLink>
+            ) : null}
             {match.status === "cancelled" ? (
-              <span className="inline-flex items-center text-sm font-medium text-gray-500">
-                Resultado no disponible para partidos cancelados.
-              </span>
-            ) : (
+              permissions.canUpdateResults ? (
+                <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                  Resultado no disponible para partidos cancelados.
+                </span>
+              ) : null
+            ) : permissions.canUpdateResults ? (
               <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}>
                 Capturar resultado
               </TextLink>
-            )}
+            ) : null}
             {match.status === "cancelled" ? (
-              <span className="inline-flex items-center text-sm font-medium text-gray-500">
-                Eventos no disponibles para partidos cancelados.
-              </span>
-            ) : (
+              permissions.canManageEvents ? (
+                <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                  Eventos no disponibles para partidos cancelados.
+                </span>
+              ) : null
+            ) : permissions.canManageEvents ? (
               <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}>
                 Eventos
               </TextLink>
-            )}
+            ) : null}
           </ToolbarActions>
         }
       />
@@ -236,7 +249,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </CardContent>
       </Card>
 
-      {match.status === "completed" ? (
+      {match.status === "completed" && permissions.canUpdateResults ? (
         <Card>
           <CardHeader>
             <CardTitle>Ajuste administrativo de resultado y estado</CardTitle>

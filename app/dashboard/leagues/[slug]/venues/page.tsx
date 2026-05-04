@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { CreateVenueForm } from "@/components/venues/create-venue-form";
 import { VenueCard } from "@/components/venues/venue-card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FormSectionCard } from "@/components/ui/form-section-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -41,6 +43,12 @@ export default async function LeagueVenuesPage({ params }: LeagueVenuesPageProps
 
   const league = leagueData as LeagueSummary;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
   const { data: venuesData, error: venuesError } = await supabase
     .from("venues")
     .select("id, name, address, city, state, latitude, longitude")
@@ -67,9 +75,19 @@ export default async function LeagueVenuesPage({ params }: LeagueVenuesPageProps
         }
       />
 
-      <FormSectionCard title="Nueva sede">
-        <CreateVenueForm leagueSlug={league.slug} />
-      </FormSectionCard>
+      {permissions.canManageCatalog ? (
+        <FormSectionCard title="Nueva sede">
+          <CreateVenueForm leagueSlug={league.slug} />
+        </FormSectionCard>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta a las sedes de esta liga. Las acciones administrativas están disponibles para administradores de liga.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {venues.length === 0 ? (
         <EmptyState

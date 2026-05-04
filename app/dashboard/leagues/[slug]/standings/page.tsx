@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Season, Standing } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -78,6 +79,12 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
   }
 
   const league = leagueData as LeagueSummary;
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
 
   const { data: seasonsData, error: seasonsError } = await supabase
     .from("seasons")
@@ -247,11 +254,13 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
             </div>
           </div>
 
-          <ToolbarActions>
-            <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
-              Recalcular tabla
-            </TextLink>
-          </ToolbarActions>
+          {permissions.canRecalculateStandings ? (
+            <ToolbarActions>
+              <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
+                Recalcular tabla
+              </TextLink>
+            </ToolbarActions>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -263,7 +272,10 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
               <p>Aún no hay tabla de posiciones generada para esta temporada.</p>
               <p className="mt-2">
                 La tabla se actualiza automáticamente cuando se guardan resultados de partidos
-                finalizados. También puedes recalcularla manualmente desde la temporada.
+                finalizados.
+                {permissions.canRecalculateStandings
+                  ? " También puedes recalcularla manualmente desde la temporada."
+                  : " El recálculo manual está disponible para administradores de liga."}
               </p>
             </>
           }
@@ -271,9 +283,11 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
             <ToolbarActions>
               <TextLink href={`/dashboard/leagues/${league.slug}/matches`}>Ver partidos</TextLink>
               <TextLink href={`/dashboard/leagues/${league.slug}/teams`}>Ver equipos</TextLink>
-              <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
-                Recalcular tabla
-              </TextLink>
+              {permissions.canRecalculateStandings ? (
+                <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
+                  Recalcular tabla
+                </TextLink>
+              ) : null}
             </ToolbarActions>
           }
         />

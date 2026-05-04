@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { StandingsTable } from "@/components/standings/standings-table";
 import { RecalculateStandingsForm } from "@/components/standings/recalculate-standings-form";
 import { StandingsEmptyState } from "@/components/standings/standings-empty-state";
@@ -40,6 +41,12 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
   }
 
   const league = leagueData as LeagueSummary;
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
 
   const { data: seasonData, error: seasonError } = await supabase
     .from("seasons")
@@ -101,14 +108,24 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recalcular tabla</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RecalculateStandingsForm leagueSlug={league.slug} seasonSlug={season.slug} />
-        </CardContent>
-      </Card>
+      {permissions.canRecalculateStandings ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recalcular tabla</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RecalculateStandingsForm leagueSlug={league.slug} seasonSlug={season.slug} />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta. El recálculo manual está disponible para administradores de liga.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {standings.length === 0 ? (
         <StandingsEmptyState />

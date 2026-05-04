@@ -37,9 +37,10 @@
 - ✅ QA público real validado con datos reales de Supabase/RLS (2026-05-04).
 - Pendiente: detalle público de equipo/partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 
-### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica existente, UI pendiente)
+### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX implementado, UI de administración pendiente)
 - Modelo base en schema/RLS.
-- Pendiente: administración UI de permisos granulares, asignaciones avanzadas y consulta de auditoría.
+- Hardening UX de permisos en dashboard implementado: helper `getLeaguePermissions` y ocultamiento de CTAs administrativas según rol.
+- Pendiente: administración UI de permisos granulares, asignaciones avanzadas, consola de roles y consulta de auditoría.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)
 - Tablas base de planes/suscripciones disponibles.

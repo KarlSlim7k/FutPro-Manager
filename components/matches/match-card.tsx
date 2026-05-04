@@ -15,6 +15,9 @@ type MatchCardProps = {
   homeScore: number;
   awayScore: number;
   roundName: string | null;
+  canEdit?: boolean;
+  canUpdateResult?: boolean;
+  canManageEvents?: boolean;
 };
 
 function formatDateTime(date: string) {
@@ -35,6 +38,9 @@ export function MatchCard({
   homeScore,
   awayScore,
   roundName,
+  canEdit = true,
+  canUpdateResult = true,
+  canManageEvents = true,
 }: MatchCardProps) {
   return (
     <Card className="transition hover:shadow-sm">
@@ -60,38 +66,30 @@ export function MatchCard({
         </p>
 
         <ToolbarActions className="pt-1">
-          <TextLink
-            href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}
-          >
+          <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}`}>
             Ver detalle
           </TextLink>
-          <TextLink
-            href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/edit`}
-          >
-            Editar
-          </TextLink>
+          {canEdit ? (
+            <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/edit`}>Editar</TextLink>
+          ) : null}
           {status === "cancelled" ? (
-            <span className="inline-flex items-center text-sm font-medium text-gray-500">
-              Resultado no disponible
-            </span>
-          ) : (
-            <TextLink
-              href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/result`}
-            >
-              Resultado
-            </TextLink>
-          )}
+            canUpdateResult ? (
+              <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                Resultado no disponible
+              </span>
+            ) : null
+          ) : canUpdateResult ? (
+            <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/result`}>Resultado</TextLink>
+          ) : null}
           {status === "cancelled" ? (
-            <span className="inline-flex items-center text-sm font-medium text-gray-500">
-              Eventos no disponibles
-            </span>
-          ) : (
-            <TextLink
-              href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`}
-            >
-              Eventos
-            </TextLink>
-          )}
+            canManageEvents ? (
+              <span className="inline-flex items-center text-sm font-medium text-gray-500">
+                Eventos no disponibles
+              </span>
+            ) : null
+          ) : canManageEvents ? (
+            <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`}>Eventos</TextLink>
+          ) : null}
         </ToolbarActions>
       </CardContent>
     </Card>

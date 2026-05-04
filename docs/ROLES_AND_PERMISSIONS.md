@@ -50,6 +50,17 @@
 - Jerarquía avanzada de permisos por torneo/categoría.
 
 
+## Hardening UX de permisos en dashboard
+
+- **Objetivo:** evitar que usuarios sin permisos vean acciones administrativas que probablemente no pueden ejecutar, manteniendo RLS/server actions como fuente real de seguridad.
+- **Implementación:** helper server-side `getLeaguePermissions` en `lib/permissions/league-permissions.ts`.
+- **Reglas UX actuales (MVP conservador):**
+  - `super_admin` y `league_admin` dentro de su liga: pueden ver todas las acciones administrativas.
+  - Otros roles (`team_admin`, `coach`, `referee`, `viewer`, sin rol): solo consulta; CTAs administrativas ocultas.
+- **Qué se oculta:** formularios de creación (temporadas, equipos, jugadores, sedes, partidos), links de edición de partido, captura de resultado/eventos, recálculo manual de standings, ajuste administrativo de resultado.
+- **Qué sigue visible:** listados, detalles, navegación de lectura permitida por RLS.
+- **Autoridad final:** RLS y server actions siguen siendo la autoridad de seguridad. Este cambio es puramente de UX/visibilidad.
+
 ## Nota de alcance UI vs schema
 
 El modelo de roles/permisos está definido en schema + RLS, pero algunas capacidades avanzadas pueden existir primero a nivel de base de datos y no necesariamente tener aún una pantalla administrativa completa en UI.

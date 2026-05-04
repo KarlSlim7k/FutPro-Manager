@@ -76,10 +76,10 @@ Estado actual del MVP:
 - **Pendiente:** automatización avanzada por eventos, auditoría de recalculos y estrategia de jobs/background para cargas mayores.
 
 ### Roles y permisos
-- **Estado:** Base técnica existente.
-- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migración inicial en `supabase/migrations/0001_initial_schema.sql`.
-- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; protección de acceso por usuario autenticado en rutas dashboard.
-- **Pendiente:** UI completa de administración de permisos/roles y flujos avanzados por rol.
+- **Estado:** Parcial (base técnica + hardening UX implementado).
+- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migración inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`.
+- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; protección de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; páginas del dashboard ocultan CTAs administrativas según rol.
+- **Pendiente:** UI completa de administración de permisos/roles, RBAC granular por feature/equipo/partido y flujos avanzados por rol.
 
 ### Vista pública
 - **Estado:** Parcial (vista pública mínima implementada).
@@ -111,7 +111,7 @@ Estado actual del MVP:
 
 1. Consolidar automatización avanzada de standings (event-driven/auditable) y estrategia de ejecución en background.
 2. ~~Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).~~ ✅ Implementado.
-3. Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).
+3. ~~Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).~~ ✅ Hardening UX implementado (ocultar CTAs administrativas para usuarios sin permisos). QA funcional por rol pendiente si hay segunda cuenta disponible.
 4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados.
 
 ## Pendientes post-MVP
@@ -134,3 +134,4 @@ Estado actual del MVP:
 - Fecha: 2026-05-04
 - Branch: main
 - Commit: `4840694e` (+ QA público real y fix menor en `PublicNav`)
+- Commit posterior: hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas según rol en páginas de matches, standings, seasons, teams, players, venues y detalle de partido).
