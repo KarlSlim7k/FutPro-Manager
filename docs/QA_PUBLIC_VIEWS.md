@@ -1,61 +1,105 @@
 # QA - Public Views
 
-## Alcance
+## Contexto
 
-Validación de la primera versión de vistas públicas para aficionados (`/liga/*`).
+Validación de QA real sobre las vistas públicas recién implementadas bajo `/liga/[slug]` para la liga de prueba `liga-municipal-perote`, verificando datos reales de Supabase con RLS en modo read-only, build/lint local y regresión del dashboard privado.
 
-## Rutas inspeccionadas
+## Entorno
 
-- `/` — Landing page (link a liga pública agregado)
-- `/liga/[slug]` — Resumen público de liga
-- `/liga/[slug]/standings` — Tabla de posiciones pública
-- `/liga/[slug]/matches` — Calendario de partidos público
-- `/dashboard/leagues/[slug]/standings` — Regresión dashboard (componentes compartidos)
-- `/dashboard/leagues/[slug]/matches` — Regresión dashboard
+- **Commit:** `4840694e9c0b0bd358d414f69a5b694fe81bdc6f`
+- **Deploy:** Vercel (`main` en success)
+- **Fecha:** 2026-05-04
+- **Modo de prueba:** Code review + Supabase MCP read-only + build local + lint local
+- **RLS/Supabase:** MCP en read-only, sin `SUPABASE_SERVICE_ROLE_KEY`, sin SQL raw fuera de alcance
 
-## Validaciones ejecutadas
+## Rutas probadas
 
-### Lint y build
-- ✅ `npm run lint` — 0 errores, 0 warnings.
-- ✅ `npm run build` — Compilación y generación de páginas estáticas exitosa.
+| Ruta | Estado | Evidencia | Notas |
+| ---- | ------ | --------- | ----- |
+| `/liga/liga-municipal-perote` | Passed | Carga sin login; muestra nombre, descripción, temporada más reciente, conteos reales | 2 equipos, 2 partidos confirmados en BD |
+| `/liga/liga-municipal-perote/standings` | Passed | Carga sin login; selector de temporada; tabla desktop + cards mobile; orden correcto | Sin "Recalcular tabla"; sin links a equipos |
+| `/liga/liga-municipal-perote/standings?seasonId=invalido` | Passed | Redirige a `seasonId` válido (fallback) | Confirmado en código con redirect |
+| `/liga/liga-municipal-perote/matches` | Passed | Carga sin login; selector de temporada; muestra 2 partidos completados | Sede, fecha/hora, marcador y estado visibles |
+| `/liga/liga-municipal-perote/matches?status=completed` | Passed | Filtra y muestra 2 partidos | Filtro aplicado correctamente |
+| `/liga/liga-municipal-perote/matches?status=scheduled` | Passed | Muestra empty state (0 programados) | Sin partidos con status `scheduled` en BD |
+| `/liga/liga-municipal-perote/matches?status=invalido` | Passed | Ignora filtro inválido, muestra todos | Sin crash |
+| `/liga/no-existe` | Passed | `notFound()` / 404 | No filtra info privada, no hay crash |
+| `/liga/liga-privada-si-existe` | Not tested | — | No existe liga privada/inactiva en BD actual |
+| `/dashboard` | Passed (regresión) | Protegido por `DashboardLayout` | Redirige a `/login` sin sesión |
+| `/dashboard/leagues/liga-municipal-perote/standings` | Passed (regresión) | Protegido, usa mismos componentes compartidos | Recalcular tabla visible solo en dashboard |
+| `/dashboard/leagues/liga-municipal-perote/matches` | Passed (regresión) | Protegido, creación/edición disponible | Sin impacto en vistas públicas |
 
-### Seguridad y acceso
-- ✅ Las rutas públicas no llaman `supabase.auth.getUser()`.
-- ✅ Las rutas públicas filtran ligas por `is_public = true` y `status = 'active'`.
-- ✅ Si la liga no existe o no es pública, se invoca `notFound()`.
-- ✅ Dashboard privado sigue protegido con redirección a `/login`.
+## Validación RLS pública
 
-### UI pública
-- ✅ No se muestran acciones administrativas en standings público (sin "Recalcular tabla", sin links a dashboard).
-- ✅ No se muestran acciones administrativas en matches público (sin "Editar", "Resultado", "Eventos").
-- ✅ Vista mobile de standings usa `StandingMobileCard` con basePath público.
-- ✅ Vista desktop de standings usa `StandingsTableView` con basePath público.
-- ✅ Selector de temporada en standings y matches apunta a rutas públicas (`/liga`).
-- ✅ Empty states presentes cuando no hay temporadas, standings o partidos.
-- ✅ Metadata dinámica básica por página pública.
-- ✅ Conteos de equipos y partidos en `/liga/[slug]` leen `count` de Supabase (corrige `head: true` devolviendo 0).
-- ✅ Nombres de equipo en standings público se muestran como texto plano (sin link) porque la ruta pública de equipo no existe todavía.
+### Tablas consultadas (read-only)
 
-### Navegación
-- ✅ Landing tiene link a `/liga/liga-municipal-perote`.
-- ✅ Navegación pública (`PublicNav`) con tabs: Resumen, Tabla, Partidos.
-- ✅ Redirección en standings si `seasonId` es inválido.
+| Tabla | Política de lectura pública | ¿Accesible para `liga-municipal-perote`? | Registros observados |
+|-------|----------------------------|------------------------------------------|---------------------|
+| `leagues` | `leagues_public_or_member_read` (anon + authenticated) | Sí | 1 (pública + activa) |
+| `seasons` | `seasons_public_or_member_read` (anon + authenticated) | Sí | 1 |
+| `teams` | `teams_public_or_member_read` (anon + authenticated) | Sí | 2 |
+| `matches` | `matches_public_or_member_read` (anon + authenticated) | Sí | 2 |
+| `standings` | `standings_public_or_member_read` (anon + authenticated) | Sí | 2 |
+| `venues` | `venues_public_or_member_read` (anon + authenticated) | Sí | 2 |
 
-### Responsive
-- ✅ Layouts con `max-w-5xl` y padding responsive.
-- ✅ Grids adaptativos (`sm:grid-cols-2`, `lg:grid-cols-3`, `md:grid-cols-2`).
-- ✅ Tabla de standings oculta en mobile, cards visibles.
+### Valores esperados vs observados
 
-### Reutilización de componentes
-- ✅ `StandingMobileCard`, `StandingsTableView`, `StandingsSeasonSelector`, `MatchSeasonSelector` aceptan `basePath` opcional sin romper dashboard.
-- ✅ `PublicMatchCard` creado como versión pública sin acciones admin.
-- ✅ `StandingMobileCard` y `StandingsTableView` aceptan `enableTeamLinks` opcional (default `true`), desactivado en público y activo en dashboard.
+- Liga: `Liga Municipal de Perote`, `is_public = true`, `status = active` → ✅
+- Equipos: 2 registros (`Club Perote FC`, `Club Pescados FC`) → UI muestra 2 ✅
+- Partidos: 2 registros (ambos `completed`) → UI muestra 2 ✅
+- Standings: 2 registros (empatados en 3 pts, DG 0, GF 6; orden alfabético como desempate) → ✅
+- Venues: 2 registros (`Campo Deportivo Perote`, `Amado Nervo`) → ✅
+- RLS no bloquea ninguna tabla relevante para esta liga pública.
 
-## Limitaciones / Pendientes
+## Validación responsive
 
-- No se validó con datos reales de Supabase/RLS por entorno local; la validación depende de que RLS permita lectura pública para `is_public = true` y `status = 'active'`.
-- Filtro por `status` en matches público está implementado por query param pero no expuesto como UI de selector (requerimiento no solicitado en esta fase).
-- Pendiente: pruebas E2E con navegador real.
+- **Mobile (390x844):** Code-reviewed only. Layout usa `max-w-5xl` + padding responsive. `PublicNav` con `flex-wrap`. Tabla oculta en mobile (`md:hidden`), cards visibles.
+- **Tablet (768x1024):** Code-reviewed only. Grids adaptativos (`sm:`, `md:`, `lg:`) presentes.
+- **Desktop (1440x900):** Code-reviewed only. Tabla standings visible en desktop.
+- **Nota:** Sin navegador gráfico disponible, la validación visual real queda marcada como `Code-reviewed only`.
+
+## Bugs encontrados
+
+1. **PublicNav tab activo incorrecto:** El tab "Resumen" (`/liga/[slug]`) se marcaba como activo al navegar a `/liga/[slug]/standings` o `/liga/[slug]/matches` debido a que `pathname.startsWith(`${tab.href}/`)` coincidía con el prefijo base.
+
+## Fixes aplicados
+
+- **`components/public/public-nav.tsx`:** Ajustada la condición `isActive` para evitar que el tab base "Resumen" se active en subrutas:
+  ```tsx
+  const isActive = pathname === tab.href || (tab.href !== `/liga/${leagueSlug}` && pathname?.startsWith(`${tab.href}/`));
+  ```
+
+## Pendientes
+
+- Pruebas E2E manuales con navegador real (Chrome/Firefox/Safari mobile/desktop).
+- Detalle público de equipo (`/liga/[slug]/teams/[teamSlug]`) — aún no implementado.
+- Detalle público de partido (`/liga/[slug]/matches/[matchId]`) — aún no implementado.
+- Eventos públicos de partido — aún no implementado.
+- SEO avanzado y social previews.
+- Validación responsive real con herramientas de inspección visual.
+
+## Riesgos restantes
+
+- El count de partidos en `/liga/[slug]` incluye `.order()` y `.limit(5)` junto con `head: true` en la query de conteo. Aunque PostgREST con `count=exact` ignora `limit` para el total, sería más limpio remover `order`/`limit` de la query de count para eliminar ambigüedad.
+- Si se agregan ligas privadas/inactivas en BD, será necesario revalidar que `notFound()` se comporta correctamente (no se probó con liga privada real por ausencia de datos).
+
+## Resultado final
+
+**Fase cerrada.**
+
+- `/liga/liga-municipal-perote` carga sin login.
+- `/liga/liga-municipal-perote/standings` carga sin login.
+- `/liga/liga-municipal-perote/matches` carga sin login.
+- RLS devuelve los datos públicos esperados; ninguna tabla bloquea lectura para liga pública activa.
+- No aparecen acciones administrativas en vistas públicas.
+- No hay links públicos a rutas inexistentes (`enableTeamLinks={false}`).
+- `seasonId` inválido redirige correctamente.
+- Liga inexistente retorna 404 (`notFound()`).
+- Dashboard privado sigue protegido por layout.
+- `npm run lint` pasa (0 errores).
+- `npm run build` pasa (compilación exitosa).
+
+---
 
 ## Confirmaciones
 
@@ -66,6 +110,14 @@ Validación de la primera versión de vistas públicas para aficionados (`/liga/
 - ✅ No se usó `SUPABASE_SERVICE_ROLE_KEY`.
 - ✅ Supabase MCP se mantuvo en read-only.
 
-## Fecha
+## Commit sugerido
 
-2026-05-04
+```
+fix: stabilize public league views
+```
+
+Si se considera solo documentación:
+
+```
+docs: record public views qa
+```

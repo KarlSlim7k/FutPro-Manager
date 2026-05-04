@@ -87,6 +87,7 @@ Estado actual del MVP:
 - **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada y calendario de partidos; navegación pública entre vistas; empty states; metadata dinámico básico.
 - **Pendiente:** detalle público de equipo, detalle público de partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 - **Nota:** los nombres de equipo en la tabla de posiciones pública se muestran como texto plano (sin link) hasta que exista la ruta pública de detalle de equipo.
+- **QA realizado (2026-05-04):** rutas públicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegación pública (`PublicNav`).
 
 ### Media uploads
 - **Estado:** Base técnica existente.
@@ -132,4 +133,4 @@ Estado actual del MVP:
 
 - Fecha: 2026-05-04
 - Branch: main
-- Commit: `c4df8abe` (+ fixes menores de responsive/permisos QA)
+- Commit: `4840694e` (+ QA público real y fix menor en `PublicNav`)

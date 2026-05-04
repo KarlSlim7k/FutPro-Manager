@@ -20,7 +20,7 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
   return (
     <nav className="flex flex-wrap gap-2 border-b border-gray-200 pb-1">
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href || pathname?.startsWith(`${tab.href}/`);
+        const isActive = pathname === tab.href || (tab.href !== `/liga/${leagueSlug}` && pathname?.startsWith(`${tab.href}/`));
         return (
           <Link
             key={tab.href}

@@ -34,6 +34,7 @@
 ### Fase 5 - Vista pública (Parcialmente completado)
 - ✅ Portal público mínimo: resumen de liga, tabla de posiciones y calendario de partidos.
 - ✅ Navegación de consulta para aficionados entre vistas públicas.
+- ✅ QA público real validado con datos reales de Supabase/RLS (2026-05-04).
 - Pendiente: detalle público de equipo/partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 
 ### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica existente, UI pendiente)
