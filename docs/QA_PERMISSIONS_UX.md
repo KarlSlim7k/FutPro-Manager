@@ -62,6 +62,75 @@ Validación del hardening UX de permisos en el dashboard de FutPro Manager.
 - Falta RBAC granular por feature/equipo/partido (futuro).
 - Falta validación UI de árbitro asignado para mostrar acciones de resultado/eventos solo en partidos asignados.
 
+## Micro-QA league_admin post hardening
+
+### Entorno
+
+- Local / Vercel (preview deploy success).
+- Commit probado: `c71df88599f04f8ae1daff472994ad0fce312660` + fix posterior.
+
+### Usuario/rol probado
+
+- Perfil: `a37100ec-d8cd-4a46-bca4-49f86e1cade6`
+- Liga: `liga-municipal-perote`
+- `global_role`: `super_admin`
+- `league_members.role`: `league_admin`
+
+### Resultados por ruta
+
+| Ruta | Acción esperada | Estado | Evidencia | Notas |
+| ---- | --------------- | ------ | --------- | ----- |
+| `/matches` | Ver formulario "Programar partido" | Passed | Code review + build | `permissions.canManageMatches` = true |
+| `/matches` | Ver "Editar" en cada partido | Passed | Code review + build | MatchCard recibe `canEdit=true` |
+| `/matches` | Ver "Resultado" si no cancelled | Passed | Code review + build | MatchCard recibe `canUpdateResult=true` |
+| `/matches` | Ver "Eventos" si no cancelled | Passed | Code review + build | MatchCard recibe `canManageEvents=true` |
+| `/matches` | Ver mensajes cancelled | Passed | Code review | Renderizado condicional preservado |
+| `/matches/[matchId]` | Ver "Editar partido" | Passed | Code review | `permissions.canManageMatches` usado |
+| `/matches/[matchId]` | Ver "Capturar resultado" si no cancelled | Passed | Code review | `permissions.canUpdateResults` usado |
+| `/matches/[matchId]` | Ver "Eventos" si no cancelled | Passed | Code review | `permissions.canManageEvents` usado |
+| `/matches/[matchId]` | Ver card ajuste admin si completed | Passed | Code review | `permissions.canUpdateResults` usado |
+| `/standings` | Ver link "Recalcular tabla" | Passed | Code review | `permissions.canRecalculateStandings` usado |
+| `/standings` | Ver "Recalcular tabla" en empty state | Passed | Code review | Condición preservada |
+| `/standings` | Ver links lectura "Ver partidos"/"Ver equipos" | Passed | Code review | Siempre visibles |
+| `/seasons/[seasonSlug]/standings` | Ver form/card "Recalcular tabla" | Passed | Code review | `permissions.canRecalculateStandings` usado |
+| `/seasons` | Ver formulario "Nueva temporada" | Passed | Code review | `permissions.canManageCatalog` usado |
+| `/teams` | Ver formulario "Nuevo equipo" | Passed | Code review | `permissions.canManageCatalog` usado |
+| `/players` | Ver formulario "Nuevo jugador" | Passed | Code review | `permissions.canManageCatalog` usado |
+| `/venues` | Ver formulario "Nueva sede" | Passed | Code review | `permissions.canManageCatalog` usado |
+| `/dashboard` (no auth) | Redirige a `/login` | Passed | Code review + build | Middleware + page redirect |
+
+### Bug encontrado y corregido
+
+**Severidad:** Alta (regresión para `league_admin`).
+**Archivo:** `lib/permissions/league-permissions.ts`
+**Problema:** La query a `league_members` usaba `eq("user_id", userId)`, pero la columna real en schema es `profile_id`. Esto causaba que `leagueRole` siempre fuera `null` para usuarios no-super-admin, ocultando todas las acciones administrativas a `league_admin`.
+**Fix:** Cambiar `eq("user_id", userId)` → `eq("profile_id", userId)`.
+**Validación post-fix:** `npm run lint` ✅, `npm run build` ✅.
+
+### Acciones no probadas (sin impacto en regresión)
+
+- Ejecución real de recálculo de standings (solo verificación UI).
+- Creación real de entidades (temporada, equipo, jugador, sede, partido).
+- Captura real de resultado/eventos.
+
+### Validaciones técnicas
+
+- `npm run lint`: ✅ Pasa.
+- `npm run build`: ✅ Pasa.
+
+### Confirmaciones
+
+- No se modificó schema.
+- No se modificó RLS.
+- No se ejecutaron migraciones.
+- No se modificaron datos directamente por MCP.
+- No se usó `SUPABASE_SERVICE_ROLE_KEY`.
+
+### Riesgos restantes
+
+- Falta QA funcional con cuenta real de `league_admin` que NO sea `super_admin`.
+- Falta validación con roles `team_admin`, `coach`, `referee`, `viewer`.
+
 ## Fecha
 
 2026-05-04

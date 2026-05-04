@@ -26,7 +26,7 @@ export async function getLeaguePermissions({
     const [{ data: profileData, error: profileError }, { data: membershipData, error: membershipError }] =
       await Promise.all([
         supabase.from("profiles").select("global_role").eq("id", userId).maybeSingle(),
-        supabase.from("league_members").select("role").eq("league_id", leagueId).eq("user_id", userId).maybeSingle(),
+        supabase.from("league_members").select("role").eq("league_id", leagueId).eq("profile_id", userId).maybeSingle(),
       ]);
 
     // Si falla por RLS u otro motivo, no romper la página; devolver permisos mínimos seguros.
