@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -234,6 +235,27 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           </div>
         </CardContent>
       </Card>
+
+      {match.status === "completed" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Ajuste administrativo de resultado y estado</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Usa este formulario para corregir marcador o cambiar el estado del partido
+              finalizado (por ejemplo, volverlo a programado, en juego, pospuesto o cancelado).
+            </p>
+            <UpdateMatchResultForm
+              leagueSlug={league.slug}
+              matchId={match.id}
+              initialHomeScore={match.home_score}
+              initialAwayScore={match.away_score}
+              initialStatus={match.status}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

@@ -155,14 +155,16 @@ export async function updateMatchResultAction(
     throw seasonError;
   }
 
-  const { error: updateError } = await supabase
+  const { data: updatedRows, error: updateError } = await supabase
     .from("matches")
     .update({
       home_score: Number(values.home_score),
       away_score: Number(values.away_score),
       status: values.status as MatchStatus,
     })
-    .eq("id", matchId);
+    .eq("id", matchId)
+    .eq("league_id", league.id)
+    .select("id");
 
   if (updateError) {
     return {
@@ -173,6 +175,16 @@ export async function updateMatchResultAction(
         updateError.message,
         updateError.details
       ),
+      success: false,
+      standingsWarning: null,
+    };
+  }
+
+  if (!updatedRows?.[0]) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para actualizar este partido.",
       success: false,
       standingsWarning: null,
     };

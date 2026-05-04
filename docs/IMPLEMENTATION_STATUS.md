@@ -66,7 +66,7 @@ Estado actual del MVP:
 ### Resultados y eventos de partido
 - **Estado:** Implementado.
 - **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/[matchId]/result/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/events/page.tsx`, `components/matches/update-match-result-form.tsx`, `components/matches/create-match-event-form.tsx`.
-- **Funcionalidad existente:** captura/actualización de marcadores y registro de eventos deportivos.
+- **Funcionalidad existente:** captura/actualización de marcadores y registro de eventos deportivos, incluyendo ajuste administrativo de marcador/estado para partidos `completed` desde el detalle del partido.
 - **Pendiente:** mayor trazabilidad y auditoría de cambios en UI.
 
 ### Tabla de posiciones

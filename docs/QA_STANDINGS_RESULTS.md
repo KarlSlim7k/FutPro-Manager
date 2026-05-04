@@ -28,7 +28,7 @@ QA funcional guiado y revisión técnica del flujo de resultados/standings despu
 | ---- | ------ | --------- | ----- |
 | A. scheduled -> completed actualiza standings | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/result/actions.ts`, `lib/standings/recalculate-standings.ts` | La acción guarda marcador con `status: "completed"` y llama `recalculateStandingsForSeason`. |
 | B. completed cambia marcador y recalcula | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/result/actions.ts`, `lib/standings/recalculate-standings.ts` | Recalcula desde todos los partidos `completed`, evitando acumulaciones incrementales incorrectas. |
-| C. completed -> otro status retira impacto | Failed | `app/dashboard/leagues/[slug]/matches/[matchId]/edit/actions.ts`, `components/matches/edit-match-form.tsx`, `components/matches/match-result-form.tsx`, `components/matches/update-match-result-form.tsx` | El flujo visible no permite transición desde `completed` a otro estado. Existe acción con soporte (`app/.../matches/[matchId]/actions.ts`) pero el form asociado no está conectado en rutas activas. |
+| C. completed -> otro status retira impacto | Code-reviewed only | `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `components/matches/update-match-result-form.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/actions.ts` | El detalle del partido ahora expone un formulario administrativo activo para marcador + estado cuando el partido está `completed`. |
 | D. recálculo manual | Code-reviewed only | `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/actions.ts`, `components/standings/recalculate-standings-form.tsx` | Botón/manual action funcional por código, con mensajes de éxito/error. |
 | E. `seasonId` inválido en standings | Code-reviewed only | `app/dashboard/leagues/[slug]/standings/page.tsx` | Hay redirección explícita a temporada fallback válida cuando `seasonId` no existe para la liga. |
 | F. empty states | Code-reviewed only | `app/dashboard/leagues/[slug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/page.tsx` | Revisados estados para liga sin temporadas y temporada sin standings. Se corrigió copy desactualizado. |
@@ -49,24 +49,24 @@ QA funcional guiado y revisión técnica del flujo de resultados/standings despu
 
 ## Bugs encontrados
 
-1. **[Mayor] Falta de flujo UI activo para `completed -> non-completed`**  
-   El caso C no es cubrible en la UI actualmente: el formulario de edición no permite editar partidos `completed` y el formulario que sí maneja `status` no está conectado a una ruta activa.
+1. **[Mayor - corregido] Falta de flujo UI activo para `completed -> non-completed`**  
+   Se corrigió conectando `UpdateMatchResultForm` en la ruta activa de detalle del partido (`/dashboard/leagues/[slug]/matches/[matchId]`) cuando el estado es `completed`, reutilizando la action administrativa que recalcula standings.
 2. **[Menor - corregido] Mensaje desactualizado en empty state de standings**  
    Decía que la generación automática sería “fase posterior”, cuando ya existe auto-recálculo.
 
 ## Pendientes de validación manual
 
-- Ejecución real E2E de casos A/B/C/D con usuario `league_admin` en entorno desplegado.
+- Ejecución real E2E de casos A/B/C/D con usuario `league_admin` en entorno desplegado (incluyendo transición `completed -> scheduled/postponed/cancelled` desde el detalle del partido).
 - Caso H con usuario sin permisos explícitos para confirmar mensaje controlado por RLS.
 - Caso G en dispositivos reales (mobile/desktop) y navegadores objetivo.
 
 ## Riesgos
 
-- La cobertura funcional del caso C queda incompleta en UI, lo que impide retirar impacto de un partido `completed` mediante flujo operativo estándar.
+- Falta validación manual autenticada para confirmar el comportamiento final del nuevo flujo en entorno real.
 - Sin sesiones de prueba por rol, la validación de permisos queda parcial.
 
 ## Recomendaciones siguientes
 
-1. Crear commit específico para resolver el bug mayor del caso C (con decisión explícita de UX/permisos sobre dónde exponer el cambio de estado desde `completed`).
-2. Ejecutar ronda QA manual autenticada con al menos: `league_admin`, usuario sin permisos y usuario no autenticado.
+1. Ejecutar ronda QA manual autenticada con al menos: `league_admin`, usuario sin permisos y usuario no autenticado.
+2. Validar explícitamente la regresión `completed -> non-completed -> completed` en un mismo partido y revisar standings antes/después.
 3. Mantener verificación de consistencia season/team en `standings` como checklist de regresión post-release.

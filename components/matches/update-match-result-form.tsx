@@ -63,6 +63,11 @@ export function UpdateMatchResultForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        Cambiar el estado o marcador de un partido finalizado recalculará automáticamente la tabla
+        de posiciones de la temporada.
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="home_score" className="text-sm font-medium text-gray-700">
