@@ -86,6 +86,7 @@ Estado actual del MVP:
 - **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `components/public/*`.
 - **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada y calendario de partidos; navegación pública entre vistas; empty states; metadata dinámico básico.
 - **Pendiente:** detalle público de equipo, detalle público de partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
+- **Nota:** los nombres de equipo en la tabla de posiciones pública se muestran como texto plano (sin link) hasta que exista la ruta pública de detalle de equipo.
 
 ### Media uploads
 - **Estado:** Base técnica existente.

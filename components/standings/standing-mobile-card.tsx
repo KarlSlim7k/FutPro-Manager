@@ -8,6 +8,7 @@ interface StandingMobileCardProps {
   position: number;
   leagueSlug: string;
   basePath?: string;
+  enableTeamLinks?: boolean;
 }
 
 export function StandingMobileCard({
@@ -15,6 +16,7 @@ export function StandingMobileCard({
   position,
   leagueSlug,
   basePath = "/dashboard/leagues",
+  enableTeamLinks = true,
 }: StandingMobileCardProps) {
   const teamName = row.team?.name ?? "Equipo desconocido";
   const teamSlug = row.team?.slug ?? null;
@@ -26,7 +28,7 @@ export function StandingMobileCard({
           <div className="min-w-0 space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">#{position}</p>
             <p className="break-words text-sm font-semibold text-gray-900">
-              {teamSlug ? (
+              {teamSlug && enableTeamLinks ? (
                 <TextLink href={`${basePath}/${leagueSlug}/teams/${teamSlug}`}>{teamName}</TextLink>
               ) : (
                 teamName

@@ -33,6 +33,8 @@ Validación de la primera versión de vistas públicas para aficionados (`/liga/
 - ✅ Selector de temporada en standings y matches apunta a rutas públicas (`/liga`).
 - ✅ Empty states presentes cuando no hay temporadas, standings o partidos.
 - ✅ Metadata dinámica básica por página pública.
+- ✅ Conteos de equipos y partidos en `/liga/[slug]` leen `count` de Supabase (corrige `head: true` devolviendo 0).
+- ✅ Nombres de equipo en standings público se muestran como texto plano (sin link) porque la ruta pública de equipo no existe todavía.
 
 ### Navegación
 - ✅ Landing tiene link a `/liga/liga-municipal-perote`.
@@ -47,6 +49,7 @@ Validación de la primera versión de vistas públicas para aficionados (`/liga/
 ### Reutilización de componentes
 - ✅ `StandingMobileCard`, `StandingsTableView`, `StandingsSeasonSelector`, `MatchSeasonSelector` aceptan `basePath` opcional sin romper dashboard.
 - ✅ `PublicMatchCard` creado como versión pública sin acciones admin.
+- ✅ `StandingMobileCard` y `StandingsTableView` aceptan `enableTeamLinks` opcional (default `true`), desactivado en público y activo en dashboard.
 
 ## Limitaciones / Pendientes
 

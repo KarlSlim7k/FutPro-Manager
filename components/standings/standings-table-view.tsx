@@ -7,9 +7,10 @@ interface StandingsTableViewProps {
   rows: StandingRowViewModel[];
   leagueSlug: string;
   basePath?: string;
+  enableTeamLinks?: boolean;
 }
 
-export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/leagues" }: StandingsTableViewProps) {
+export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/leagues", enableTeamLinks = true }: StandingsTableViewProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
@@ -56,7 +57,7 @@ export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/le
               <tr key={`${row.team_id}-${index}`} className="transition hover:bg-gray-50">
                 <td className="px-4 py-3">{index + 1}</td>
                 <td className="px-4 py-3 font-medium text-gray-900">
-                  {teamSlug ? (
+                  {teamSlug && enableTeamLinks ? (
                     <TextLink href={`${basePath}/${leagueSlug}/teams/${teamSlug}`}>
                       {teamName}
                     </TextLink>

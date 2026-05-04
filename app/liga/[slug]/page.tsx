@@ -58,8 +58,8 @@ export default async function LeaguePublicPage({ params }: LeaguePublicPageProps
 
   const [
     { data: seasonsData },
-    { data: teamsData },
-    { data: matchesData },
+    { count: teamCount },
+    { count: matchCount },
   ] = await Promise.all([
     supabase
       .from("seasons")
@@ -80,8 +80,8 @@ export default async function LeaguePublicPage({ params }: LeaguePublicPageProps
   ]);
 
   const latestSeason = seasonsData?.[0] ?? null;
-  const teamCount = teamsData?.length ?? 0;
-  const matchCount = matchesData?.length ?? 0;
+  const resolvedTeamCount = teamCount ?? 0;
+  const resolvedMatchCount = matchCount ?? 0;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
@@ -119,7 +119,7 @@ export default async function LeaguePublicPage({ params }: LeaguePublicPageProps
               <CardTitle>Equipos</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-gray-900">{teamCount}</p>
+              <p className="text-3xl font-bold text-gray-900">{resolvedTeamCount}</p>
               <p className="mt-1 text-sm text-gray-600">Equipos registrados</p>
             </CardContent>
           </Card>
@@ -129,7 +129,7 @@ export default async function LeaguePublicPage({ params }: LeaguePublicPageProps
               <CardTitle>Partidos</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-gray-900">{matchCount}</p>
+              <p className="text-3xl font-bold text-gray-900">{resolvedMatchCount}</p>
               <p className="mt-1 text-sm text-gray-600">Partidos próximos o recientes</p>
             </CardContent>
           </Card>
