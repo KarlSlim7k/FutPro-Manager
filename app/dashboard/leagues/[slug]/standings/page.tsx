@@ -261,7 +261,10 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
           description={
             <>
               <p>Aún no hay tabla de posiciones generada para esta temporada.</p>
-              <p className="mt-2">La generación automática de standings se implementará en una fase posterior.</p>
+              <p className="mt-2">
+                La tabla se actualiza automáticamente cuando se guardan resultados de partidos
+                finalizados. También puedes recalcularla manualmente desde la temporada.
+              </p>
             </>
           }
           action={
