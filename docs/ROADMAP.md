@@ -32,10 +32,10 @@
 - **Pendiente:** automatización avanzada por eventos/auditoría y soporte de jobs/background para mayor robustez.
 
 ### Fase 5 - Vista pública (Parcialmente completado)
-- ✅ Portal público mínimo: resumen de liga, tabla de posiciones y calendario de partidos.
+- ✅ Portal público mínimo: resumen de liga, tabla de posiciones, calendario de partidos y detalle público de equipo.
 - ✅ Navegación de consulta para aficionados entre vistas públicas.
 - ✅ QA público real validado con datos reales de Supabase/RLS (2026-05-04).
-- Pendiente: detalle público de equipo/partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
+- Pendiente: detalle público de partido/jugador, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
 
 ### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX implementado, UI de administración pendiente)
 - Modelo base en schema/RLS.

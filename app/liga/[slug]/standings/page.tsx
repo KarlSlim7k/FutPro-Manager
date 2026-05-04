@@ -240,13 +240,12 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
                     position={index + 1}
                     leagueSlug={league.slug}
                     basePath="/liga"
-                    enableTeamLinks={false}
                   />
                 ))}
               </div>
 
               <div className="hidden md:block">
-                <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} basePath="/liga" enableTeamLinks={false} />
+                <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} basePath="/liga" />
               </div>
             </CardContent>
           </Card>

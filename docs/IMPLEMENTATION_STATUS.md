@@ -83,10 +83,10 @@ Estado actual del MVP:
 
 ### Vista pública
 - **Estado:** Parcial (vista pública mínima implementada).
-- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `components/public/*`.
-- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada y calendario de partidos; navegación pública entre vistas; empty states; metadata dinámico básico.
-- **Pendiente:** detalle público de equipo, detalle público de partido, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
-- **Nota:** los nombres de equipo en la tabla de posiciones pública se muestran como texto plano (sin link) hasta que exista la ruta pública de detalle de equipo.
+- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `components/public/*`.
+- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
+- **Pendiente:** detalle público de partido, detalle público de jugador, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
+- **Nota:** standings público ahora enlaza a detalle de equipo; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`.
 - **QA realizado (2026-05-04):** rutas públicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegación pública (`PublicNav`).
 
 ### Media uploads

@@ -17,16 +17,19 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 | Ruta | Estado | Evidencia | Notas |
 | ---- | ------ | --------- | ----- |
 | `/liga/liga-municipal-perote` | Passed | Carga sin login; muestra nombre, descripción, temporada más reciente, conteos reales | 2 equipos, 2 partidos confirmados en BD |
-| `/liga/liga-municipal-perote/standings` | Passed | Carga sin login; selector de temporada; tabla desktop + cards mobile; orden correcto | Sin "Recalcular tabla"; sin links a equipos |
+| `/liga/liga-municipal-perote/standings` | Passed | Carga sin login; selector de temporada; tabla desktop + cards mobile; orden correcto | Sin "Recalcular tabla"; enlaza a detalle de equipo |
 | `/liga/liga-municipal-perote/standings?seasonId=invalido` | Passed | Redirige a `seasonId` válido (fallback) | Confirmado en código con redirect |
 | `/liga/liga-municipal-perote/matches` | Passed | Carga sin login; selector de temporada; muestra 2 partidos completados | Sede, fecha/hora, marcador y estado visibles |
 | `/liga/liga-municipal-perote/matches?status=completed` | Passed | Filtra y muestra 2 partidos | Filtro aplicado correctamente |
 | `/liga/liga-municipal-perote/matches?status=scheduled` | Passed | Muestra empty state (0 programados) | Sin partidos con status `scheduled` en BD |
 | `/liga/liga-municipal-perote/matches?status=invalido` | Passed | Ignora filtro inválido, muestra todos | Sin crash |
+| `/liga/liga-municipal-perote/teams/club-perote-fc` | Passed | Carga sin login; ficha, plantilla, partidos | Sin acciones admin; sin links a dashboard |
+| `/liga/liga-municipal-perote/teams/club-pescados-fc` | Passed | Carga sin login; ficha, plantilla, partidos | Sin acciones admin; sin links a dashboard |
+| `/liga/liga-municipal-perote/teams/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
 | `/liga/no-existe` | Passed | `notFound()` / 404 | No filtra info privada, no hay crash |
 | `/liga/liga-privada-si-existe` | Not tested | — | No existe liga privada/inactiva en BD actual |
 | `/dashboard` | Passed (regresión) | Protegido por `DashboardLayout` | Redirige a `/login` sin sesión |
-| `/dashboard/leagues/liga-municipal-perote/standings` | Passed (regresión) | Protegido, usa mismos componentes compartidos | Recalcular tabla visible solo en dashboard |
+| `/dashboard/leagues/liga-municipal-perote/standings` | Passed (regresión) | Protegido, usa mismos componentes compartidos | Recalcular tabla visible solo en dashboard; links a equipos privados |
 | `/dashboard/leagues/liga-municipal-perote/matches` | Passed (regresión) | Protegido, creación/edición disponible | Sin impacto en vistas públicas |
 
 ## Validación RLS pública
@@ -72,8 +75,8 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 ## Pendientes
 
 - Pruebas E2E manuales con navegador real (Chrome/Firefox/Safari mobile/desktop).
-- Detalle público de equipo (`/liga/[slug]/teams/[teamSlug]`) — aún no implementado.
 - Detalle público de partido (`/liga/[slug]/matches/[matchId]`) — aún no implementado.
+- Detalle público de jugador (`/liga/[slug]/players/[playerId]`) — aún no implementado.
 - Eventos públicos de partido — aún no implementado.
 - SEO avanzado y social previews.
 - Validación responsive real con herramientas de inspección visual.
@@ -90,9 +93,14 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 - `/liga/liga-municipal-perote` carga sin login.
 - `/liga/liga-municipal-perote/standings` carga sin login.
 - `/liga/liga-municipal-perote/matches` carga sin login.
+- `/liga/liga-municipal-perote/teams/club-perote-fc` carga sin login; muestra ficha, plantilla y partidos.
+- `/liga/liga-municipal-perote/teams/club-pescados-fc` carga sin login; muestra ficha, plantilla y partidos.
+- `/liga/liga-municipal-perote/teams/no-existe` retorna 404 (`notFound()`).
+- `/liga/liga-municipal-perote/standings` enlaza correctamente a `/liga/[slug]/teams/[teamSlug]`.
+- `/dashboard/leagues/liga-municipal-perote/standings` conserva links privados del dashboard.
 - RLS devuelve los datos públicos esperados; ninguna tabla bloquea lectura para liga pública activa.
 - No aparecen acciones administrativas en vistas públicas.
-- No hay links públicos a rutas inexistentes (`enableTeamLinks={false}`).
+- No hay formularios ni links a dashboard en detalle de equipo público.
 - `seasonId` inválido redirige correctamente.
 - Liga inexistente retorna 404 (`notFound()`).
 - Dashboard privado sigue protegido por layout.
