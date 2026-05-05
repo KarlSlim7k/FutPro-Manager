@@ -83,10 +83,10 @@ Estado actual del MVP:
 
 ### Vista pública
 - **Estado:** Parcial (vista pública mínima implementada).
-- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `components/public/*`.
-- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
-- **Pendiente:** detalle público de partido, detalle público de jugador, eventos públicos, SEO avanzado, filtros avanzados, sharing/social previews.
-- **Nota:** standings público ahora enlaza a detalle de equipo; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`.
+- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `components/public/*`.
+- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos, detalle público de partido (con eventos básicos) y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
+- **Pendiente:** detalle público de jugador, eventos públicos avanzados, filtros avanzados, SEO/social previews.
+- **Nota:** standings público ahora enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`; eventos públicos se consultan de forma segura y no rompen la página si RLS no permite lectura.
 - **QA realizado (2026-05-04):** rutas públicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegación pública (`PublicNav`).
 
 ### Media uploads
@@ -135,3 +135,4 @@ Estado actual del MVP:
 - Branch: main
 - Commit: `4840694e` (+ QA público real y fix menor en `PublicNav`)
 - Commit posterior: hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas según rol en páginas de matches, standings, seasons, teams, players, venues y detalle de partido).
+- Commit actual: detalle público de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.

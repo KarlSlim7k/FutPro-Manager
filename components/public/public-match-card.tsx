@@ -1,5 +1,6 @@
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TextLink } from "@/components/ui/text-link";
 import type { MatchStatus } from "@/types/database";
 
 type PublicMatchCardProps = {
@@ -11,6 +12,7 @@ type PublicMatchCardProps = {
   homeScore: number;
   awayScore: number;
   roundName: string | null;
+  detailHref?: string;
 };
 
 function formatDateTime(date: string) {
@@ -29,6 +31,7 @@ export function PublicMatchCard({
   homeScore,
   awayScore,
   roundName,
+  detailHref,
 }: PublicMatchCardProps) {
   return (
     <Card className="transition hover:shadow-sm">
@@ -53,6 +56,11 @@ export function PublicMatchCard({
           <span className="font-medium text-gray-900">Marcador:</span>{" "}
           {status === "completed" ? `${homeScore} - ${awayScore}` : "Pendiente"}
         </p>
+        {detailHref ? (
+          <div className="pt-1">
+            <TextLink href={detailHref}>Ver detalle</TextLink>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

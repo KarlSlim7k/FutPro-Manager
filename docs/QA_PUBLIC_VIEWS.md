@@ -27,6 +27,8 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 | `/liga/liga-municipal-perote/teams/club-pescados-fc` | Passed | Carga sin login; ficha, plantilla, partidos | Sin acciones admin; sin links a dashboard |
 | `/liga/liga-municipal-perote/teams/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
 | `/liga/no-existe` | Passed | `notFound()` / 404 | No filtra info privada, no hay crash |
+| `/liga/liga-municipal-perote/matches/<matchId-real>` | Passed | Carga sin login; muestra equipos, marcador, sede, temporada, eventos | Sin acciones admin; enlaza a equipos públicos |
+| `/liga/liga-municipal-perote/matches/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
 | `/liga/liga-privada-si-existe` | Not tested | — | No existe liga privada/inactiva en BD actual |
 | `/dashboard` | Passed (regresión) | Protegido por `DashboardLayout` | Redirige a `/login` sin sesión |
 | `/dashboard/leagues/liga-municipal-perote/standings` | Passed (regresión) | Protegido, usa mismos componentes compartidos | Recalcular tabla visible solo en dashboard; links a equipos privados |
@@ -44,6 +46,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 | `matches` | `matches_public_or_member_read` (anon + authenticated) | Sí | 2 |
 | `standings` | `standings_public_or_member_read` (anon + authenticated) | Sí | 2 |
 | `venues` | `venues_public_or_member_read` (anon + authenticated) | Sí | 2 |
+| `match_events` | Sin política pública confirmada | No aplica / graceful empty state | Se maneja sin romper página |
 
 ### Valores esperados vs observados
 
@@ -75,9 +78,8 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 ## Pendientes
 
 - Pruebas E2E manuales con navegador real (Chrome/Firefox/Safari mobile/desktop).
-- Detalle público de partido (`/liga/[slug]/matches/[matchId]`) — aún no implementado.
 - Detalle público de jugador (`/liga/[slug]/players/[playerId]`) — aún no implementado.
-- Eventos públicos de partido — aún no implementado.
+- Eventos públicos avanzados de partido.
 - SEO avanzado y social previews.
 - Validación responsive real con herramientas de inspección visual.
 
@@ -92,15 +94,18 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 
 - `/liga/liga-municipal-perote` carga sin login.
 - `/liga/liga-municipal-perote/standings` carga sin login.
-- `/liga/liga-municipal-perote/matches` carga sin login.
-- `/liga/liga-municipal-perote/teams/club-perote-fc` carga sin login; muestra ficha, plantilla y partidos.
+- `/liga/liga-municipal-perote/matches` carga sin login; enlaza a detalle de partido.
+- `/liga/liga-municipal-perote/matches/<matchId-real>` carga sin login; muestra equipos, marcador, sede, temporada, estado y eventos.
+- `/liga/liga-municipal-perote/matches/no-existe` retorna 404 (`notFound()`).
+- `/liga/liga-municipal-perote/teams/club-perote-fc` carga sin login; muestra ficha, plantilla y partidos (enlazan a detalle de partido).
 - `/liga/liga-municipal-perote/teams/club-pescados-fc` carga sin login; muestra ficha, plantilla y partidos.
 - `/liga/liga-municipal-perote/teams/no-existe` retorna 404 (`notFound()`).
 - `/liga/liga-municipal-perote/standings` enlaza correctamente a `/liga/[slug]/teams/[teamSlug]`.
 - `/dashboard/leagues/liga-municipal-perote/standings` conserva links privados del dashboard.
-- RLS devuelve los datos públicos esperados; ninguna tabla bloquea lectura para liga pública activa.
+- `/dashboard/leagues/liga-municipal-perote/matches` conserva creación/edición.
+- RLS devuelve los datos públicos esperados; eventos se manejan graceful si no hay acceso.
 - No aparecen acciones administrativas en vistas públicas.
-- No hay formularios ni links a dashboard en detalle de equipo público.
+- No hay formularios ni links a dashboard en detalle de equipo/partido público.
 - `seasonId` inválido redirige correctamente.
 - Liga inexistente retorna 404 (`notFound()`).
 - Dashboard privado sigue protegido por layout.
@@ -121,7 +126,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 ## Commit sugerido
 
 ```
-fix: stabilize public league views
+feat: add public match detail pages
 ```
 
 Si se considera solo documentación:

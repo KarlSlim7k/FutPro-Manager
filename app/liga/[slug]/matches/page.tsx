@@ -183,6 +183,7 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
                 homeScore={match.home_score}
                 awayScore={match.away_score}
                 roundName={match.round_name}
+                detailHref={`/liga/${league.slug}/matches/${match.id}`}
               />
             ))}
           </div>
