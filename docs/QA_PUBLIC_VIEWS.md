@@ -27,7 +27,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 | `/liga/liga-municipal-perote/teams/club-pescados-fc` | Passed | Carga sin login; ficha, plantilla, partidos | Sin acciones admin; sin links a dashboard |
 | `/liga/liga-municipal-perote/teams/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
 | `/liga/no-existe` | Passed | `notFound()` / 404 | No filtra info privada, no hay crash |
-| `/liga/liga-municipal-perote/matches/<matchId-real>` | Passed | Carga sin login; muestra equipos, marcador, sede, temporada, eventos | Sin acciones admin; enlaza a equipos públicos |
+| `/liga/liga-municipal-perote/matches/<matchId-real>` | Passed | Carga sin login; muestra equipos, marcador, sede, temporada, eventos con timeline visual | Sin acciones admin; enlaza a equipos públicos |
 | `/liga/liga-municipal-perote/matches/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
 | `/liga/liga-privada-si-existe` | Not tested | — | No existe liga privada/inactiva en BD actual |
 | `/dashboard` | Passed (regresión) | Protegido por `DashboardLayout` | Redirige a `/login` sin sesión |
@@ -79,7 +79,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 
 - Pruebas E2E manuales con navegador real (Chrome/Firefox/Safari mobile/desktop).
 - Detalle público de jugador (`/liga/[slug]/players/[playerId]`) — aún no implementado.
-- Eventos públicos avanzados de partido.
+- Eventos públicos avanzados de partido (filtros, estadísticas, iconografía profesional).
 - SEO avanzado y social previews.
 - Validación responsive real con herramientas de inspección visual.
 
@@ -95,7 +95,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 - `/liga/liga-municipal-perote` carga sin login.
 - `/liga/liga-municipal-perote/standings` carga sin login.
 - `/liga/liga-municipal-perote/matches` carga sin login; enlaza a detalle de partido.
-- `/liga/liga-municipal-perote/matches/<matchId-real>` carga sin login; muestra equipos, marcador, sede, temporada, estado y eventos.
+- `/liga/liga-municipal-perote/matches/<matchId-real>` carga sin login; muestra equipos, marcador, sede, temporada, estado y eventos con timeline visual (minuto, tipo, equipo local/visitante, jugador).
 - `/liga/liga-municipal-perote/matches/no-existe` retorna 404 (`notFound()`).
 - `/liga/liga-municipal-perote/teams/club-perote-fc` carga sin login; muestra ficha, plantilla y partidos (enlazan a detalle de partido).
 - `/liga/liga-municipal-perote/teams/club-pescados-fc` carga sin login; muestra ficha, plantilla y partidos.
@@ -126,7 +126,7 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 ## Commit sugerido
 
 ```
-feat: add public match detail pages
+feat: polish public match events
 ```
 
 Si se considera solo documentación:

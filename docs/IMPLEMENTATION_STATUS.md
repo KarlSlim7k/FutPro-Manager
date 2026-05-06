@@ -84,9 +84,9 @@ Estado actual del MVP:
 ### Vista pública
 - **Estado:** Parcial (vista pública mínima implementada).
 - **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `components/public/*`.
-- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos, detalle público de partido (con eventos básicos) y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
-- **Pendiente:** detalle público de jugador, eventos públicos avanzados, filtros avanzados, SEO/social previews.
-- **Nota:** standings público ahora enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`; eventos públicos se consultan de forma segura y no rompen la página si RLS no permite lectura.
+- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos, detalle público de partido (con timeline visual de eventos) y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
+- **Pendiente:** detalle público de jugador, eventos públicos avanzados (filtros/estadísticas), filtros avanzados, SEO/social previews.
+- **Nota:** standings público ahora enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`; eventos públicos se muestran en timeline visual con etiquetas local/visitante y no rompen la página si RLS no permite lectura.
 - **QA realizado (2026-05-04):** rutas públicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegación pública (`PublicNav`).
 
 ### Media uploads

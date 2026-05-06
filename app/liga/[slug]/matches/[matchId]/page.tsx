@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
@@ -307,14 +306,13 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
             <CardTitle>Eventos del partido</CardTitle>
           </CardHeader>
           <CardContent>
-            {events.length === 0 ? (
-              <EmptyState
-                title="Sin eventos registrados"
-                description="Sin eventos registrados para este partido."
-              />
-            ) : (
-              <PublicMatchEvents events={events} teams={teams} players={eventPlayers} />
-            )}
+            <PublicMatchEvents
+              events={events}
+              teams={teams}
+              players={eventPlayers}
+              homeTeamId={match.home_team_id}
+              awayTeamId={match.away_team_id}
+            />
           </CardContent>
         </Card>
       </section>

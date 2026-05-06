@@ -13,6 +13,8 @@ type PublicMatchEventsProps = {
   events: MatchEventItem[];
   teams: TeamItem[];
   players: PlayerItem[];
+  homeTeamId?: string;
+  awayTeamId?: string;
 };
 
 function formatEventType(eventType: MatchEventItem["event_type"]) {
@@ -29,7 +31,38 @@ function formatEventType(eventType: MatchEventItem["event_type"]) {
   return labels[eventType];
 }
 
-export function PublicMatchEvents({ events, teams, players }: PublicMatchEventsProps) {
+function eventIcon(eventType: MatchEventItem["event_type"]) {
+  const icons: Record<MatchEventItem["event_type"], string> = {
+    goal: "⚽",
+    own_goal: "⚽",
+    assist: "🎯",
+    yellow_card: "🟨",
+    red_card: "🟥",
+    substitution: "🔁",
+    penalty_goal: "⚽",
+    penalty_miss: "❌",
+  };
+  return icons[eventType];
+}
+
+function teamLabel(
+  teamId: string | null,
+  homeTeamId?: string,
+  awayTeamId?: string
+): string | null {
+  if (!teamId || !homeTeamId || !awayTeamId) return null;
+  if (teamId === homeTeamId) return "Local";
+  if (teamId === awayTeamId) return "Visitante";
+  return null;
+}
+
+export function PublicMatchEvents({
+  events,
+  teams,
+  players,
+  homeTeamId,
+  awayTeamId,
+}: PublicMatchEventsProps) {
   const teamsMap = new Map(teams.map((t) => [t.id, t]));
   const playersMap = new Map(players.map((p) => [p.id, p]));
 
@@ -37,38 +70,66 @@ export function PublicMatchEvents({ events, teams, players }: PublicMatchEventsP
     return (
       <EmptyState
         title="Sin eventos registrados"
-        description="Sin eventos registrados para este partido."
+        description="Cuando se registren goles, tarjetas o sustituciones, aparecerán aquí."
       />
     );
   }
 
   return (
-    <div className="space-y-3">
-      {events.map((event) => {
-        const team = event.team_id ? teamsMap.get(event.team_id) : null;
-        const player = event.player_id ? playersMap.get(event.player_id) : null;
+    <div className="relative">
+      {/* Timeline vertical line */}
+      <div className="absolute left-4 top-2 bottom-2 w-px bg-gray-200" />
 
-        return (
-          <div
-            key={event.id}
-            className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Eyebrow as="span" tone="brand">
-                {event.minute}&apos;
-              </Eyebrow>
-              <span className="font-medium text-gray-900">
-                {formatEventType(event.event_type)}
-              </span>
+      <div className="space-y-4">
+        {events.map((event) => {
+          const team = event.team_id ? teamsMap.get(event.team_id) : null;
+          const player = event.player_id ? playersMap.get(event.player_id) : null;
+          const label = teamLabel(event.team_id, homeTeamId, awayTeamId);
+
+          return (
+            <div key={event.id} className="relative flex items-start gap-4">
+              {/* Timeline dot / icon */}
+              <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-sm shadow-sm">
+                {eventIcon(event.event_type)}
+              </div>
+
+              {/* Event card */}
+              <div className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Eyebrow as="span" tone="brand">
+                    {event.minute}&apos;
+                  </Eyebrow>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatEventType(event.event_type)}
+                  </span>
+                  {label ? (
+                    <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                      {label}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="mt-1 flex flex-wrap gap-x-3 text-sm text-gray-600">
+                  {team ? (
+                    <span className="break-words">{team.name}</span>
+                  ) : null}
+                  {player ? (
+                    <span className="break-words font-medium text-gray-800">
+                      {player.full_name}
+                    </span>
+                  ) : null}
+                </div>
+
+                {event.notes ? (
+                  <p className="mt-1 text-xs text-gray-500 break-words">
+                    {event.notes}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-x-4 text-gray-600">
-              {team ? <span>{team.name}</span> : null}
-              {player ? <span>{player.full_name}</span> : null}
-              {event.notes ? <span className="text-gray-500">{event.notes}</span> : null}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
