@@ -176,6 +176,11 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
         currentTo={rawTo}
         slug={league.slug}
       />
+      {logs.length === 100 && (
+        <p className="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-700">
+          Mostrando los primeros 100 registros. Aplica filtros para acotar los resultados.
+        </p>
+      )}
       {auditLogRows.length === 0 ? (
         <EmptyState
           title="Sin registros"

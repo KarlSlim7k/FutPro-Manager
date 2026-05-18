@@ -118,16 +118,19 @@ export async function updateMemberRoleAction(
     }
   } else {
     // newRole === 'league_admin': fetch current member to get previousRole and profile_id for audit
-    const { data: currentMember } = await supabase
+    const { data: currentMember, error: fetchError } = await supabase
       .from("league_members")
       .select("role, profile_id")
       .eq("id", memberId)
       .eq("league_id", league.id)
       .maybeSingle();
 
-    if (currentMember) {
+    if (!fetchError && currentMember) {
       previousRole = currentMember.role ?? null;
       targetProfileId = currentMember.profile_id ?? null;
+    } else {
+      previousRole = "unknown";
+      targetProfileId = null;
     }
   }
 

@@ -208,5 +208,6 @@ export interface AuditLog {
   entity_id: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
+  /** Schema artifact — audit records are immutable; this field is not updated in practice. */
   updated_at: string;
 }

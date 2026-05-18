@@ -46,14 +46,16 @@ export function AuditLogFilters({
         <label htmlFor="audit-entity-type" className="text-xs font-medium text-gray-500">
           Tipo de entidad
         </label>
-        <input
+        <select
           id="audit-entity-type"
           name="entityType"
-          type="text"
           defaultValue={currentEntityType ?? ""}
-          placeholder="ej: match, league_member"
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
-        />
+        >
+          <option value="">Todos</option>
+          <option value="league_member">league_member</option>
+          <option value="match">match</option>
+        </select>
       </div>
 
       <div className="flex flex-col gap-1">
