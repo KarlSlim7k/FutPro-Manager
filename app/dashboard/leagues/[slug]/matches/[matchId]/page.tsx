@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import { RefereeAssignmentCard } from "@/components/referees/referee-assignment-card";
+import { RefereeAssignmentForm } from "@/components/referees/referee-assignment-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { ExternalTextLink } from "@/components/ui/external-text-link";
@@ -26,6 +28,7 @@ type MatchDetail = Pick<
   | "away_score"
   | "round_name"
   | "created_at"
+  | "referee_id"
 >;
 type SeasonSummary = Pick<Season, "id" | "name">;
 type TeamSummary = Pick<Team, "id" | "name">;
@@ -88,7 +91,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, created_at")
+    .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, created_at, referee_id")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -147,6 +150,45 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const googleMapsUrl = hasVenueCoordinates
     ? `https://www.google.com/maps?q=${venue.latitude},${venue.longitude}`
     : null;
+
+  // Fetch referee profile if assigned
+  let refereeName: string | null = null;
+  if (match.referee_id) {
+    const { data: refereeProfile } = await supabase
+      .from("profiles")
+      .select("id, full_name, display_name")
+      .eq("id", match.referee_id)
+      .maybeSingle();
+
+    if (refereeProfile) {
+      refereeName = refereeProfile.display_name || refereeProfile.full_name || null;
+    }
+  }
+
+  // Fetch available referees for assignment form
+  const { data: refereeMembersData } = await supabase
+    .from("league_members")
+    .select("profile_id, role")
+    .eq("league_id", league.id)
+    .in("role", ["referee", "league_admin"]);
+
+  const refereeMembers = refereeMembersData ?? [];
+  let availableReferees: { id: string; name: string }[] = [];
+
+  if (refereeMembers.length > 0) {
+    const refereeProfileIds = refereeMembers.map((m) => m.profile_id);
+    const { data: refereeProfiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, display_name")
+      .in("id", refereeProfileIds);
+
+    if (refereeProfiles) {
+      availableReferees = refereeProfiles.map((p) => ({
+        id: p.id,
+        name: p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+      }));
+    }
+  }
 
   return (
     <section className="space-y-6">
@@ -248,6 +290,22 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           </div>
         </CardContent>
       </Card>
+
+      <RefereeAssignmentCard
+        refereeName={refereeName}
+        refereeId={match.referee_id}
+        canAssign={permissions.canAssignReferees}
+        assignmentForm={
+          permissions.canAssignReferees ? (
+            <RefereeAssignmentForm
+              leagueSlug={league.slug}
+              matchId={match.id}
+              currentRefereeId={match.referee_id}
+              availableReferees={availableReferees}
+            />
+          ) : null
+        }
+      />
 
       {match.status === "completed" && permissions.canUpdateResults ? (
         <Card>

@@ -111,3 +111,57 @@ Usuarios con roles distintos a `super_admin`/`league_admin` pueden acceder a la 
 - `components/members/role-badge.tsx` - Badge visual por rol.
 - `components/members/league-members-table.tsx` - Tabla/cards responsive de miembros.
 - `components/members/league-member-role-form.tsx` - Formulario de cambio de rol (client component).
+
+
+## Asignacion basica de arbitros a partidos (Fase 6B)
+
+### Descripcion
+
+Asignacion y remocion de un arbitro a un partido desde el detalle del partido en el dashboard. El arbitro asignado se muestra tanto en el detalle como en el listado de partidos.
+
+### Quien puede asignar
+
+- `super_admin` (acceso global a todas las ligas).
+- `league_admin` (solo dentro de su liga).
+
+### Roles que pueden ser asignados como arbitro
+
+- `referee` (miembro de la liga con rol referee).
+- `league_admin` (miembro de la liga con rol league_admin).
+
+### Flags de permisos
+
+En `lib/permissions/league-permissions.ts`:
+
+- `canAssignReferees`: `true` para `super_admin` o `league_admin`. Controla visibilidad del formulario de asignacion.
+- `canViewRefereeAssignments`: `true` para cualquier usuario autenticado con acceso a la liga (leagueRole no es null o globalRole es super_admin).
+
+### Restricciones y guardrails
+
+1. **Solo miembros de la liga con rol `referee` o `league_admin` pueden ser asignados.** Se valida membresia y rol antes de actualizar.
+2. **Si se envia valor vacio o "none", se remueve la asignacion** (referee_id se pone en null).
+3. **No se usa `SUPABASE_SERVICE_ROLE_KEY`.** Todas las operaciones se ejecutan con el cliente autenticado del usuario.
+4. **No se modifican migraciones, schema ni RLS.** La columna `matches.referee_id` ya existe en el schema.
+5. **RLS y server actions siguen siendo la autoridad final de seguridad.**
+6. **Si RLS impide la operacion, se muestra error controlado** (codigo 42501 o mensaje de row-level security).
+
+### Comportamiento UI
+
+- **Detalle de partido:** tarjeta "Arbitro" muestra nombre del arbitro asignado o "Sin arbitro asignado". Si el usuario tiene `canAssignReferees`, se muestra formulario de seleccion/asignacion.
+- **Listado de partidos:** cada tarjeta muestra "Arbitro: {nombre}" o "Sin arbitro" debajo de la sede.
+
+### Archivos implementados
+
+- `app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts` - Server action para asignar/quitar arbitro.
+- `components/referees/referee-assignment-form.tsx` - Formulario de asignacion (client component).
+- `components/referees/referee-assignment-card.tsx` - Tarjeta de visualizacion de arbitro (server component).
+- `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx` - Detalle de partido (integra tarjeta y formulario).
+- `app/dashboard/leagues/[slug]/matches/page.tsx` - Listado de partidos (muestra nombre de arbitro en cards).
+- `components/matches/match-card.tsx` - Card de partido (muestra linea de arbitro).
+
+### Pendiente post-MVP
+
+- Tabla de asignaciones de arbitros con historial (auditar quien asigno, cuando, cambios).
+- Soporte multi-arbitro (arbitro principal, asistentes).
+- Calendario de disponibilidad de arbitros.
+- Notificaciones al arbitro asignado.

@@ -59,9 +59,9 @@ Estado actual del MVP:
 
 ### Partidos
 - **Estado:** Implementado.
-- **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `components/matches/create-match-form.tsx`.
-- **Funcionalidad existente:** creación, edición y detalle de partidos por liga.
-- **Pendiente:** calendario avanzado/filtros y asignaciones formales de árbitros con historial.
+- **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `components/matches/create-match-form.tsx`, `components/referees/referee-assignment-card.tsx`, `components/referees/referee-assignment-form.tsx`.
+- **Funcionalidad existente:** creacion, edicion y detalle de partidos por liga; asignacion basica de arbitros a partidos (asignar/quitar desde detalle de partido, visualizacion en listado).
+- **Pendiente:** calendario avanzado/filtros y tabla de asignaciones de arbitros con historial.
 
 ### Resultados y eventos de partido
 - **Estado:** Implementado.
@@ -76,10 +76,10 @@ Estado actual del MVP:
 - **Pendiente:** automatización avanzada por eventos, auditoría de recalculos y estrategia de jobs/background para cargas mayores.
 
 ### Roles y permisos
-- **Estado:** Parcial (base tecnica + hardening UX + administracion de miembros por liga implementada).
-- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/members/actions.ts`, `components/members/role-badge.tsx`, `components/members/league-members-table.tsx`, `components/members/league-member-role-form.tsx`.
-- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; proteccion de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; paginas del dashboard ocultan CTAs administrativas segun rol; UI de administracion de miembros por liga con cambio de rol y guardrails (no super_admin desde UI, proteccion de ultimo league_admin); helper extendido con `canManageMembers`/`canManageRoles`.
-- **Pendiente:** RBAC granular por feature/equipo/partido, consola avanzada de roles, asignaciones de arbitros con historial, auditoria visible en UI.
+- **Estado:** Parcial (base tecnica + hardening UX + administracion de miembros por liga + asignacion basica de arbitros implementada).
+- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/members/actions.ts`, `components/members/role-badge.tsx`, `components/members/league-members-table.tsx`, `components/members/league-member-role-form.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/referee-assignment-form.tsx`, `components/referees/referee-assignment-card.tsx`.
+- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; proteccion de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; paginas del dashboard ocultan CTAs administrativas segun rol; UI de administracion de miembros por liga con cambio de rol y guardrails (no super_admin desde UI, proteccion de ultimo league_admin); helper extendido con `canManageMembers`/`canManageRoles`/`canAssignReferees`/`canViewRefereeAssignments`; asignacion basica de arbitros a partidos desde detalle.
+- **Pendiente:** RBAC granular por feature/equipo/partido, consola avanzada de roles, tabla de asignaciones de arbitros con historial, auditoria visible en UI.
 
 ### Vista pública
 - **Estado:** Implementado para MVP.
@@ -142,12 +142,13 @@ Estado actual del MVP:
 ## Última actualización
 
 - Fecha: 2026-05-18
-- Branch: main
-- Commit/PR: `19e998c` (feat: add league members administration UI with role management)
-- Nota: Fase 6A implementada - UI de administracion de miembros por liga con cambio de roles, guardrails y permisos extendidos.
+- Branch: feat/phase-6b-referee-assignment
+- Commit/PR: Fase 6B - Asignacion basica de arbitros a partidos
+- Nota: Fase 6B implementada - asignacion y remocion de arbitros desde detalle de partido, visualizacion en listado, permisos extendidos.
 
 ### Historial relevante
 
+- 2026-05-18: Fase 6B - Asignacion basica de arbitros a partidos (`app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/*`, helper extendido con `canAssignReferees`/`canViewRefereeAssignments`).
 - 2026-05-18: Fase 6A - UI de administracion de miembros por liga (`app/dashboard/leagues/[slug]/members/`, `components/members/*`, helper extendido con `canManageMembers`/`canManageRoles`).
 - 2026-05-18: Fase 5 publica completada para MVP: ruta `/liga/[slug]/players/[playerId]`, eventos publicos con resumen/filtros, filtros de partidos por estado/equipo/jornada, SEO basico con metadata/OpenGraph/Twitter.
 - 2026-05-04: QA publico real y fix menor en `PublicNav` (`4840694e`).
