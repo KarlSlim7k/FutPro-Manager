@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import type { AppRole } from "@/types/database";
 
 export type UpdateMemberRoleState = {
@@ -75,10 +76,13 @@ export async function updateMemberRoleAction(
   }
 
   // Prevent removing the last league_admin
+  let previousRole: string | null = null;
+  let targetProfileId: string | null = null;
+
   if (newRole !== "league_admin") {
     const { data: currentMember, error: currentMemberError } = await supabase
       .from("league_members")
-      .select("role")
+      .select("role, profile_id")
       .eq("id", memberId)
       .eq("league_id", league.id)
       .maybeSingle();
@@ -90,6 +94,9 @@ export async function updateMemberRoleAction(
     if (!currentMember) {
       return { success: false, message: "Miembro no encontrado en esta liga." };
     }
+
+    previousRole = currentMember.role ?? null;
+    targetProfileId = currentMember.profile_id ?? null;
 
     if (currentMember.role === "league_admin") {
       const { count, error: countError } = await supabase
@@ -109,6 +116,19 @@ export async function updateMemberRoleAction(
         };
       }
     }
+  } else {
+    // newRole === 'league_admin': fetch current member to get previousRole and profile_id for audit
+    const { data: currentMember } = await supabase
+      .from("league_members")
+      .select("role, profile_id")
+      .eq("id", memberId)
+      .eq("league_id", league.id)
+      .maybeSingle();
+
+    if (currentMember) {
+      previousRole = currentMember.role ?? null;
+      targetProfileId = currentMember.profile_id ?? null;
+    }
   }
 
   const { error: updateError } = await supabase
@@ -125,5 +145,22 @@ export async function updateMemberRoleAction(
   }
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/members`);
+
+  // Best-effort audit log
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "member.role_updated",
+    entityType: "league_member",
+    entityId: memberId,
+    metadata: {
+      previous_role: previousRole ?? null,
+      new_role: newRole,
+      target_profile_id: targetProfileId ?? null,
+      league_slug: leagueSlug,
+    },
+  });
+
   return { success: true, message: "Rol actualizado correctamente." };
 }

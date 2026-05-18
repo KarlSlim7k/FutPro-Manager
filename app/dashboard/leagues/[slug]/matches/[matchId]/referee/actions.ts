@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 
 export type UpdateRefereeState = {
   success: boolean;
@@ -53,7 +54,7 @@ export async function updateMatchRefereeAction(
 
   const { data: match, error: matchError } = await supabase
     .from("matches")
-    .select("id")
+    .select("id, referee_id")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -65,6 +66,8 @@ export async function updateMatchRefereeAction(
   if (!match) {
     return { success: false, message: "Partido no encontrado en esta liga." };
   }
+
+  const previousRefereeId = match.referee_id ?? null;
 
   const rawRefereeId = String(formData.get("refereeId") ?? "").trim();
   const refereeId = rawRefereeId === "" || rawRefereeId === "none" ? null : rawRefereeId;
@@ -117,5 +120,21 @@ export async function updateMatchRefereeAction(
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
+
+  // Best-effort audit log
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: refereeId ? "match.referee_updated" : "match.referee_removed",
+    entityType: "match",
+    entityId: matchId,
+    metadata: {
+      previous_referee_id: previousRefereeId,
+      new_referee_id: refereeId ?? null,
+      league_slug: leagueSlug,
+    },
+  });
+
   return { success: true, message: "Arbitro actualizado correctamente." };
 }
