@@ -40,10 +40,16 @@
 - ✅ QA publico validado con datos reales de Supabase/RLS; build y lint exitosos (PR #4 y PR #5).
 - **Post-MVP:** OG dinamico con imagenes, E2E automatizado, QA visual cross-browser/manual, estadisticas publicas avanzadas.
 
-### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX implementado, UI de administración pendiente)
+### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX + UI de administracion de miembros implementada)
 - Modelo base en schema/RLS.
 - Hardening UX de permisos en dashboard implementado: helper `getLeaguePermissions` y ocultamiento de CTAs administrativas según rol.
-- Pendiente: administración UI de permisos granulares, asignaciones avanzadas, consola de roles y consulta de auditoría.
+- **Fase 6A - Administracion de miembros por liga (Implementado):**
+  - UI de administracion de miembros por liga: ruta `/dashboard/leagues/[slug]/members`.
+  - Cambio de roles de miembros de liga desde dashboard (league_admin, team_admin, coach, referee, viewer).
+  - Helper de permisos extendido con `canManageMembers`/`canManageRoles`.
+  - Guardrails: no se permite asignar `super_admin` desde UI, proteccion del ultimo `league_admin`.
+  - Vista informativa sin controles de edicion para usuarios sin permisos de administracion.
+- Pendiente: asignaciones avanzadas de arbitros, auditoria visible, permisos granulares por feature, consola completa de roles.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)
 - Tablas base de planes/suscripciones disponibles.

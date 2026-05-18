@@ -64,3 +64,50 @@
 ## Nota de alcance UI vs schema
 
 El modelo de roles/permisos está definido en schema + RLS, pero algunas capacidades avanzadas pueden existir primero a nivel de base de datos y no necesariamente tener aún una pantalla administrativa completa en UI.
+
+
+## Administracion UI de miembros por liga (Fase 6A)
+
+### Ruta
+
+`/dashboard/leagues/[slug]/members`
+
+### Quien puede administrar
+
+- `super_admin` (acceso global a todas las ligas).
+- `league_admin` (solo dentro de su liga).
+
+### Roles asignables desde UI
+
+- `league_admin`
+- `team_admin`
+- `coach`
+- `referee`
+- `viewer`
+
+### Restricciones y guardrails
+
+1. **No se permite asignar `super_admin` desde la UI de liga.** El rol `super_admin` se gestiona exclusivamente a nivel de base de datos/schema.
+2. **No se permite dejar la liga sin al menos un `league_admin`.** Si el miembro objetivo es el ultimo `league_admin` de la liga, la operacion se rechaza con mensaje de error.
+3. **No se usa `SUPABASE_SERVICE_ROLE_KEY`.** Todas las operaciones se ejecutan con el cliente autenticado del usuario.
+4. **RLS y server actions siguen siendo la autoridad final de seguridad.** La UI refleja permisos pero no los reemplaza.
+5. **Si RLS impide la operacion, se muestra error controlado** sin exponer detalles internos.
+
+### Flags de permisos nuevos
+
+En `lib/permissions/league-permissions.ts`:
+
+- `canManageMembers`: `true` para `super_admin` o `league_admin` dentro de la liga. Controla la visibilidad de la tabla con controles de edicion.
+- `canManageRoles`: `true` para `super_admin` o `league_admin` dentro de la liga. Controla la visibilidad del formulario de cambio de rol por miembro.
+
+### Comportamiento para usuarios sin permisos de administracion
+
+Usuarios con roles distintos a `super_admin`/`league_admin` pueden acceder a la ruta `/dashboard/leagues/[slug]/members` pero ven la pagina en modo informativo: se muestra un Card explicativo indicando que no tienen permisos para administrar miembros, sin formularios ni controles de edicion.
+
+### Archivos implementados
+
+- `app/dashboard/leagues/[slug]/members/page.tsx` - Pagina principal de administracion de miembros.
+- `app/dashboard/leagues/[slug]/members/actions.ts` - Server action para cambio de rol.
+- `components/members/role-badge.tsx` - Badge visual por rol.
+- `components/members/league-members-table.tsx` - Tabla/cards responsive de miembros.
+- `components/members/league-member-role-form.tsx` - Formulario de cambio de rol (client component).
