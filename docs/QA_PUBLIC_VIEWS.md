@@ -29,6 +29,12 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 | `/liga/no-existe` | Passed | `notFound()` / 404 | No filtra info privada, no hay crash |
 | `/liga/liga-municipal-perote/matches/<matchId-real>` | Passed | Carga sin login; muestra equipos, marcador, sede, temporada, eventos con timeline visual | Sin acciones admin; enlaza a equipos públicos |
 | `/liga/liga-municipal-perote/matches/no-existe` | Passed | `notFound()` / 404 | No filtra info privada |
+| `/liga/liga-municipal-perote/players/<playerId-real>` | Passed (2026-05-18) | Carga sin login; muestra datos del jugador | Validado en PR #5 |
+| `/liga/liga-municipal-perote/players/no-existe` | Passed (2026-05-18) | `notFound()` / 404 | No filtra info privada |
+| `/liga/liga-municipal-perote/matches?status=completed&teamId=<id>` | Passed (2026-05-18) | Filtra correctamente por combinacion | Validado en PR #4 |
+| `/liga/liga-municipal-perote/matches?round=1` | Passed (2026-05-18) | Filtra por jornada cuando aplique | Validado en PR #4 |
+| `/liga/liga-municipal-perote/matches?teamId=invalido` | Passed (2026-05-18) | Ignora filtro invalido, muestra todos | Sin crash |
+| `/liga/liga-municipal-perote/matches?round=invalido` | Passed (2026-05-18) | Ignora filtro invalido, muestra todos | Sin crash |
 | `/liga/liga-privada-si-existe` | Not tested | — | No existe liga privada/inactiva en BD actual |
 | `/dashboard` | Passed (regresión) | Protegido por `DashboardLayout` | Redirige a `/login` sin sesión |
 | `/dashboard/leagues/liga-municipal-perote/standings` | Passed (regresión) | Protegido, usa mismos componentes compartidos | Recalcular tabla visible solo en dashboard; links a equipos privados |
@@ -77,11 +83,10 @@ Validación de QA real sobre las vistas públicas recién implementadas bajo `/l
 
 ## Pendientes
 
-- Pruebas E2E manuales con navegador real (Chrome/Firefox/Safari mobile/desktop).
-- Detalle público de jugador (`/liga/[slug]/players/[playerId]`) — aún no implementado.
-- Eventos públicos avanzados de partido (filtros, estadísticas, iconografía profesional).
-- SEO avanzado y social previews.
+- Pruebas E2E automatizadas con navegador real (Chrome/Firefox/Safari mobile/desktop).
 - Validación responsive real con herramientas de inspección visual.
+- Social previews avanzados con imágenes dinámicas (OG images).
+- Estadísticas públicas avanzadas (post-MVP).
 
 ## Riesgos restantes
 
@@ -138,8 +143,10 @@ docs: record public views qa
 ## QA agregado Fase 5 (2026-05-18)
 - Probado `/liga/[slug]/players/[playerId]` y `/liga/[slug]/players/no-existe`.
 - Probado detalle de partido con eventos y sin eventos.
-- Probados filtros válidos e inválidos en `/liga/[slug]/matches` (`seasonId`, `status`, `teamId`, `round`).
-- Pendiente post-MVP: social previews con imagen dinámica, E2E, QA cross-browser real.
+- Probados filtros validos e invalidos en `/liga/[slug]/matches` (`seasonId`, `status`, `teamId`, `round`).
+- Metadata basica SEO/OpenGraph/Twitter verificada en vistas publicas principales via code review.
+- `npm run lint` y `npm run build` exitosos (PR #4, PR #5).
+- Pendiente post-MVP: social previews con imagen dinamica, E2E automatizado, QA cross-browser real.
 
 ## QA adicional - Eventos públicos (2026-05-18)
 - Verificado timeline visual con filtros client-side en `/liga/liga-municipal-perote/matches/<matchId-real>`.

@@ -31,11 +31,14 @@
 - Existe recálculo automático al guardar resultados que impactan estado `completed`.
 - **Pendiente:** automatización avanzada por eventos/auditoría y soporte de jobs/background para mayor robustez.
 
-### Fase 5 - Vista pública (Parcialmente completado)
-- ✅ Portal público mínimo: resumen de liga, tabla de posiciones, calendario de partidos, detalle público de partido (con timeline visual de eventos) y detalle público de equipo.
-- ✅ Navegación de consulta para aficionados entre vistas públicas.
-- ✅ QA público real validado con datos reales de Supabase/RLS (2026-05-04).
-- Pendiente: detalle público de jugador, eventos públicos avanzados (filtros/estadísticas), filtros avanzados, SEO/social previews.
+### Fase 5 - Vista pública (Completado para MVP)
+- ✅ Portal público: resumen de liga, standings, calendario/lista de partidos, detalle de partido, detalle de equipo y detalle de jugador.
+- ✅ Eventos públicos: timeline visual, resumen por categorias y filtros (todos/goles/tarjetas/sustituciones/penales).
+- ✅ Filtros publicos de partidos: estado, equipo y jornada/round cuando aplique.
+- ✅ SEO basico: metadata, OpenGraph y Twitter en vistas publicas principales.
+- ✅ Navegacion de consulta para aficionados entre vistas publicas.
+- ✅ QA publico validado con datos reales de Supabase/RLS; build y lint exitosos (PR #4 y PR #5).
+- **Post-MVP:** OG dinamico con imagenes, E2E automatizado, QA visual cross-browser/manual, estadisticas publicas avanzadas.
 
 ### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX implementado, UI de administración pendiente)
 - Modelo base en schema/RLS.
@@ -72,6 +75,3 @@ Semántica, links externos, controles de formulario, densidad mobile y documenta
 
 ### Fase 5 - QA visual final (Pendiente)
 Revisión cross-browser/manual, checklist de release y preparación para pruebas con usuarios reales.
-
-- Fase 5 MVP completada: detalle público de jugador, eventos públicos avanzados con resumen/filtros, filtros públicos de partidos y SEO básico.
-- Post-MVP: OG dinámico con imágenes, E2E automatizado y QA visual cross-browser.
