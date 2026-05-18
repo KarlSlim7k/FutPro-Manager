@@ -14,14 +14,12 @@ const ASSIGNABLE_ROLES: { value: AppRole; label: string }[] = [
 
 interface LeagueMemberRoleFormProps {
   memberId: string;
-  memberProfileId: string;
   currentRole: AppRole;
   leagueSlug: string;
 }
 
 export function LeagueMemberRoleForm({
   memberId,
-  memberProfileId,
   currentRole,
   leagueSlug,
 }: LeagueMemberRoleFormProps) {
@@ -34,7 +32,6 @@ export function LeagueMemberRoleForm({
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="memberId" value={memberId} />
-      <input type="hidden" name="memberProfileId" value={memberProfileId} />
       <select
         name="newRole"
         defaultValue={currentRole}
