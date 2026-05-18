@@ -212,6 +212,22 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             </TextLink>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Miembros</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Administra los miembros y roles de la liga.
+            </p>
+            <TextLink
+              href={`/dashboard/leagues/${league.slug}/members`}
+            >
+              Ver miembros
+            </TextLink>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
