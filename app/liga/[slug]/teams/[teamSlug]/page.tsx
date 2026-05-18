@@ -114,9 +114,9 @@ export async function generateMetadata({ params }: PublicTeamDetailPageProps): P
     return { title: "Equipo no encontrado | FutPro Manager" };
   }
 
-  return {
-    title: `${teamData.name} - ${leagueData.name} | FutPro Manager`,
-  };
+  const title = `${teamData.name} - ${leagueData.name} | FutPro Manager`;
+  const description = `Ficha pública del equipo ${teamData.name} en ${leagueData.name}.`;
+  return { title, description, openGraph: { title, description }, twitter: { card: "summary", title, description } };
 }
 
 export default async function PublicTeamDetailPage({ params, searchParams }: PublicTeamDetailPageProps) {
@@ -393,7 +393,7 @@ async function PublicTeamSeasonContent({
                   <CardContent className="space-y-2 p-4 text-sm text-gray-700">
                     <div className="flex items-start justify-between gap-3">
                       <p className="font-semibold text-gray-900">
-                        {registration.player?.full_name ?? "Jugador no disponible"}
+                        {registration.player ? (<Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-700 hover:text-emerald-800 hover:underline">{registration.player.full_name}</Link>) : "Jugador no disponible"}
                       </p>
                       <StatusBadge
                         variant={registrationStatusStyles[registration.status].variant}
@@ -451,7 +451,7 @@ async function PublicTeamSeasonContent({
                   {rosterRegistrations.map((registration) => (
                     <tr key={registration.id}>
                       <td className="px-4 py-3 font-medium text-gray-900">
-                        {registration.player?.full_name ?? "No disponible"}
+                        {registration.player ? (<Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-700 hover:text-emerald-800 hover:underline">{registration.player.full_name}</Link>) : "No disponible"}
                       </td>
                       <td className="px-4 py-3">
                         {registration.jersey_number ?? "Sin número"}

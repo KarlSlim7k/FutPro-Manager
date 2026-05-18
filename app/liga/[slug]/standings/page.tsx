@@ -57,9 +57,9 @@ export async function generateMetadata({ params }: LeagueStandingsPublicPageProp
     return { title: "Liga no encontrada | FutPro Manager" };
   }
 
-  return {
-    title: `Tabla de posiciones - ${data.name} | FutPro Manager`,
-  };
+  const title = `Tabla de posiciones - ${data.name} | FutPro Manager`;
+  const description = `Tabla pública de posiciones de ${data.name}.`;
+  return { title, description, openGraph: { title, description }, twitter: { card: "summary", title, description } };
 }
 
 export default async function LeagueStandingsPublicPage({ params, searchParams }: LeagueStandingsPublicPageProps) {

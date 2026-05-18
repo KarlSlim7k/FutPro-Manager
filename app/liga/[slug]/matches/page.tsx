@@ -29,7 +29,7 @@ type MatchListItem = Pick<
 
 interface LeagueMatchesPublicPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ seasonId?: string | string[]; status?: string | string[] }>;
+  searchParams: Promise<{ seasonId?: string | string[]; status?: string | string[]; teamId?: string | string[]; round?: string | string[] }>;
 }
 
 export async function generateMetadata({ params }: LeagueMatchesPublicPageProps): Promise<Metadata> {
@@ -47,16 +47,18 @@ export async function generateMetadata({ params }: LeagueMatchesPublicPageProps)
     return { title: "Liga no encontrada | FutPro Manager" };
   }
 
-  return {
-    title: `Partidos - ${data.name} | FutPro Manager`,
-  };
+  const title = `Partidos - ${data.name} | FutPro Manager`;
+  const description = `Calendario y resultados públicos de ${data.name}.`;
+  return { title, description, openGraph: { title, description }, twitter: { card: "summary", title, description } };
 }
 
 export default async function LeagueMatchesPublicPage({ params, searchParams }: LeagueMatchesPublicPageProps) {
   const { slug } = await params;
-  const { seasonId: rawSeasonId, status: rawStatus } = await searchParams;
+  const { seasonId: rawSeasonId, status: rawStatus, teamId: rawTeamId, round: rawRound } = await searchParams;
   const seasonId = Array.isArray(rawSeasonId) ? rawSeasonId[0] : rawSeasonId;
   const statusFilter = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
+  const teamIdFilter = Array.isArray(rawTeamId) ? rawTeamId[0] : rawTeamId;
+  const roundFilter = Array.isArray(rawRound) ? rawRound[0] : rawRound;
 
   const supabase = await createClient();
 
@@ -137,7 +139,14 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
     throw matchesError;
   }
 
-  const matches = (matchesData ?? []) as MatchListItem[];
+  const validTeamId = teamIdFilter && teams.some((t) => t.id === teamIdFilter) ? teamIdFilter : null;
+  const validRound = roundFilter ? roundFilter.trim() : "";
+  const matches = ((matchesData ?? []) as MatchListItem[]).filter((m) => {
+    const okTeam = validTeamId ? m.home_team_id === validTeamId || m.away_team_id === validTeamId : true;
+    const okRound = validRound ? (m.round_name ?? "").toLowerCase() === validRound.toLowerCase() : true;
+    return okTeam && okRound;
+  });
+  const availableRounds = [...new Set(((matchesData ?? []) as MatchListItem[]).map((m) => m.round_name).filter(Boolean))] as string[];
 
   const teamsMap = new Map(teams.map((team) => [team.id, team.name]));
   const venuesMap = new Map(venues.map((venue) => [venue.id, venue.name]));
@@ -153,15 +162,32 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
             <CardTitle>Temporadas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <form method="get" className="space-y-3">
             <MatchSeasonSelector
               leagueSlug={league.slug}
               seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
               selectedSeasonId={selectedSeason.id}
               basePath="/liga"
             />
-            <p className="text-sm text-gray-600">
-              Mostrando calendario para <span className="font-medium text-gray-900">{selectedSeason.name}</span>.
-            </p>
+            <p className="text-sm text-gray-600">Mostrando calendario para <span className="font-medium text-gray-900">{selectedSeason.name}</span>.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="team-filter" className="text-xs text-gray-600">Equipo</label>
+                <select id="team-filter" name="teamId" defaultValue={validTeamId ?? ""} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                  <option value="">Todos</option>
+                  {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="round-filter" className="text-xs text-gray-600">Jornada</label>
+                <select id="round-filter" name="round" defaultValue={validRound} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                  <option value="">Todas</option>
+                  {availableRounds.map((round) => <option key={round} value={round}>{round}</option>)}
+                </select>
+              </div>
+            </div>
+          <div className="flex gap-2"><button type="submit" className="rounded-lg bg-emerald-700 px-3 py-2 text-sm text-white">Aplicar filtros</button><a href={`/liga/${league.slug}/matches?seasonId=${selectedSeason.id}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700">Limpiar</a></div>
+            </form>
           </CardContent>
         </Card>
 

@@ -95,8 +95,13 @@ export async function generateMetadata({ params }: PublicMatchDetailPageProps): 
   const homeTeamName = teamsMap.get(matchData.home_team_id) ?? "Equipo local";
   const awayTeamName = teamsMap.get(matchData.away_team_id) ?? "Equipo visitante";
 
+  const title = `${homeTeamName} vs ${awayTeamName} - ${leagueData.name} | FutPro Manager`;
+  const description = `Detalle público del partido ${homeTeamName} vs ${awayTeamName} en ${leagueData.name}.`;
   return {
-    title: `${homeTeamName} vs ${awayTeamName} - ${leagueData.name} | FutPro Manager`,
+    title,
+    description,
+    openGraph: { title, description, type: "article" },
+    twitter: { card: "summary", title, description },
   };
 }
 
@@ -312,6 +317,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
               players={eventPlayers}
               homeTeamId={match.home_team_id}
               awayTeamId={match.away_team_id}
+              leagueSlug={league.slug}
             />
           </CardContent>
         </Card>
