@@ -70,6 +70,11 @@ export async function updateMatchRefereeAction(
   const refereeId = rawRefereeId === "" || rawRefereeId === "none" ? null : rawRefereeId;
 
   if (refereeId) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(refereeId)) {
+      return { success: false, message: "ID de arbitro no valido." };
+    }
+
     const { data: member, error: memberError } = await supabase
       .from("league_members")
       .select("role")

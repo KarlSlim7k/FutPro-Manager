@@ -165,28 +165,31 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     }
   }
 
-  // Fetch available referees for assignment form
-  const { data: refereeMembersData } = await supabase
-    .from("league_members")
-    .select("profile_id, role")
-    .eq("league_id", league.id)
-    .in("role", ["referee", "league_admin"]);
-
-  const refereeMembers = refereeMembersData ?? [];
+  // Fetch available referees for assignment form (only for users who can assign)
   let availableReferees: { id: string; name: string }[] = [];
 
-  if (refereeMembers.length > 0) {
-    const refereeProfileIds = refereeMembers.map((m) => m.profile_id);
-    const { data: refereeProfiles } = await supabase
-      .from("profiles")
-      .select("id, full_name, display_name")
-      .in("id", refereeProfileIds);
+  if (permissions.canAssignReferees) {
+    const { data: refereeMembersData } = await supabase
+      .from("league_members")
+      .select("profile_id, role")
+      .eq("league_id", league.id)
+      .in("role", ["referee", "league_admin"]);
 
-    if (refereeProfiles) {
-      availableReferees = refereeProfiles.map((p) => ({
-        id: p.id,
-        name: p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
-      }));
+    const refereeMembers = refereeMembersData ?? [];
+
+    if (refereeMembers.length > 0) {
+      const refereeProfileIds = refereeMembers.map((m) => m.profile_id);
+      const { data: refereeProfiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, display_name")
+        .in("id", refereeProfileIds);
+
+      if (refereeProfiles) {
+        availableReferees = refereeProfiles.map((p) => ({
+          id: p.id,
+          name: p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+        }));
+      }
     }
   }
 
@@ -291,21 +294,23 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </CardContent>
       </Card>
 
-      <RefereeAssignmentCard
-        refereeName={refereeName}
-        refereeId={match.referee_id}
-        canAssign={permissions.canAssignReferees}
-        assignmentForm={
-          permissions.canAssignReferees ? (
-            <RefereeAssignmentForm
-              leagueSlug={league.slug}
-              matchId={match.id}
-              currentRefereeId={match.referee_id}
-              availableReferees={availableReferees}
-            />
-          ) : null
-        }
-      />
+      {permissions.canViewRefereeAssignments ? (
+        <RefereeAssignmentCard
+          refereeName={refereeName}
+          refereeId={match.referee_id}
+          canAssign={permissions.canAssignReferees}
+          assignmentForm={
+            permissions.canAssignReferees ? (
+              <RefereeAssignmentForm
+                leagueSlug={league.slug}
+                matchId={match.id}
+                currentRefereeId={match.referee_id}
+                availableReferees={availableReferees}
+              />
+            ) : null
+          }
+        />
+      ) : null}
 
       {match.status === "completed" && permissions.canUpdateResults ? (
         <Card>
