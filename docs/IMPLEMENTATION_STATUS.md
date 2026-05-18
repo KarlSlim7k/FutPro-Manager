@@ -136,3 +136,9 @@ Estado actual del MVP:
 - Commit: `4840694e` (+ QA público real y fix menor en `PublicNav`)
 - Commit posterior: hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas según rol en páginas de matches, standings, seasons, teams, players, venues y detalle de partido).
 - Commit actual: detalle público de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
+
+## 2026-05-18 - Fase 5 pública completada para MVP
+- Ruta nueva: `/liga/[slug]/players/[playerId]` con notFound para casos inválidos.
+- Eventos públicos: resumen y filtros (todos/goles/tarjetas/sustituciones/penales).
+- Partidos públicos: filtros por estado/equipo/jornada y tolerancia a query params inválidos.
+- SEO básico: metadata + OpenGraph + Twitter en vistas públicas principales.

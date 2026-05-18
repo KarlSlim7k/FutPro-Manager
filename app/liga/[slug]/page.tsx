@@ -28,10 +28,9 @@ export async function generateMetadata({ params }: LeaguePublicPageProps): Promi
     return { title: "Liga no encontrada | FutPro Manager" };
   }
 
-  return {
-    title: `${data.name} | FutPro Manager`,
-    description: data.description ?? `Información pública de ${data.name}`,
-  };
+  const title = `${data.name} | FutPro Manager`;
+  const description = data.description ?? `Información pública de ${data.name}`;
+  return { title, description, openGraph: { title, description }, twitter: { card: "summary", title, description } };
 }
 
 export default async function LeaguePublicPage({ params }: LeaguePublicPageProps) {

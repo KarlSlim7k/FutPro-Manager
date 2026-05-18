@@ -72,3 +72,6 @@ Semántica, links externos, controles de formulario, densidad mobile y documenta
 
 ### Fase 5 - QA visual final (Pendiente)
 Revisión cross-browser/manual, checklist de release y preparación para pruebas con usuarios reales.
+
+- Fase 5 MVP completada: detalle público de jugador, eventos públicos avanzados con resumen/filtros, filtros públicos de partidos y SEO básico.
+- Post-MVP: OG dinámico con imágenes, E2E automatizado y QA visual cross-browser.
