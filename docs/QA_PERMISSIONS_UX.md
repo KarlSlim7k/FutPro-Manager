@@ -134,3 +134,44 @@ Validación del hardening UX de permisos en el dashboard de FutPro Manager.
 ## Fecha
 
 2026-05-04
+
+
+## Auditoria (Fase 6C)
+
+### Ruta validada
+
+`/dashboard/leagues/[slug]/audit`
+
+### Reglas de permisos aplicadas
+
+| Rol | Resultado esperado |
+| --- | --- |
+| `super_admin` | Ve tabla/cards de logs filtrados por liga |
+| `league_admin` (de la liga) | Ve tabla/cards de logs filtrados por liga |
+| `team_admin` | Ve card de acceso restringido |
+| `coach` | Ve card de acceso restringido |
+| `referee` | Ve card de acceso restringido |
+| `viewer` | Ve card de acceso restringido |
+| Sin rol en liga | Ve card de acceso restringido |
+| No autenticado | Redirige a `/login` |
+
+### Filtros
+
+- `action`, `entityType`, `actorId`, `from`, `to` son opcionales.
+- `actorId` invalido (no UUID): ignorado sin crash.
+- Fechas invalidas: ignoradas sin crash.
+- Sin logs que coincidan: EmptyState visible.
+
+### Card en dashboard de liga
+
+- Card "Auditoria" visible solo cuando `permissions.canViewAuditLogs` es true.
+- No visible para roles sin permisos de administracion.
+
+### Build y lint
+
+- `npm run lint`: pendiente de re-validacion post-Fase-6C.
+- `npm run build`: pendiente de re-validacion post-Fase-6C.
+
+### Fecha
+
+2026-05-18

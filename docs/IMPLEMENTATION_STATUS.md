@@ -106,10 +106,10 @@ Estado actual del MVP:
 - **Pendiente:** UI/flujo de carga, permisos operativos y consumo de archivos.
 
 ### Auditoría
-- **Estado:** Base técnica existente.
-- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles.
-- **Funcionalidad existente:** capacidad estructural para registrar acciones.
-- **Pendiente:** instrumentación funcional en app y pantallas de consulta.
+- **Estado:** Parcial (Fase 6C implementada).
+- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `lib/audit/create-audit-log.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`.
+- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas; helper best-effort de insercion `createAuditLog`; instrumentacion en cambio de rol de miembro (`member.role_updated`) y asignacion/remocion de arbitro (`match.referee_updated`/`match.referee_removed`). Visible solo para `super_admin` y `league_admin`. Sin cambios a schema/RLS/migraciones.
+- **Pendiente:** Instrumentacion exhaustiva de todos los server actions; auditoria automatica via triggers SQL o event bus; auditoria global para `super_admin`; exportacion CSV/PDF; retencion avanzada; filtros full-text.
 
 ### Suscripciones / pagos
 - **Estado:** Base técnica existente.
@@ -142,12 +142,13 @@ Estado actual del MVP:
 ## Última actualización
 
 - Fecha: 2026-05-18
-- Branch: feat/phase-6b-referee-assignment
-- Commit/PR: Fase 6B - Asignacion basica de arbitros a partidos
-- Nota: Fase 6B implementada - asignacion y remocion de arbitros desde detalle de partido, visualizacion en listado, permisos extendidos.
+- Branch: feat/phase-6c-audit-ui
+- Commit/PR: Fase 6C - Auditoria visible en UI para league_admin
+- Nota: Fase 6C implementada - auditoria visible en UI, helper best-effort `createAuditLog`, instrumentacion en cambio de rol de miembro y asignacion/remocion de arbitro.
 
 ### Historial relevante
 
+- 2026-05-18: Fase 6C - Auditoria visible en UI (`app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`, `lib/audit/create-audit-log.ts`, helper extendido con `canViewAuditLogs`/`canManageAuditLogs`).
 - 2026-05-18: Fase 6B - Asignacion basica de arbitros a partidos (`app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/*`, helper extendido con `canAssignReferees`/`canViewRefereeAssignments`).
 - 2026-05-18: Fase 6A - UI de administracion de miembros por liga (`app/dashboard/leagues/[slug]/members/`, `components/members/*`, helper extendido con `canManageMembers`/`canManageRoles`).
 - 2026-05-18: Fase 5 publica completada para MVP: ruta `/liga/[slug]/players/[playerId]`, eventos publicos con resumen/filtros, filtros de partidos por estado/equipo/jornada, SEO basico con metadata/OpenGraph/Twitter.
