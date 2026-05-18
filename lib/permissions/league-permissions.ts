@@ -15,6 +15,8 @@ export type LeaguePermissions = {
   canAssignReferees: boolean;
   canViewRefereeAssignments: boolean;
   isReadOnly: boolean;
+  canViewAuditLogs: boolean;
+  canManageAuditLogs: boolean;
 };
 
 export async function getLeaguePermissions({
@@ -60,6 +62,8 @@ export async function getLeaguePermissions({
       canAssignReferees: canManageLeague,
       canViewRefereeAssignments: isSuperAdmin || leagueRole !== null,
       isReadOnly: !canManageLeague,
+      canViewAuditLogs: canManageLeague,
+      canManageAuditLogs: canManageLeague,
     };
   } catch {
     return safePermissions();
@@ -81,5 +85,7 @@ function safePermissions(): LeaguePermissions {
     canAssignReferees: false,
     canViewRefereeAssignments: false,
     isReadOnly: true,
+    canViewAuditLogs: false,
+    canManageAuditLogs: false,
   };
 }

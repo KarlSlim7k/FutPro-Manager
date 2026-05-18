@@ -4,6 +4,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League } from "@/types/database";
 
 type LeagueDetail = Pick<
@@ -58,6 +59,12 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
   }
 
   const league = data as LeagueDetail;
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
 
   return (
     <section className="space-y-6">
@@ -228,6 +235,22 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             </TextLink>
           </CardContent>
         </Card>
+
+        {permissions.canViewAuditLogs && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Auditoria</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-gray-600">
+                Consulta el historial de acciones administrativas realizadas en la liga.
+              </p>
+              <TextLink href={`/dashboard/leagues/${league.slug}/audit`}>
+                Ver auditoria
+              </TextLink>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </section>
   );

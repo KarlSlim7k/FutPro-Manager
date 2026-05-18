@@ -198,3 +198,16 @@ export interface Standing {
 export type StandingWithTeam = Standing & {
   team: Pick<Team, "id" | "name" | "slug">;
 };
+
+export interface AuditLog {
+  id: string;
+  actor_id: string | null;
+  league_id: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  /** Schema artifact — audit records are immutable; this field is not updated in practice. */
+  updated_at: string;
+}

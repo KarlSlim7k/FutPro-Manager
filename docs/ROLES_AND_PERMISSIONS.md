@@ -165,3 +165,50 @@ En `lib/permissions/league-permissions.ts`:
 - Soporte multi-arbitro (arbitro principal, asistentes).
 - Calendario de disponibilidad de arbitros.
 - Notificaciones al arbitro asignado.
+
+
+## Auditoria visible en UI (Fase 6C)
+
+### Ruta
+
+`/dashboard/leagues/[slug]/audit`
+
+### Quien puede ver
+
+- `super_admin` (acceso global a todas las ligas).
+- `league_admin` (solo dentro de su liga).
+
+### Flags de permisos nuevos
+
+En `lib/permissions/league-permissions.ts`:
+
+- `canViewAuditLogs`: `true` para `super_admin` o `league_admin`. Controla visibilidad de la pagina y del card en el dashboard de liga.
+- `canManageAuditLogs`: `true` para `super_admin` o `league_admin`. Reservado para futura gestion avanzada (actualmente igual a `canViewAuditLogs`).
+
+### Filtros disponibles
+
+Filtros via query params: `action`, `entityType`, `actorId` (UUID validado), `from` y `to` (fecha YYYY-MM-DD). Valores invalidos se ignoran sin crash.
+
+### Guardrails
+
+1. **Sin cambios a schema, RLS ni migraciones.** La tabla `audit_logs` ya existe en el schema inicial.
+2. **Sin service role.** Todas las operaciones usan el cliente autenticado del usuario.
+3. **Audit log best-effort.** Si la insercion falla (por RLS u otro error), la accion principal continua y retorna su resultado normal.
+4. **RLS sigue siendo la autoridad final.** Solo el actor autenticado puede insertar (`actor_id = auth.uid()`); solo `super_admin` o `league_admin` pueden leer via `can_manage_league`.
+5. **Si RLS impide leer `audit_logs`, se muestra empty state seguro** sin exponer detalles del error.
+6. **Actor sin perfil legible:** fallback `Usuario <id corta>`.
+
+### Acciones auditadas inicialmente
+
+- `member.role_updated` (via `updateMemberRoleAction` en `app/dashboard/leagues/[slug]/members/actions.ts`)
+- `match.referee_updated` (via `updateMatchRefereeAction` en `app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`)
+- `match.referee_removed` (via `updateMatchRefereeAction` cuando se remueve el arbitro)
+
+### Pendientes post-MVP
+
+- Instrumentacion exhaustiva de todos los server actions.
+- Auditoria automatica via triggers SQL o event bus (sin pasar por server actions).
+- Auditoria global para `super_admin` (multi-liga).
+- Exportacion CSV/PDF.
+- Retencion avanzada y politicas de limpieza.
+- Filtros full-text y busqueda avanzada.
