@@ -76,10 +76,10 @@ Estado actual del MVP:
 - **Pendiente:** automatización avanzada por eventos, auditoría de recalculos y estrategia de jobs/background para cargas mayores.
 
 ### Roles y permisos
-- **Estado:** Parcial (base técnica + hardening UX implementado).
-- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migración inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`.
-- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; protección de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; páginas del dashboard ocultan CTAs administrativas según rol.
-- **Pendiente:** UI completa de administración de permisos/roles, RBAC granular por feature/equipo/partido y flujos avanzados por rol.
+- **Estado:** Parcial (base tecnica + hardening UX + administracion de miembros por liga implementada).
+- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/members/actions.ts`, `components/members/role-badge.tsx`, `components/members/league-members-table.tsx`, `components/members/league-member-role-form.tsx`.
+- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; proteccion de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; paginas del dashboard ocultan CTAs administrativas segun rol; UI de administracion de miembros por liga con cambio de rol y guardrails (no super_admin desde UI, proteccion de ultimo league_admin); helper extendido con `canManageMembers`/`canManageRoles`.
+- **Pendiente:** RBAC granular por feature/equipo/partido, consola avanzada de roles, asignaciones de arbitros con historial, auditoria visible en UI.
 
 ### Vista pública
 - **Estado:** Implementado para MVP.
@@ -143,12 +143,13 @@ Estado actual del MVP:
 
 - Fecha: 2026-05-18
 - Branch: main
-- Commit/PR: PR #4 y PR #5 / merge `5c8d0ae`
-- Nota: Fase 5 publica completada para MVP (detalle de jugador, eventos con filtros, filtros de partidos, SEO basico).
+- Commit/PR: `19e998c` (feat: add league members administration UI with role management)
+- Nota: Fase 6A implementada - UI de administracion de miembros por liga con cambio de roles, guardrails y permisos extendidos.
 
 ### Historial relevante
 
+- 2026-05-18: Fase 6A - UI de administracion de miembros por liga (`app/dashboard/leagues/[slug]/members/`, `components/members/*`, helper extendido con `canManageMembers`/`canManageRoles`).
+- 2026-05-18: Fase 5 publica completada para MVP: ruta `/liga/[slug]/players/[playerId]`, eventos publicos con resumen/filtros, filtros de partidos por estado/equipo/jornada, SEO basico con metadata/OpenGraph/Twitter.
 - 2026-05-04: QA publico real y fix menor en `PublicNav` (`4840694e`).
 - 2026-05-04: Hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas segun rol).
 - 2026-05-04: Detalle publico de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
-- 2026-05-18: Fase 5 publica completada para MVP: ruta `/liga/[slug]/players/[playerId]`, eventos publicos con resumen/filtros, filtros de partidos por estado/equipo/jornada, SEO basico con metadata/OpenGraph/Twitter.
