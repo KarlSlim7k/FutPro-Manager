@@ -53,8 +53,8 @@ export function LeagueMembersTable({
               <p>Miembro desde: {formatDate(member.createdAt)}</p>
               {permissions.canManageMembers && (
                 <LeagueMemberRoleForm
+                  key={member.id + member.role}
                   memberId={member.id}
-                  memberProfileId={member.profileId}
                   currentRole={member.role}
                   leagueSlug={leagueSlug}
                 />
@@ -98,8 +98,8 @@ export function LeagueMembersTable({
                 {permissions.canManageMembers && (
                   <td className="px-4 py-3">
                     <LeagueMemberRoleForm
+                      key={member.id + member.role}
                       memberId={member.id}
-                      memberProfileId={member.profileId}
                       currentRole={member.role}
                       leagueSlug={leagueSlug}
                     />
