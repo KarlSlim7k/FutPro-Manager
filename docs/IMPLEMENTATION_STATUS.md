@@ -8,7 +8,7 @@ Estado actual del MVP:
 
 - **Funcionando**: login, protección de rutas, navegación de dashboard, CRUD base de ligas/temporadas/equipos/jugadores/sedes/partidos, captura de resultado y eventos, y consulta de standings.
 - **Parcialmente listo**: standings (vista activa, recálculo manual y recálculo automático al guardar resultados que impactan `completed`; pendientes avanzados de automatización/eventos).
-- **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI, vista pública integral y cobertura de QA end-to-end.
+- **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI y cobertura de QA end-to-end.
 - **Solo en base técnica (schema/RLS)**: media uploads, auditoría y suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
 
 ## Leyenda de estado
@@ -82,12 +82,22 @@ Estado actual del MVP:
 - **Pendiente:** UI completa de administración de permisos/roles, RBAC granular por feature/equipo/partido y flujos avanzados por rol.
 
 ### Vista pública
-- **Estado:** Parcial (vista pública mínima implementada).
-- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `components/public/*`.
-- **Funcionalidad existente:** landing pública con link a liga activa; páginas públicas de resumen de liga, tabla de posiciones por temporada, calendario de partidos, detalle público de partido (con timeline visual de eventos) y detalle público de equipo con plantilla y partidos por temporada; navegación pública entre vistas; empty states; metadata dinámico básico.
-- **Pendiente:** detalle público de jugador, eventos públicos avanzados (filtros/estadísticas), filtros avanzados, SEO/social previews.
-- **Nota:** standings público ahora enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla pública depende de RLS existente para `player_team_registrations` y `players`; eventos públicos se muestran en timeline visual con etiquetas local/visitante y no rompen la página si RLS no permite lectura.
-- **QA realizado (2026-05-04):** rutas públicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegación pública (`PublicNav`).
+- **Estado:** Implementado para MVP.
+- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `app/liga/[slug]/players/[playerId]/page.tsx`, `components/public/*`, `components/public/public-match-events.tsx`.
+- **Funcionalidad existente:**
+  - Resumen de liga con link a liga activa.
+  - Standings publicos por temporada.
+  - Calendario/lista de partidos con filtros (estado, equipo, jornada/round).
+  - Detalle publico de partido con timeline visual de eventos, resumen por categorias y filtros (todos/goles/tarjetas/sustituciones/penales).
+  - Detalle publico de equipo con plantilla y partidos por temporada.
+  - Detalle publico de jugador.
+  - Metadata basica SEO/OpenGraph/Twitter en vistas publicas principales.
+  - Navegacion publica entre vistas.
+  - Empty states y manejo de rutas inexistentes (notFound).
+- **Post-MVP:** E2E automatizado, QA visual cross-browser, social previews avanzados con imagenes dinamicas, estadisticas publicas avanzadas.
+- **Nota:** standings publico enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla publica depende de RLS existente para `player_team_registrations` y `players`; eventos publicos se muestran en timeline visual con etiquetas local/visitante y no rompen la pagina si RLS no permite lectura.
+- **QA realizado (2026-05-04):** rutas publicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegacion publica (`PublicNav`).
+- **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
 
 ### Media uploads
 - **Estado:** Base técnica existente.
@@ -131,14 +141,14 @@ Estado actual del MVP:
 
 ## Última actualización
 
-- Fecha: 2026-05-04
+- Fecha: 2026-05-18
 - Branch: main
-- Commit: `4840694e` (+ QA público real y fix menor en `PublicNav`)
-- Commit posterior: hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas según rol en páginas de matches, standings, seasons, teams, players, venues y detalle de partido).
-- Commit actual: detalle público de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
+- Commit/PR: PR #4 y PR #5 / merge `5c8d0ae`
+- Nota: Fase 5 publica completada para MVP (detalle de jugador, eventos con filtros, filtros de partidos, SEO basico).
 
-## 2026-05-18 - Fase 5 pública completada para MVP
-- Ruta nueva: `/liga/[slug]/players/[playerId]` con notFound para casos inválidos.
-- Eventos públicos: resumen y filtros (todos/goles/tarjetas/sustituciones/penales).
-- Partidos públicos: filtros por estado/equipo/jornada y tolerancia a query params inválidos.
-- SEO básico: metadata + OpenGraph + Twitter en vistas públicas principales.
+### Historial relevante
+
+- 2026-05-04: QA publico real y fix menor en `PublicNav` (`4840694e`).
+- 2026-05-04: Hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas segun rol).
+- 2026-05-04: Detalle publico de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
+- 2026-05-18: Fase 5 publica completada para MVP: ruta `/liga/[slug]/players/[playerId]`, eventos publicos con resumen/filtros, filtros de partidos por estado/equipo/jornada, SEO basico con metadata/OpenGraph/Twitter.
