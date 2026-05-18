@@ -12,6 +12,8 @@ export type LeaguePermissions = {
   canRecalculateStandings: boolean;
   canManageMembers: boolean;
   canManageRoles: boolean;
+  canAssignReferees: boolean;
+  canViewRefereeAssignments: boolean;
   isReadOnly: boolean;
 };
 
@@ -55,6 +57,8 @@ export async function getLeaguePermissions({
       canRecalculateStandings: canManageLeague,
       canManageMembers: canManageLeague,
       canManageRoles: canManageLeague,
+      canAssignReferees: canManageLeague,
+      canViewRefereeAssignments: isSuperAdmin || leagueRole !== null,
       isReadOnly: !canManageLeague,
     };
   } catch {
@@ -74,6 +78,8 @@ function safePermissions(): LeaguePermissions {
     canRecalculateStandings: false,
     canManageMembers: false,
     canManageRoles: false,
+    canAssignReferees: false,
+    canViewRefereeAssignments: false,
     isReadOnly: true,
   };
 }

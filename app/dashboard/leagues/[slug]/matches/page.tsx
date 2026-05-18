@@ -28,6 +28,7 @@ type MatchListItem = Pick<
   | "home_score"
   | "away_score"
   | "round_name"
+  | "referee_id"
 >;
 
 interface MatchesPageProps {
@@ -129,7 +130,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
 
   const { data: matchesData, error: matchesError } = await supabase
     .from("matches")
-    .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name")
+    .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, referee_id")
     .eq("league_id", league.id)
     .eq("season_id", selectedSeason.id)
     .order("scheduled_at", { ascending: true });
@@ -145,6 +146,28 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
 
   const teamsMap = new Map(teams.map((team) => [team.id, team.name]));
   const venuesMap = new Map(venues.map((venue) => [venue.id, venue.name]));
+
+  // Fetch referee profiles for matches that have a referee assigned
+  const uniqueRefereeIds = [
+    ...new Set(matches.map((m) => m.referee_id).filter(Boolean)),
+  ] as string[];
+
+  let refereesMap = new Map<string, string>();
+  if (uniqueRefereeIds.length > 0) {
+    const { data: refereeProfiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, display_name")
+      .in("id", uniqueRefereeIds);
+
+    if (refereeProfiles) {
+      refereesMap = new Map(
+        refereeProfiles.map((p) => [
+          p.id,
+          p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+        ])
+      );
+    }
+  }
 
   return (
     <section className="space-y-6">
@@ -208,6 +231,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
                   homeScore={match.home_score}
                   awayScore={match.away_score}
                   roundName={match.round_name}
+                  refereeName={match.referee_id ? (refereesMap.get(match.referee_id) ?? null) : null}
                   canEdit={permissions.canManageMatches}
                   canUpdateResult={permissions.canUpdateResults}
                   canManageEvents={permissions.canManageEvents}

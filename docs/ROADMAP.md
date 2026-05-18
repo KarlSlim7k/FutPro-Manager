@@ -49,7 +49,14 @@
   - Helper de permisos extendido con `canManageMembers`/`canManageRoles`.
   - Guardrails: no se permite asignar `super_admin` desde UI, proteccion del ultimo `league_admin`.
   - Vista informativa sin controles de edicion para usuarios sin permisos de administracion.
-- Pendiente: asignaciones avanzadas de arbitros, auditoria visible, permisos granulares por feature, consola completa de roles.
+- **Fase 6B - Asignacion basica de arbitros a partidos (Implementado):**
+  - Asignacion y remocion de arbitro desde el detalle de partido.
+  - Helper de permisos extendido con `canAssignReferees`/`canViewRefereeAssignments`.
+  - Solo `super_admin` y `league_admin` pueden asignar arbitros.
+  - Solo miembros con rol `referee` o `league_admin` pueden ser asignados como arbitro.
+  - Tarjeta de arbitro visible en detalle de partido; nombre de arbitro visible en listado de partidos.
+  - Sin cambios a schema, RLS ni migraciones.
+- Pendiente: asignaciones avanzadas con historial, auditoria visible, permisos granulares por feature, consola completa de roles.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)
 - Tablas base de planes/suscripciones disponibles.

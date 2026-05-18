@@ -15,6 +15,7 @@ type MatchCardProps = {
   homeScore: number;
   awayScore: number;
   roundName: string | null;
+  refereeName?: string | null;
   canEdit?: boolean;
   canUpdateResult?: boolean;
   canManageEvents?: boolean;
@@ -38,6 +39,7 @@ export function MatchCard({
   homeScore,
   awayScore,
   roundName,
+  refereeName,
   canEdit = true,
   canUpdateResult = true,
   canManageEvents = true,
@@ -60,6 +62,9 @@ export function MatchCard({
         </p>
         <p>
           <span className="font-medium text-gray-900">Sede:</span> {venueName || "Sin sede asignada"}
+        </p>
+        <p>
+          <span className="font-medium text-gray-900">Arbitro:</span> {refereeName || "Sin arbitro"}
         </p>
         <p>
           <span className="font-medium text-gray-900">Marcador actual:</span> {homeScore} - {awayScore}
