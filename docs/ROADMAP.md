@@ -56,7 +56,7 @@
   - Solo miembros con rol `referee` o `league_admin` pueden ser asignados como arbitro.
   - Tarjeta de arbitro visible en detalle de partido; nombre de arbitro visible en listado de partidos.
   - Sin cambios a schema, RLS ni migraciones.
-- **Fase 6C - Auditoria visible en UI (Implementado):** Vista de auditoria por liga en `/dashboard/leagues/[slug]/audit`. Solo accesible para `super_admin` y `league_admin`. Filtros por accion, tipo de entidad, actor y rango de fechas via query params. Instrumentacion best-effort en `updateMemberRoleAction` (`member.role_updated`) y `updateMatchRefereeAction` (`match.referee_updated` / `match.referee_removed`). Sin cambios a schema, RLS ni migraciones. Sin service role.
+- **Fase 6C - Auditoria visible en UI (Implementado + hardening menor):** Vista de auditoria por liga en `/dashboard/leagues/[slug]/audit`. Solo accesible para `super_admin` y `league_admin`. Filtros por accion, tipo de entidad, actor y rango de fechas via query params; `action` y `entityType` con validacion server-side por allowlist (valores invalidos se ignoran sin crash). Instrumentacion best-effort en `updateMemberRoleAction` (`member.role_updated`) y `updateMatchRefereeAction` (`match.referee_updated` / `match.referee_removed`). Sin cambios a schema, RLS ni migraciones. Sin service role.
 - Pendiente: asignaciones avanzadas con historial, permisos granulares por feature, consola completa de roles.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)

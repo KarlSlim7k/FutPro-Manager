@@ -1,6 +1,7 @@
 "use client";
 
 import { TextLink } from "@/components/ui/text-link";
+import { AUDIT_ACTION_OPTIONS, AUDIT_ENTITY_TYPE_OPTIONS } from "@/lib/audit/audit-filters";
 
 interface AuditLogFiltersProps {
   currentAction?: string;
@@ -36,9 +37,11 @@ export function AuditLogFilters({
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
         >
           <option value="">Todas</option>
-          <option value="member.role_updated">member.role_updated</option>
-          <option value="match.referee_updated">match.referee_updated</option>
-          <option value="match.referee_removed">match.referee_removed</option>
+          {AUDIT_ACTION_OPTIONS.map((action) => (
+            <option key={action} value={action}>
+              {action}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -53,8 +56,11 @@ export function AuditLogFilters({
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
         >
           <option value="">Todos</option>
-          <option value="league_member">league_member</option>
-          <option value="match">match</option>
+          {AUDIT_ENTITY_TYPE_OPTIONS.map((entityType) => (
+            <option key={entityType} value={entityType}>
+              {entityType}
+            </option>
+          ))}
         </select>
       </div>
 
