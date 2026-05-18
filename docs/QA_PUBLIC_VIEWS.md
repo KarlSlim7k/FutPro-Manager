@@ -134,3 +134,9 @@ Si se considera solo documentación:
 ```
 docs: record public views qa
 ```
+
+## QA agregado Fase 5 (2026-05-18)
+- Probado `/liga/[slug]/players/[playerId]` y `/liga/[slug]/players/no-existe`.
+- Probado detalle de partido con eventos y sin eventos.
+- Probados filtros válidos e inválidos en `/liga/[slug]/matches` (`seasonId`, `status`, `teamId`, `round`).
+- Pendiente post-MVP: social previews con imagen dinámica, E2E, QA cross-browser real.
