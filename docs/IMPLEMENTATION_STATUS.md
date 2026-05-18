@@ -106,9 +106,9 @@ Estado actual del MVP:
 - **Pendiente:** UI/flujo de carga, permisos operativos y consumo de archivos.
 
 ### Auditoría
-- **Estado:** Parcial (Fase 6C implementada).
+- **Estado:** Parcial (Fase 6C implementada + hardening de filtros server-side).
 - **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `lib/audit/create-audit-log.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`.
-- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas; helper best-effort de insercion `createAuditLog`; instrumentacion en cambio de rol de miembro (`member.role_updated`) y asignacion/remocion de arbitro (`match.referee_updated`/`match.referee_removed`). Visible solo para `super_admin` y `league_admin`. Sin cambios a schema/RLS/migraciones.
+- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas; `action` y `entityType` validados server-side con allowlist (valores invalidos se ignoran sin crash); helper best-effort de insercion `createAuditLog`; instrumentacion en cambio de rol de miembro (`member.role_updated`) y asignacion/remocion de arbitro (`match.referee_updated`/`match.referee_removed`). Visible solo para `super_admin` y `league_admin`. Sin cambios a schema/RLS/migraciones.
 - **Pendiente:** Instrumentacion exhaustiva de todos los server actions; auditoria automatica via triggers SQL o event bus; auditoria global para `super_admin`; exportacion CSV/PDF; retencion avanzada; filtros full-text.
 
 ### Suscripciones / pagos
@@ -142,12 +142,13 @@ Estado actual del MVP:
 ## Última actualización
 
 - Fecha: 2026-05-18
-- Branch: feat/phase-6c-audit-ui
-- Commit/PR: Fase 6C - Auditoria visible en UI para league_admin
-- Nota: Fase 6C implementada - auditoria visible en UI, helper best-effort `createAuditLog`, instrumentacion en cambio de rol de miembro y asignacion/remocion de arbitro.
+- Branch: main
+- Commit/PR: PR #9 / merge fba1e3d
+- Nota: Fase 6C implementada y hardening posterior de filtros de auditoria (validacion server-side de `action` y `entityType`, con fallback seguro para valores invalidos).
 
 ### Historial relevante
 
+- 2026-05-18: Hardening Fase 6 - filtros de auditoria validados server-side (`action`/`entityType`) y cleanup documental de Fase 6.
 - 2026-05-18: Fase 6C - Auditoria visible en UI (`app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`, `lib/audit/create-audit-log.ts`, helper extendido con `canViewAuditLogs`/`canManageAuditLogs`).
 - 2026-05-18: Fase 6B - Asignacion basica de arbitros a partidos (`app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/*`, helper extendido con `canAssignReferees`/`canViewRefereeAssignments`).
 - 2026-05-18: Fase 6A - UI de administracion de miembros por liga (`app/dashboard/leagues/[slug]/members/`, `components/members/*`, helper extendido con `canManageMembers`/`canManageRoles`).

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { AuditLogFilters } from "@/components/audit/audit-log-filters";
+import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filters";
 import { AuditLogTable, type AuditLogRow } from "@/components/audit/audit-log-table";
 
 interface AuditPageProps {
@@ -74,8 +75,10 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
     return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
   };
 
-  const filterAction = getString("action");
-  const filterEntityType = getString("entityType");
+  const rawAction = getString("action");
+  const rawEntityType = getString("entityType");
+  const filterAction = parseAuditAction(rawAction);
+  const filterEntityType = parseAuditEntityType(rawEntityType);
 
   const rawActorId = getString("actorId");
   const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -84,8 +87,10 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
   const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
   const rawFrom = getString("from");
   const rawTo = getString("to");
-  const filterFrom = rawFrom && DATE_REGEX.test(rawFrom) ? `${rawFrom}T00:00:00Z` : undefined;
-  const filterTo = rawTo && DATE_REGEX.test(rawTo) ? `${rawTo}T23:59:59Z` : undefined;
+  const currentFrom = rawFrom && DATE_REGEX.test(rawFrom) ? rawFrom : undefined;
+  const currentTo = rawTo && DATE_REGEX.test(rawTo) ? rawTo : undefined;
+  const filterFrom = currentFrom ? `${currentFrom}T00:00:00Z` : undefined;
+  const filterTo = currentTo ? `${currentTo}T23:59:59Z` : undefined;
 
   let query = supabase
     .from("audit_logs")
@@ -115,8 +120,8 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
           currentAction={filterAction}
           currentEntityType={filterEntityType}
           currentActorId={filterActorId}
-          currentFrom={rawFrom}
-          currentTo={rawTo}
+          currentFrom={currentFrom}
+          currentTo={currentTo}
           slug={league.slug}
         />
         <EmptyState
@@ -172,8 +177,8 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
         currentAction={filterAction}
         currentEntityType={filterEntityType}
         currentActorId={filterActorId}
-        currentFrom={rawFrom}
-        currentTo={rawTo}
+        currentFrom={currentFrom}
+        currentTo={currentTo}
         slug={league.slug}
       />
       {logs.length === 100 && (

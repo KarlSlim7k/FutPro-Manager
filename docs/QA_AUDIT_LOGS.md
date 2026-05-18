@@ -12,6 +12,10 @@ Validacion de la vista de auditoria por liga y la instrumentacion de acciones ad
 
 | Caso | Resultado esperado | Estado |
 | --- | --- | --- |
+| Query param `action=member.role_updated` | Filtra por esa accion | Por validar |
+| Query param `action=valor-invalido` | Se ignora sin crash ni filtro activo invalido | Por validar |
+| Query param `entityType=match` | Filtra por `entity_type=match` | Por validar |
+| Query param `entityType=invalido` | Se ignora sin crash ni filtro activo invalido | Por validar |
 | `league_admin` accede a `/audit` | Ve tabla/cards de logs filtrados por liga | Por validar |
 | `super_admin` accede a `/audit` | Ve tabla/cards de logs | Por validar |
 | `viewer`/`coach`/`referee` accede a `/audit` | Ve card de acceso restringido | Por validar |
@@ -21,6 +25,7 @@ Validacion de la vista de auditoria por liga y la instrumentacion de acciones ad
 | Remocion de arbitro genera audit log | Fila en `audit_logs` con `action=match.referee_removed` | Por validar |
 | Fallo de audit log no rompe accion principal | Accion devuelve `success: true` aunque audit falle | Por validar |
 | Filtro `action` invalido o vacio | No crashea; se ignora | Por validar |
+| Filtro `entityType` invalido o vacio | No crashea; se ignora | Por validar |
 | Filtros `from`/`to` con fechas invalidas | No crashea; se ignoran | Por validar |
 | Filtro `actorId` con UUID invalido | No crashea; se ignora | Por validar |
 | Sin logs que coincidan con filtros | EmptyState visible | Por validar |
@@ -40,8 +45,8 @@ Validacion de la vista de auditoria por liga y la instrumentacion de acciones ad
 
 ## Build y lint
 
-- `npm run lint`: pendiente de validacion con build completo.
-- `npm run build`: pendiente de validacion.
+- `npm run lint`: OK (2026-05-18).
+- `npm run build`: OK (2026-05-18).
 
 ## Pendientes post-MVP
 
