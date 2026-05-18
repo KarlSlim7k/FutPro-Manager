@@ -24,15 +24,23 @@ type PublicMatchEventsProps = {
   leagueSlug: string;
 };
 
-const filterLabels: Record<EventFilter, string> = {
-  all: "Todos",
-  goals: "Goles",
-  cards: "Tarjetas",
-  substitutions: "Sustituciones",
-  penalties: "Penales",
+type EventSummary = {
+  total: number;
+  goals: number;
+  cards: number;
+  substitutions: number;
+  penalties: number;
 };
 
-function formatEventType(eventType: MatchEventItem["event_type"]) {
+const filterOptions: { key: EventFilter; label: string }[] = [
+  { key: "all", label: "Todos" },
+  { key: "goals", label: "Goles" },
+  { key: "cards", label: "Tarjetas" },
+  { key: "substitutions", label: "Sustituciones" },
+  { key: "penalties", label: "Penales" },
+];
+
+function formatEventType(eventType: MatchEventItem["event_type"]): string {
   const labels: Record<MatchEventItem["event_type"], string> = {
     goal: "Gol",
     own_goal: "Autogol",
@@ -43,61 +51,103 @@ function formatEventType(eventType: MatchEventItem["event_type"]) {
     penalty_goal: "Gol de penal",
     penalty_miss: "Penal fallado",
   };
+
   return labels[eventType];
 }
 
-function eventDisplay(eventType: MatchEventItem["event_type"]) {
-  const styles: Record<MatchEventItem["event_type"], { icon: string; color: string }> = {
-    goal: { icon: "⚽", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    own_goal: { icon: "🥅", color: "bg-orange-50 text-orange-700 border-orange-200" },
-    assist: { icon: "🎯", color: "bg-sky-50 text-sky-700 border-sky-200" },
-    yellow_card: { icon: "🟨", color: "bg-amber-50 text-amber-700 border-amber-200" },
-    red_card: { icon: "🟥", color: "bg-rose-50 text-rose-700 border-rose-200" },
-    substitution: { icon: "🔁", color: "bg-violet-50 text-violet-700 border-violet-200" },
-    penalty_goal: { icon: "✅", color: "bg-teal-50 text-teal-700 border-teal-200" },
-    penalty_miss: { icon: "❌", color: "bg-red-50 text-red-700 border-red-200" },
+function getEventVisual(eventType: MatchEventItem["event_type"]) {
+  const visuals: Record<MatchEventItem["event_type"], { icon: string; className: string }> = {
+    goal: { icon: "⚽", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+    own_goal: { icon: "🥅", className: "border-orange-200 bg-orange-50 text-orange-700" },
+    assist: { icon: "🎯", className: "border-sky-200 bg-sky-50 text-sky-700" },
+    yellow_card: { icon: "🟨", className: "border-amber-200 bg-amber-50 text-amber-700" },
+    red_card: { icon: "🟥", className: "border-rose-200 bg-rose-50 text-rose-700" },
+    substitution: { icon: "🔁", className: "border-violet-200 bg-violet-50 text-violet-700" },
+    penalty_goal: { icon: "✅", className: "border-teal-200 bg-teal-50 text-teal-700" },
+    penalty_miss: { icon: "❌", className: "border-red-200 bg-red-50 text-red-700" },
   };
-  return styles[eventType];
+
+  return visuals[eventType];
 }
 
-function matchesFilter(event: MatchEventItem, filter: EventFilter) {
+function isGoalEvent(event: MatchEventItem): boolean {
+  return event.event_type === "goal" || event.event_type === "own_goal";
+}
+
+function isCardEvent(event: MatchEventItem): boolean {
+  return event.event_type === "yellow_card" || event.event_type === "red_card";
+}
+
+function isPenaltyEvent(event: MatchEventItem): boolean {
+  return event.event_type === "penalty_goal" || event.event_type === "penalty_miss";
+}
+
+function matchesFilter(event: MatchEventItem, filter: EventFilter): boolean {
   if (filter === "all") return true;
-  if (filter === "goals") return ["goal", "own_goal"].includes(event.event_type);
-  if (filter === "cards") return ["yellow_card", "red_card"].includes(event.event_type);
+  if (filter === "goals") return isGoalEvent(event);
+  if (filter === "cards") return isCardEvent(event);
   if (filter === "substitutions") return event.event_type === "substitution";
-  return ["penalty_goal", "penalty_miss"].includes(event.event_type);
+  return isPenaltyEvent(event);
 }
 
-function teamLabel(teamId: string | null, homeTeamId?: string, awayTeamId?: string): string | null {
+function resolveSideLabel(teamId: string | null, homeTeamId?: string, awayTeamId?: string): string | null {
   if (!teamId || !homeTeamId || !awayTeamId) return null;
   if (teamId === homeTeamId) return "Local";
   if (teamId === awayTeamId) return "Visitante";
   return null;
 }
 
-export function PublicMatchEvents({ events, teams, players, homeTeamId, awayTeamId, leagueSlug }: PublicMatchEventsProps) {
-  const [filter, setFilter] = useState<EventFilter>("all");
-  const teamsMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
-  const playersMap = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
-
-  const summary = useMemo(() => ({
+function buildSummary(events: MatchEventItem[]): EventSummary {
+  return {
     total: events.length,
-    goals: events.filter((e) => ["goal", "own_goal"].includes(e.event_type)).length,
-    cards: events.filter((e) => ["yellow_card", "red_card"].includes(e.event_type)).length,
-    substitutions: events.filter((e) => e.event_type === "substitution").length,
-    penalties: events.filter((e) => ["penalty_goal", "penalty_miss"].includes(e.event_type)).length,
-  }), [events]);
+    goals: events.filter(isGoalEvent).length,
+    cards: events.filter(isCardEvent).length,
+    substitutions: events.filter((event) => event.event_type === "substitution").length,
+    penalties: events.filter(isPenaltyEvent).length,
+  };
+}
 
-  const filteredEvents = useMemo(() => events.filter((event) => matchesFilter(event, filter)), [events, filter]);
+export function PublicMatchEvents({
+  events,
+  teams,
+  players,
+  homeTeamId,
+  awayTeamId,
+  leagueSlug,
+}: PublicMatchEventsProps) {
+  const [activeFilter, setActiveFilter] = useState<EventFilter>("all");
+
+  const teamsMap = useMemo(() => new Map(teams.map((team) => [team.id, team])), [teams]);
+  const playersMap = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
+
+  const summary = useMemo(() => buildSummary(events), [events]);
+
+  const filteredEvents = useMemo(
+    () => events.filter((event) => matchesFilter(event, activeFilter)),
+    [events, activeFilter]
+  );
+
+  const activeFilterLabel = filterOptions.find((option) => option.key === activeFilter)?.label ?? "Todos";
 
   if (events.length === 0) {
-    return <EmptyState title="Sin eventos registrados" description="Cuando se registren goles, tarjetas o sustituciones, aparecerán aquí." />;
+    return (
+      <EmptyState
+        title="Sin eventos registrados"
+        description="Cuando se registren goles, tarjetas o sustituciones, aparecerán aquí."
+      />
+    );
   }
 
   return (
-    <div className="space-y-4">
+    <section className="space-y-4" aria-label="Eventos públicos del partido">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        {[{ label: "Total", value: summary.total }, { label: "Goles", value: summary.goals }, { label: "Tarjetas", value: summary.cards }, { label: "Sustituciones", value: summary.substitutions }, { label: "Penales", value: summary.penalties }].map((item) => (
+        {[
+          { label: "Total", value: summary.total },
+          { label: "Goles", value: summary.goals },
+          { label: "Tarjetas", value: summary.cards },
+          { label: "Sustituciones", value: summary.substitutions },
+          { label: "Penales", value: summary.penalties },
+        ].map((item) => (
           <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-3 text-center">
             <p className="text-xs text-gray-600">{item.label}</p>
             <p className="text-lg font-semibold text-gray-900">{item.value}</p>
@@ -105,50 +155,97 @@ export function PublicMatchEvents({ events, teams, players, homeTeamId, awayTeam
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(Object.keys(filterLabels) as EventFilter[]).map((option) => (
-          <button key={option} type="button" onClick={() => setFilter(option)} className={`rounded-full border px-3 py-1.5 text-sm ${filter === option ? "border-emerald-700 bg-emerald-700 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-emerald-500 hover:text-emerald-700"}`} aria-label={`Filtrar eventos: ${filterLabels[option]}`}>
-            {filterLabels[option]}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtros de eventos">
+        {filterOptions.map((option) => {
+          const selected = activeFilter === option.key;
+
+          return (
+            <button
+              key={option.key}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-label={`Filtrar por ${option.label}`}
+              onClick={() => setActiveFilter(option.key)}
+              className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                selected
+                  ? "border-emerald-700 bg-emerald-700 text-white"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-emerald-500 hover:text-emerald-700"
+              }`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
 
       {filteredEvents.length === 0 ? (
-        <EmptyState title={`Sin eventos en filtro: ${filterLabels[filter]}`} description="Prueba otro filtro para visualizar otros eventos del partido." />
+        <EmptyState
+          title={`Sin eventos para el filtro “${activeFilterLabel}”`}
+          description="Prueba con otro filtro para ver más acciones del partido."
+        />
       ) : (
         <div className="relative">
-          <div className="absolute left-4 top-2 bottom-2 w-px bg-gray-200" />
-          <div className="space-y-4">
+          <div className="absolute bottom-2 left-4 top-2 w-px bg-gray-200" aria-hidden />
+
+          <ul className="space-y-4" aria-live="polite">
             {filteredEvents.map((event) => {
+              const eventTypeLabel = formatEventType(event.event_type);
+              const eventVisual = getEventVisual(event.event_type);
               const team = event.team_id ? teamsMap.get(event.team_id) : null;
               const player = event.player_id ? playersMap.get(event.player_id) : null;
-              const sideLabel = teamLabel(event.team_id, homeTeamId, awayTeamId);
-              const display = eventDisplay(event.event_type);
+              const side = resolveSideLabel(event.team_id, homeTeamId, awayTeamId);
 
               return (
-                <div key={event.id} className="relative flex items-start gap-4">
-                  <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm shadow-sm ${display.color}`} title={formatEventType(event.event_type)} aria-label={formatEventType(event.event_type)}>
-                    <span aria-hidden>{display.icon}</span>
-                  </div>
+                <li key={event.id} className="relative flex items-start gap-4">
+                  <span
+                    className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm shadow-sm ${eventVisual.className}`}
+                    title={eventTypeLabel}
+                    aria-label={eventTypeLabel}
+                  >
+                    <span aria-hidden>{eventVisual.icon}</span>
+                  </span>
 
-                  <div className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                  <article className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Eyebrow as="span" tone="brand">{event.minute}&apos;</Eyebrow>
-                      <span className="text-sm font-medium text-gray-900">{formatEventType(event.event_type)}</span>
-                      {sideLabel ? <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{sideLabel}</span> : null}
+                      <Eyebrow as="span" tone="brand">
+                        {event.minute}&apos;
+                      </Eyebrow>
+                      <span className="text-sm font-medium text-gray-900">{eventTypeLabel}</span>
+                      {side ? (
+                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                          {side}
+                        </span>
+                      ) : null}
                     </div>
+
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-600">
                       <span className="break-words">Equipo: {team?.name ?? "No especificado"}</span>
-                      <span className="break-words">Jugador: {player ? <Link className="font-medium text-emerald-700 hover:text-emerald-800 hover:underline" href={`/liga/${leagueSlug}/players/${player.id}`}>{player.full_name}</Link> : "No especificado"}</span>
+                      <span className="break-words">
+                        Jugador:{" "}
+                        {player ? (
+                          <Link
+                            className="font-medium text-emerald-700 hover:text-emerald-800 hover:underline"
+                            href={`/liga/${leagueSlug}/players/${player.id}`}
+                          >
+                            {player.full_name}
+                          </Link>
+                        ) : (
+                          "No especificado"
+                        )}
+                      </span>
                     </div>
-                    {event.notes ? <p className="mt-1 break-words text-xs text-gray-500">Notas: {event.notes}</p> : null}
-                  </div>
-                </div>
+
+                    {event.notes ? (
+                      <p className="mt-1 break-words text-xs text-gray-500">Notas: {event.notes}</p>
+                    ) : null}
+                  </article>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       )}
-    </div>
+    </section>
   );
 }

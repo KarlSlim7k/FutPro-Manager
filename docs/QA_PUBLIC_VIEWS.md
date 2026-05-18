@@ -140,3 +140,11 @@ docs: record public views qa
 - Probado detalle de partido con eventos y sin eventos.
 - Probados filtros válidos e inválidos en `/liga/[slug]/matches` (`seasonId`, `status`, `teamId`, `round`).
 - Pendiente post-MVP: social previews con imagen dinámica, E2E, QA cross-browser real.
+
+## QA adicional - Eventos públicos (2026-05-18)
+- Verificado timeline visual con filtros client-side en `/liga/liga-municipal-perote/matches/<matchId-real>`.
+- Filtros probados: `Todos`, `Goles`, `Tarjetas`, `Sustituciones`, `Penales`.
+- Validado resumen superior de eventos: total, goles, tarjetas, sustituciones y penales.
+- Validado fallback seguro cuando faltan `team_id`, `player_id` o `notes` (texto "No especificado" y layout sin ruptura).
+- Validado empty state general cuando no hay eventos y empty state específico cuando un filtro no tiene resultados.
+- Validado enlace público de jugador desde evento: `/liga/[slug]/players/[playerId]`.
