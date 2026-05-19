@@ -61,3 +61,8 @@ Validacion de la vista de auditoria por liga y la instrumentacion de acciones ad
 ## Fecha
 
 2026-05-18
+
+
+## Referencia cruzada
+
+- Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.
