@@ -36,20 +36,54 @@ Fecha: 2026-05-19
 - [x] Policy de lectura pública existe para `league-media`.
 - [x] Policy de insert autenticado existe bajo `leagues/%`.
 - [x] Validación segura sin persistencia: `anon` puede leer sin error y `authenticated` puede insertar bajo `leagues/%` dentro de transacción revertida.
-- [ ] Usuario `league_admin` puede subir logo de liga.
-- [ ] Usuario `league_admin` puede subir logo de equipo.
-- [ ] Usuario `league_admin` puede subir foto de jugador.
+- [x] Usuario `league_admin` puede subir logo de liga.
+- [x] Usuario `league_admin` puede subir logo de equipo.
+- [x] Usuario `league_admin` puede subir foto de jugador.
 - [ ] Usuario sin permiso no ve controles.
 - [ ] SVG permitido para logos.
-- [ ] SVG rechazado/no sugerido para foto de jugador.
-- [ ] Metadata aparece en `media_uploads`.
-- [ ] Audit logs aparecen en auditoría.
-- [ ] Vistas públicas muestran imagen o fallback.
+- [x] SVG rechazado/no sugerido para foto de jugador.
+- [x] MIME inválido rechazado para foto de jugador.
+- [x] Archivo excedido rechazado de forma controlada para foto de jugador.
+- [x] Metadata aparece en `media_uploads`.
+- [x] Audit logs aparecen en auditoría.
+- [x] Vistas públicas de liga/equipo muestran imágenes subidas sin sesión.
+- [x] URLs públicas de liga/equipo/jugador responden `HTTP 200` con `content-type: image/png`.
+- [ ] Vista pública de jugador sin sesión queda pendiente por RLS actual de `public.players` (solo permite `SELECT` a `authenticated`).
 - [ ] Error controlado cuando bucket/policy falta.
 
 ## Smoke test Storage
 - Smoke test físico por Storage API no ejecutado porque este entorno no tiene una sesión de usuario autenticado de la app para probar el flujo real sin usar `service_role`.
 - No se dejaron objetos de prueba persistidos en `league-media`.
+
+## QA real con usuario dedicado
+- Fecha: 2026-05-19.
+- Proyecto Supabase: `wyntbcsgnbpznimcixqb`.
+- Usuario QA: `qa.codex.futpro@gmail.com`.
+- `profiles.global_role`: `viewer`.
+- Rol de liga: `league_admin` solo en `liga-qa-codex`.
+- Liga QA: `Liga QA Codex` (`liga-qa-codex`).
+- Equipo QA: `Equipo QA Codex` (`equipo-qa-codex`).
+- Jugador QA: `Jugador QA Codex`.
+- Login real validado por Auth y UI local.
+- Uploads reales desde la app:
+  - logo de liga: exitoso;
+  - logo de equipo: exitoso;
+  - foto de jugador: exitoso.
+- Verificación de base de datos:
+  - `leagues.logo_url`, `teams.logo_url` y `players.photo_url` actualizados;
+  - registros en `media_uploads` para `league`, `team` y `player`;
+  - audit logs `media.league_logo_updated`, `media.team_logo_updated`, `media.player_photo_updated`.
+- Ajuste aplicado durante QA:
+  - `next.config.js` ahora configura `experimental.serverActions.bodySizeLimit = "4mb"` para que las validaciones propias de 2 MB/3 MB respondan con errores controlados y no con el límite default de 1 MB de Next.js.
+- Objetos persistidos:
+  - quedaron 6 objetos de prueba en `league-media` bajo `leagues/ed40be3c-0171-4ba9-9a67-d28f3d6b1c4b/...` por dos corridas positivas de QA;
+  - se dejaron intencionalmente para preservar evidencia y no borrar archivos existentes.
+- Credenciales:
+  - password temporal no documentado ni versionado;
+  - valores de QA usados desde `/tmp/futpro-qa-env` con permisos locales restrictivos.
+- Pendiente operativo:
+  - rotar o eliminar la cuenta QA cuando termine el ciclo de pruebas;
+  - decidir si se habilita lectura pública de `players` o un mecanismo específico para `/liga/[slug]/players/[playerId]` sin romper los guardrails de RLS.
 
 ## Pendientes post-MVP
 - Borrado físico y cleanup de huérfanos.

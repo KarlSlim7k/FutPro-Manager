@@ -19,7 +19,7 @@ import type {
   Team,
 } from "@/types/database";
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
+type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status" | "logo_url">;
 type TeamDetail = Pick<
   Team,
   | "id"
@@ -128,7 +128,7 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
 
   const { data: leagueData, error: leagueError } = await supabase
     .from("leagues")
-    .select("id, name, slug, description, status")
+    .select("id, name, slug, description, status, logo_url")
     .eq("slug", slug)
     .eq("is_public", true)
     .eq("status", "active")

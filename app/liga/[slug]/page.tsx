@@ -7,7 +7,7 @@ import { PublicNav } from "@/components/public/public-nav";
 import { createClient } from "@/lib/supabase/server";
 import type { League } from "@/types/database";
 
-type PublicLeague = Pick<League, "id" | "name" | "slug" | "description" | "status">;
+type PublicLeague = Pick<League, "id" | "name" | "slug" | "description" | "status" | "logo_url">;
 
 interface LeaguePublicPageProps {
   params: Promise<{ slug: string }>;
@@ -39,7 +39,7 @@ export default async function LeaguePublicPage({ params }: LeaguePublicPageProps
 
   const { data: leagueData, error: leagueError } = await supabase
     .from("leagues")
-    .select("id, name, slug, description, status")
+    .select("id, name, slug, description, status, logo_url")
     .eq("slug", slug)
     .eq("is_public", true)
     .eq("status", "active")
