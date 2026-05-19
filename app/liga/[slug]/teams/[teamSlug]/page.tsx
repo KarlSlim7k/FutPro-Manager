@@ -117,7 +117,16 @@ export async function generateMetadata({ params }: PublicTeamDetailPageProps): P
 
   const title = `${teamData.name} - ${leagueData.name} | FutPro Manager`;
   const description = `Ficha pública del equipo ${teamData.name} en ${leagueData.name}.`;
-  return { title, description, openGraph: { title, description }, twitter: { card: "summary", title, description } };
+  return { title, description, openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: "es_MX",
+      siteName: "FutPro Manager",
+      images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+    }, twitter: { card: "summary", title, description,
+      images: ["/og/futpro-manager.png"],
+    } };
 }
 
 export default async function PublicTeamDetailPage({ params, searchParams }: PublicTeamDetailPageProps) {

@@ -1,6 +1,29 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
+
+export const metadata: Metadata = {
+  title: "FutPro Manager — Administra ligas de fútbol amateur",
+  description:
+    "Plataforma SaaS para digitalizar ligas de fútbol amateur: equipos, jugadores, partidos, resultados y tablas de posiciones. Empieza gratis.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "FutPro Manager — Administra ligas de fútbol amateur",
+    description:
+      "Plataforma SaaS para digitalizar ligas de fútbol amateur: equipos, jugadores, partidos, resultados y tablas de posiciones. Empieza gratis.",
+    type: "website",
+    locale: "es_MX",
+    siteName: "FutPro Manager",
+    images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FutPro Manager — Administra ligas de fútbol amateur",
+    description: "Plataforma SaaS para digitalizar ligas de fútbol amateur.",
+    images: ["/og/futpro-manager.png"],
+  },
+};
 
 const features = [
   "Gestión centralizada de ligas y temporadas",

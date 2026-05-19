@@ -101,8 +101,17 @@ export async function generateMetadata({ params }: PublicMatchDetailPageProps): 
   return {
     title,
     description,
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary", title, description },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      locale: "es_MX",
+      siteName: "FutPro Manager",
+      images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+    },
+    twitter: { card: "summary", title, description,
+      images: ["/og/futpro-manager.png"],
+    },
   };
 }
 
