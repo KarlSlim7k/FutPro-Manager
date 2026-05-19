@@ -24,7 +24,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!player) return { title: "No encontrado | FutPro Manager" };
   const title = `${player.full_name} - ${league.name} | FutPro Manager`;
   const description = `Ficha pública de ${player.full_name} en la liga ${league.name}.`;
-  return { title, description, openGraph: { title, description, type: "profile" }, twitter: { card: "summary", title, description } };
+  return { title, description, openGraph: {
+      title,
+      description,
+      type: "profile",
+      locale: "es_MX",
+      siteName: "FutPro Manager",
+      images: [{ url: "/og/futpro-manager.png", width: 1200, height: 630 }],
+    }, twitter: { card: "summary", title, description,
+      images: ["/og/futpro-manager.png"],
+    } };
 }
 
 export default async function PublicPlayerPage({ params }: Props) {
