@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { createClient } from "@/lib/supabase/server";
 import type { League, MatchEvent, Player, PlayerTeamRegistration, Team, Season } from "@/types/database";
 
@@ -50,7 +51,7 @@ export default async function PublicPlayerPage({ params }: Props) {
 
   const teamsMap = new Map(teams.map((t) => [t.id, t])); const seasonsMap = new Map(seasons.map((s) => [s.id, s]));
 
-  return <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100"><section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8"><PublicLeagueHeader league={league} /><PublicNav leagueSlug={league.slug} />
+  return <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100"><section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8"><PublicLeagueHeader league={league} /><PublicNav leagueSlug={league.slug} /><PublicBreadcrumbs items={[{ label: league.name, href: `/liga/${league.slug}` },{ label: "Jugador" },{ label: player.full_name }]} />
     <Card><CardHeader><CardTitle>{player.full_name}</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">{player.photo_url ? <div className="sm:col-span-2"><Eyebrow>Foto</Eyebrow><div className="mt-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={player.photo_url} alt={`Foto de ${player.full_name}`} className="h-24 w-24 rounded-lg border border-gray-200 object-cover" />
