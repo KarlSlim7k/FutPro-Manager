@@ -16,10 +16,25 @@ export type RecalculateStandingsError = {
   details?: string;
 };
 
+export type RecalculateStandingsRowSummary = {
+  teamId: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+};
+
 export type RecalculateStandingsForSeasonResult = {
   success: boolean;
   teamsCount: number;
   matchesCount: number;
+  rowsCount: number;
+  skippedMatchesCount: number;
+  standingsRows: RecalculateStandingsRowSummary[];
   error?: RecalculateStandingsError;
 };
 
@@ -58,6 +73,9 @@ export async function recalculateStandingsForSeason({
       success: false,
       teamsCount: 0,
       matchesCount: 0,
+      rowsCount: 0,
+      skippedMatchesCount: 0,
+      standingsRows: [],
       error: toControlledError(teamsError),
     };
   }
@@ -69,6 +87,9 @@ export async function recalculateStandingsForSeason({
       success: false,
       teamsCount: 0,
       matchesCount: 0,
+      rowsCount: 0,
+      skippedMatchesCount: 0,
+      standingsRows: [],
       error: {
         code: "NO_TEAMS",
         message: "No teams available for standings recalculation.",
@@ -88,6 +109,9 @@ export async function recalculateStandingsForSeason({
       success: false,
       teamsCount: teams.length,
       matchesCount: 0,
+      rowsCount: 0,
+      skippedMatchesCount: 0,
+      standingsRows: [],
       error: toControlledError(matchesError),
     };
   }
@@ -107,11 +131,14 @@ export async function recalculateStandingsForSeason({
     });
   }
 
+  let skippedMatchesCount = 0;
+
   for (const match of matches) {
     const homeStats = stats.get(match.home_team_id);
     const awayStats = stats.get(match.away_team_id);
 
     if (!homeStats || !awayStats) {
+      skippedMatchesCount += 1;
       continue;
     }
 
@@ -157,6 +184,18 @@ export async function recalculateStandingsForSeason({
     };
   });
 
+  const standingsRows = rows.map((row) => ({
+    teamId: row.team_id,
+    played: row.played,
+    won: row.won,
+    drawn: row.drawn,
+    lost: row.lost,
+    goalsFor: row.goals_for,
+    goalsAgainst: row.goals_against,
+    goalDifference: row.goal_difference,
+    points: row.points,
+  }));
+
   const { error: upsertError } = await supabase
     .from("standings")
     .upsert(rows, { onConflict: "season_id,team_id" });
@@ -166,6 +205,9 @@ export async function recalculateStandingsForSeason({
       success: false,
       teamsCount: teams.length,
       matchesCount: matches.length,
+      rowsCount: rows.length,
+      skippedMatchesCount,
+      standingsRows,
       error: toControlledError(upsertError),
     };
   }
@@ -174,5 +216,8 @@ export async function recalculateStandingsForSeason({
     success: true,
     teamsCount: teams.length,
     matchesCount: matches.length,
+    rowsCount: rows.length,
+    skippedMatchesCount,
+    standingsRows,
   };
 }
