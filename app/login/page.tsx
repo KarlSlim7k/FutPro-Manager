@@ -4,7 +4,11 @@ import { LoginForm } from "@/components/auth/login-form";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -13,6 +17,9 @@ export default async function LoginPage() {
   if (user) {
     redirect("/dashboard");
   }
+
+  const { mode } = await searchParams;
+  const initialMode = mode === "register" ? "register" : "login";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950 px-4 py-8 text-white sm:px-6 lg:px-8">
@@ -45,7 +52,7 @@ export default async function LoginPage() {
               Inicia sesión o crea tu cuenta para entrar al dashboard.
             </p>
           </div>
-          <LoginForm />
+          <LoginForm initialMode={initialMode} />
         </section>
       </div>
     </main>
