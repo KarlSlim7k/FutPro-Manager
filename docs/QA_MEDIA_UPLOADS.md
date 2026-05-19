@@ -20,7 +20,7 @@ Fecha: 2026-05-19
 - [x] Genera audit logs media.* (si RLS permite insert en audit_logs).
 - [x] Si bucket/policies faltan, devuelve: “No se pudo subir el archivo. Verifica la configuración de Storage.”
 - [x] Vistas públicas no rompen sin imagen.
-- [x] No se tocaron migraciones/schema/RLS.
+- [x] Media Uploads no requirió cambios de escritura ni service role; cambio RLS posterior documentado para detalle público de jugador (`players` SELECT anon en ligas públicas activas).
 
 ## Setup manual requerido
 - Bucket `league-media` creado/verificado en Supabase Storage (2026-05-19).
@@ -48,7 +48,7 @@ Fecha: 2026-05-19
 - [x] Audit logs aparecen en auditoría.
 - [x] Vistas públicas de liga/equipo muestran imágenes subidas sin sesión.
 - [x] URLs públicas de liga/equipo/jugador responden `HTTP 200` con `content-type: image/png`.
-- [ ] Vista pública de jugador sin sesión queda pendiente por RLS actual de `public.players` (solo permite `SELECT` a `authenticated`).
+- [x] Vista pública de jugador sin sesión carga para jugador de liga pública activa.
 - [ ] Error controlado cuando bucket/policy falta.
 
 ## Smoke test Storage
@@ -81,9 +81,9 @@ Fecha: 2026-05-19
 - Credenciales:
   - password temporal no documentado ni versionado;
   - valores de QA usados desde `/tmp/futpro-qa-env` con permisos locales restrictivos.
-- Pendiente operativo:
+- Seguimiento operativo:
   - rotar o eliminar la cuenta QA cuando termine el ciclo de pruebas;
-  - decidir si se habilita lectura pública de `players` o un mecanismo específico para `/liga/[slug]/players/[playerId]` sin romper los guardrails de RLS.
+  - lectura pública mínima de `players` habilitada mediante `Public read players in public active leagues` (`SELECT` para `anon`, solo ligas públicas activas).
 
 ## Pendientes post-MVP
 - Borrado físico y cleanup de huérfanos.

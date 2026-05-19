@@ -24,7 +24,7 @@
 | league_members                             | No                                        | Miembros de liga                   | league_admin/super_admin                                                 |
 | seasons, teams, venues, matches, standings | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin                                                 |
 | team_members                               | No                                        | Integrantes y miembros autorizados | team_admin/league_admin/super_admin                                      |
-| players, player_team_registrations         | Parcial (registrations en ligas públicas) | Miembros de liga                   | league_admin, team_admin y coach según alcance                           |
+| players, player_team_registrations         | Parcial (players y registrations en ligas públicas activas) | Miembros de liga                   | league_admin, team_admin y coach según alcance                           |
 | match_events                               | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin, referee permitido, team_admin/coach del equipo (solo si su equipo participa en el partido) |
 | media_uploads                              | No                                        | Miembros de liga                   | Propietario de upload o admin de liga                                    |
 | audit_logs                                 | No                                        | league_admin de la liga            | Insert por actor autenticado; lectura total super_admin                  |
@@ -37,6 +37,8 @@
 2. **Helper functions reutilizables:** `can_access_league`, `can_manage_league`, `can_manage_team`, `can_manage_match`.
 3. **Protección anti-escalamiento:** trigger evita que un usuario cambie su `global_role`.
 4. **Lectura pública controlada:** solo ligas `active` y `is_public = true`.
+   - `players` permite `SELECT` a `anon` solo cuando el jugador pertenece a una liga pública activa, para soportar el detalle público `/liga/[slug]/players/[playerId]`.
+   - Esta lectura pública no habilita escritura y no expone controles administrativos.
 5. **Referee en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`).
    En `matches`, un referee no admin queda restringido a cambiar `status`, `home_score` y `away_score`.
 6. **Integridad de autoría en eventos:** `match_events.created_by` debe coincidir con el usuario autenticado en inserts y no puede cambiarse en updates (salvo `super_admin`).

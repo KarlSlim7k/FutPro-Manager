@@ -97,9 +97,10 @@ Estado actual del MVP:
   - Navegacion publica entre vistas.
   - Empty states y manejo de rutas inexistentes (notFound).
 - **Post-MVP:** E2E automatizado, QA visual cross-browser, social previews avanzados con imagenes dinamicas, estadisticas publicas avanzadas.
-- **Nota:** standings publico enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla publica depende de RLS existente para `player_team_registrations` y `players`; eventos publicos se muestran en timeline visual con etiquetas local/visitante y no rompen la pagina si RLS no permite lectura.
+- **Nota:** standings publico enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla publica enlaza a detalle publico de jugador. `players` tiene lectura publica minima para `anon` solo en ligas publicas activas; `player_team_registrations` y `match_events` mantienen lectura publica controlada para ligas publicas activas y empty states seguros.
 - **QA realizado (2026-05-04):** rutas publicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegacion publica (`PublicNav`).
 - **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
+- **QA actualizado (2026-05-19):** `/liga/liga-qa-codex/players/0aae9fd4-111e-4c0b-bb18-d31f7ea0218e` carga sin sesion tras migracion `20260519173826_public_players_read_policy.sql`; jugador inexistente retorna 404; sin controles admin.
 
 ### Media uploads
 - **Estado:** Implementado para MVP; setup operativo de Storage verificado.

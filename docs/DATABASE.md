@@ -76,13 +76,19 @@ Incluye índices para filtros frecuentes:
 
 - `leagues`, `seasons`, `teams`, `venues`, `matches`, `match_events`, `standings`.
 - Solo cuando la liga está `is_public = true` y `status = 'active'`.
+- `players`: lectura pública mínima para `anon` cuando el jugador pertenece a una liga pública activa. Esta policy existe para soportar `/liga/[slug]/players/[playerId]`; la UI pública solo muestra campos seguros (nombre, foto, estado y posición).
 
 ### Datos autenticados (lectura/escritura según rol)
 
-- `profiles`, `league_members`, `team_members`, `players`, `player_team_registrations`, `media_uploads`, `audit_logs`, `league_subscriptions`.
+- `profiles`, `league_members`, `team_members`, `player_team_registrations`, `media_uploads`, `audit_logs`, `league_subscriptions`.
 - Escritura gobernada por helpers (`is_super_admin`, `can_manage_league`, `can_manage_team`, `can_manage_match`).
+- `players`: escritura sigue limitada a usuarios autenticados autorizados (`league_admin`, `team_admin`/`coach` según alcance). No hay insert/update/delete público.
 - En `match_events`, escritura endurecida: `created_by` debe coincidir con `auth.uid()`, el `team_id` debe participar en el partido y, si hay `player_id`, debe existir registro activo del jugador para ese equipo/temporada.
 - En `matches`, un referee no administrador solo puede modificar `status` y marcadores; no puede alterar estructura del partido.
+
+### Migraciones adicionales
+
+- `supabase/migrations/20260519173826_public_players_read_policy.sql`: agrega la policy `Public read players in public active leagues` sobre `public.players` (`SELECT` para `anon`) limitada a jugadores de ligas públicas activas. No modifica escritura, triggers ni tablas de negocio.
 
 ### Datos de planes
 
@@ -109,7 +115,7 @@ where id = '<USER_UUID>';
 
 ## Aplicación de migración (cuando se apruebe)
 
-1. **Supabase SQL Editor:** ejecutar el contenido de `supabase/migrations/0001_initial_schema.sql`.
+1. **Supabase SQL Editor:** ejecutar el contenido de `supabase/migrations/0001_initial_schema.sql` y luego las migraciones incrementales (`20260519173826_*`, etc.) en orden.
 2. **Supabase CLI:**
    1. `supabase link --project-ref <PROJECT_REF>`
    2. `supabase db push`
