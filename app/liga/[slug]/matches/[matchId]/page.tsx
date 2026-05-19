@@ -5,6 +5,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { PublicMatchEvents } from "@/components/public/public-match-events";
 import { createClient } from "@/lib/supabase/server";
@@ -218,6 +219,13 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
+        <PublicBreadcrumbs
+          items={[
+            { label: league.name, href: `/liga/${league.slug}` },
+            { label: "Partidos", href: `/liga/${league.slug}/matches` },
+            { label: `${homeTeam?.name ?? "Local"} vs ${awayTeam?.name ?? "Visitante"}` },
+          ]}
+        />
 
         <Card>
           <CardHeader className="space-y-2">

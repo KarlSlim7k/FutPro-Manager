@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { PublicMatchCard } from "@/components/public/public-match-card";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -178,6 +179,13 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
+        <PublicBreadcrumbs
+          items={[
+            { label: league.name, href: `/liga/${league.slug}` },
+            { label: "Equipos", href: `/liga/${league.slug}/teams` },
+            { label: team.name },
+          ]}
+        />
 
         <Card>
           <CardHeader>
