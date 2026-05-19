@@ -25,11 +25,12 @@
 - Eventos: registro operativo por partido.
 - Pendiente: flujos avanzados de asignación arbitral y trazabilidad.
 
-### Fase 4 - Tabla de posiciones (Implementación funcional, con mejoras pendientes)
+### Fase 4 - Tabla de posiciones (Implementado con hardening MVP)
 - Vista de standings implementada y conectada a datos reales.
 - Existe recálculo manual por temporada en dashboard.
 - Existe recálculo automático al guardar resultados que impactan estado `completed`.
-- **Pendiente:** automatización avanzada por eventos/auditoría y soporte de jobs/background para mayor robustez.
+- Incluye recálculo manual por temporada, recálculo automático al actualizar resultados `completed`, auditoría best-effort de recálculos, warnings por inconsistencias de equipos (`skipped matches`) y revalidación de rutas dashboard/públicas.
+- **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial avanzado y desempates complejos.
 
 ### Fase 5 - Vista pública (Completado para MVP)
 - ✅ Portal público: resumen de liga, standings, calendario/lista de partidos, detalle de partido, detalle de equipo y detalle de jugador.

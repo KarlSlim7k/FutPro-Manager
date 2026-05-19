@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
@@ -204,6 +205,46 @@ export async function updateMatchResultAction(
     if (!recalculateResult.success) {
       standingsWarning =
         "Resultado guardado correctamente, pero no se pudo actualizar la tabla de posiciones automáticamente. Puedes recalcularla manualmente desde la temporada.";
+
+      await createAuditLog({
+        supabase,
+        actorId: user.id,
+        leagueId: league.id,
+        action: "standings.recalculate_failed",
+        entityType: "season",
+        entityId: matchData.season_id,
+        metadata: {
+          league_slug: leagueSlug,
+          match_id: matchId,
+          previous_match_status: matchData.status,
+          new_match_status: values.status,
+          error_code: recalculateResult.error?.code ?? null,
+          error_message: recalculateResult.error?.message ?? "Unknown error",
+          trigger: "match_result_update",
+        },
+      });
+    } else {
+      await createAuditLog({
+        supabase,
+        actorId: user.id,
+        leagueId: league.id,
+        action: "standings.recalculated_auto",
+        entityType: "season",
+        entityId: matchData.season_id,
+        metadata: {
+          league_slug: leagueSlug,
+          match_id: matchId,
+          previous_match_status: matchData.status,
+          new_match_status: values.status,
+          home_score: Number(values.home_score),
+          away_score: Number(values.away_score),
+          teams_count: recalculateResult.teamsCount,
+          matches_count: recalculateResult.matchesCount,
+          rows_count: recalculateResult.rowsCount,
+          skipped_matches_count: recalculateResult.skippedMatchesCount,
+          trigger: "match_result_update",
+        },
+      });
     }
   }
 
@@ -211,6 +252,8 @@ export async function updateMatchResultAction(
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/standings`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  revalidatePath(`/liga/${leagueSlug}/standings`);
+  revalidatePath(`/liga/${leagueSlug}`);
   if (seasonData?.slug) {
     revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}`);
     revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonData.slug}/standings`);
