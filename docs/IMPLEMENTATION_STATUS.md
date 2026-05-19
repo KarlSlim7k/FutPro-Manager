@@ -9,7 +9,8 @@ Estado actual del MVP:
 - **Funcionando**: login, protección de rutas, navegación de dashboard, CRUD base de ligas/temporadas/equipos/jugadores/sedes/partidos, captura de resultado y eventos, y consulta de standings.
 - **Funcionando**: standings con hardening MVP (recálculo manual + automático, auditoría best-effort de recálculos, warnings controlados por inconsistencias y revalidación dashboard/pública).
 - **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI y cobertura de QA end-to-end.
-- **Solo en base técnica (schema/RLS)**: media uploads, auditoría y suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
+- **Solo en base técnica (schema/RLS)**: suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
+- **Implementado con dependencia operativa externa**: media uploads MVP (requiere bucket/policies de Supabase Storage por entorno).
 
 ## Leyenda de estado
 
@@ -101,10 +102,10 @@ Estado actual del MVP:
 - **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
 
 ### Media uploads
-- **Estado:** Base técnica existente.
-- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y tipos en `types/database.ts`.
-- **Funcionalidad existente:** soporte de datos preparado en schema.
-- **Pendiente:** UI/flujo de carga, permisos operativos y consumo de archivos.
+- **Estado:** Implementado para MVP; requiere setup operativo de Storage.
+- **Evidencia en repo:** `lib/media/upload-media.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/entity-image-preview.tsx`, server actions de media en liga/equipo/jugador, `docs/QA_MEDIA_UPLOADS.md`, `docs/STORAGE_SETUP.md`.
+- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage.
+- **Pendiente:** hardening post-MVP (cleanup de huérfanos, borrado físico, transformaciones/crop/resize, múltiples imágenes, avatares, CDN/custom domain).
 
 ### Auditoría
 - **Estado:** Parcial (Fase 6C implementada + hardening de filtros server-side).
@@ -138,7 +139,7 @@ Estado actual del MVP:
 ## Pendientes post-MVP
 
 1. Auditoría avanzada/global/exportable y cobertura exhaustiva de acciones.
-2. Media uploads integrados por entidad.
+2. Hardening post-MVP de media uploads (cleanup/borrado físico/transformaciones/CDN).
 3. Roles avanzados y permisos granulares por feature.
 4. Suscripciones/pagos y operación comercial SaaS.
 

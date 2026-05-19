@@ -189,7 +189,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       <Card><CardHeader><CardTitle>Logo de equipo</CardTitle></CardHeader><CardContent className="space-y-4">
         <EntityImagePreview imageUrl={team.logo_url} alt={`Logo de ${team.name}`} label="Logo" />
         {permissions.canManageCatalog ? (
-          <EntityImageUploadForm action={updateTeamLogoAction.bind(null, league.slug, team.slug)} helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB." buttonText="Actualizar logo" />
+          <EntityImageUploadForm
+            action={updateTeamLogoAction.bind(null, league.slug, team.slug)}
+            helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB."
+            buttonText="Actualizar logo"
+            accept="image/jpeg,image/png,image/webp,image/svg+xml"
+          />
         ) : null}
       </CardContent></Card>
 

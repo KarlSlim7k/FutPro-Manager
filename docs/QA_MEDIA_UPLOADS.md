@@ -27,6 +27,20 @@ Fecha: 2026-05-19
 - Configurar políticas de Storage compatibles con usuarios autenticados autorizados.
 - Mantener RLS de `media_uploads` permitiendo inserts a actores autorizados.
 
+## QA operativo pendiente / real
+- [ ] Bucket `league-media` existe.
+- [ ] Bucket es público o la app usa URLs públicas compatibles.
+- [ ] Usuario `league_admin` puede subir logo de liga.
+- [ ] Usuario `league_admin` puede subir logo de equipo.
+- [ ] Usuario `league_admin` puede subir foto de jugador.
+- [ ] Usuario sin permiso no ve controles.
+- [ ] SVG permitido para logos.
+- [ ] SVG rechazado/no sugerido para foto de jugador.
+- [ ] Metadata aparece en `media_uploads`.
+- [ ] Audit logs aparecen en auditoría.
+- [ ] Vistas públicas muestran imagen o fallback.
+- [ ] Error controlado cuando bucket/policy falta.
+
 ## Pendientes post-MVP
 - Borrado físico y cleanup de huérfanos.
 - Reemplazo con rollback transaccional robusto.

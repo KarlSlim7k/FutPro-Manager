@@ -26,6 +26,45 @@ export function sanitizeFileName(value: string) {
   return cleaned || "file";
 }
 
+const STORAGE_UPLOAD_BASE_ERROR = "No se pudo subir el archivo. Verifica la configuración de Storage.";
+const MIME_LABELS: Record<string, string> = {
+  "image/jpeg": "JPG",
+  "image/png": "PNG",
+  "image/webp": "WEBP",
+  "image/svg+xml": "SVG",
+};
+
+function getInvalidMimeMessage(allowedMimeTypes: string[]) {
+  const labels = allowedMimeTypes.map((mimeType) => MIME_LABELS[mimeType]).filter(Boolean);
+  const normalizedLabels = labels.length > 0 ? labels : ["JPG", "PNG", "WEBP"];
+
+  return `Formato no permitido. Usa ${normalizedLabels.join(", ")}.`;
+}
+
+function getStorageUploadErrorMessage(uploadError: { message?: string } | null) {
+  if (!uploadError?.message) {
+    return STORAGE_UPLOAD_BASE_ERROR;
+  }
+
+  const normalizedMessage = uploadError.message.toLowerCase();
+
+  if (normalizedMessage.includes("bucket") && normalizedMessage.includes("not found")) {
+    return `${STORAGE_UPLOAD_BASE_ERROR} El bucket configurado no está disponible.`;
+  }
+
+  if (
+    normalizedMessage.includes("policy") ||
+    normalizedMessage.includes("permission") ||
+    normalizedMessage.includes("not authorized") ||
+    normalizedMessage.includes("access denied") ||
+    normalizedMessage.includes("unauthorized")
+  ) {
+    return `${STORAGE_UPLOAD_BASE_ERROR} Revisa las policies y permisos del bucket.`;
+  }
+
+  return STORAGE_UPLOAD_BASE_ERROR;
+}
+
 export async function uploadEntityImage(params: UploadEntityImageParams): Promise<UploadEntityImageResult> {
   const {
     supabase,
@@ -45,7 +84,7 @@ export async function uploadEntityImage(params: UploadEntityImageParams): Promis
   }
 
   if (!allowedMimeTypes.includes(file.type)) {
-    return { success: false, message: "Formato no permitido. Usa JPG, PNG o WEBP." };
+    return { success: false, message: getInvalidMimeMessage(allowedMimeTypes) };
   }
 
   if (file.size > maxSizeBytes) {
@@ -59,7 +98,7 @@ export async function uploadEntityImage(params: UploadEntityImageParams): Promis
   });
 
   if (uploadError) {
-    return { success: false, message: "No se pudo subir el archivo. Verifica la configuración de Storage." };
+    return { success: false, message: getStorageUploadErrorMessage(uploadError) };
   }
 
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);

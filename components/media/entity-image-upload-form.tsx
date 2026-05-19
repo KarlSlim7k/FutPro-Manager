@@ -8,9 +8,15 @@ interface EntityImageUploadFormProps {
   action: (state: UploadState, formData: FormData) => Promise<UploadState>;
   helpText: string;
   buttonText: string;
+  accept?: string;
 }
 
-export function EntityImageUploadForm({ action, helpText, buttonText }: EntityImageUploadFormProps) {
+export function EntityImageUploadForm({
+  action,
+  helpText,
+  buttonText,
+  accept = "image/jpeg,image/png,image/webp",
+}: EntityImageUploadFormProps) {
   const [state, formAction, pending] = useActionState(action, { success: false, message: null });
 
   return (
@@ -18,7 +24,7 @@ export function EntityImageUploadForm({ action, helpText, buttonText }: EntityIm
       <input
         type="file"
         name="image"
-        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+        accept={accept}
         required
         className="block w-full text-sm text-gray-700"
       />

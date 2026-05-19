@@ -135,6 +135,7 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
               action={updateLeagueLogoAction.bind(null, league.slug)}
               helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB."
               buttonText="Actualizar logo"
+              accept="image/jpeg,image/png,image/webp,image/svg+xml"
             />
           ) : null}
         </CardContent>
