@@ -33,7 +33,6 @@
 - Historial avanzado de standings.
 - Reglas avanzadas de desempate.
 
-
 ## Referencia cruzada
 
 - Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.
