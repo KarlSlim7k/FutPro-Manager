@@ -47,9 +47,13 @@ export default async function LoginPage({
 
         <section className="rounded-2xl border border-white/10 bg-white p-6 text-gray-900 shadow-2xl shadow-black/20 sm:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold">Acceso al sistema</h2>
+            <h2 className="text-2xl font-semibold">
+              {initialMode === "register" ? "Crear cuenta" : "Iniciar sesión"}
+            </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Inicia sesión o crea tu cuenta para entrar al dashboard.
+              {initialMode === "register"
+                ? "Regístrate gratis para administrar tu liga desde el dashboard."
+                : "Ingresa con tu cuenta para acceder al panel de control."}
             </p>
           </div>
           <LoginForm initialMode={initialMode} />

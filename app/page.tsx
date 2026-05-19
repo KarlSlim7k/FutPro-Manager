@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_MX",
     siteName: "FutPro Manager",
-    images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+    images: [{ url: "/og/futpro-manager.jpg", width: 640, height: 640 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "FutPro Manager — Administra ligas de fútbol amateur",
     description: "Plataforma SaaS para digitalizar ligas de fútbol amateur.",
-    images: ["/og/futpro-manager.png"],
+    images: ["/og/futpro-manager.jpg"],
   },
 };
 

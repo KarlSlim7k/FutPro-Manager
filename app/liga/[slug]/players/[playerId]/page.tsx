@@ -103,10 +103,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "profile",
       locale: "es_MX",
       siteName: "FutPro Manager",
-      images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+      images: [{ url: "/og/futpro-manager.jpg", width: 640, height: 640 }],
     },
     twitter: { card: "summary", title, description,
-      images: ["/og/futpro-manager.png"],
+      images: ["/og/futpro-manager.jpg"],
     },
   };
 }

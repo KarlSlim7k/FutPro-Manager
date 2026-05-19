@@ -28,7 +28,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
   if (!league) return { title: "No encontrado | FutPro Manager" };
   const title = `Equipos - ${league.name} | FutPro Manager`;
-  return { title, description: `Listado de equipos de ${league.name}.` };
+  const description = `Listado de equipos de ${league.name}.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: "es_MX",
+      siteName: "FutPro Manager",
+      images: [{ url: "/og/futpro-manager.jpg", width: 640, height: 640 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og/futpro-manager.jpg"],
+    },
+  };
 }
 
 export default async function PublicTeamsPage({ params }: Props) {

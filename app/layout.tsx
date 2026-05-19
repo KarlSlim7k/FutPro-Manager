@@ -15,11 +15,11 @@ export const metadata: Metadata = {
     siteName: "FutPro Manager",
     locale: "es_MX",
     type: "website",
-    images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
+    images: [{ url: "/og/futpro-manager.jpg", width: 640, height: 640 }],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/og/futpro-manager.png"],
+    images: ["/og/futpro-manager.jpg"],
   },
   icons: {
     icon: "/icon.svg",
