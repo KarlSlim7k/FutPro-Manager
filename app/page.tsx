@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_MX",
     siteName: "FutPro Manager",
-    images: [{ url: "/og/futpro-manager.png", width: 1200, height: 630 }],
+    images: [{ url: "/og/futpro-manager.png", width: 640, height: 640 }],
   },
   twitter: {
     card: "summary_large_image",
