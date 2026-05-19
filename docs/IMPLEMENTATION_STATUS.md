@@ -137,7 +137,7 @@ Estado actual del MVP:
 
 ## Pendientes post-MVP
 
-1. Auditoría operativa visible en UI.
+1. Auditoría avanzada/global/exportable y cobertura exhaustiva de acciones.
 2. Media uploads integrados por entidad.
 3. Roles avanzados y permisos granulares por feature.
 4. Suscripciones/pagos y operación comercial SaaS.
@@ -153,9 +153,14 @@ Estado actual del MVP:
 ## Última actualización
 
 - Fecha: 2026-05-19
-- Branch: (actual)
-- Commit/PR: Working tree local (hardening standings pre-MVP)
-- Nota: Hardening pre-MVP de standings implementado con auditoría manual/automática, warning por inconsistencias y revalidación de rutas dashboard/públicas.
+- Branch: main
+- Commit/PR:
+  - Standings hardening: PR #11 / merge `383770d`
+  - QA RC pre-MVP: commit `5069204`
+- Nota:
+  - Standings hardening MVP implementado.
+  - QA Release Candidate pre-MVP ejecutada.
+  - Resultado: Go with caveats → MVP controlled test.
 
 ### Historial relevante
 

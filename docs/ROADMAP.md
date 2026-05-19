@@ -88,6 +88,6 @@ Pulido visual/UX del dashboard, responsive, `ToolbarActions`, accesibilidad bás
 ### Fase 4 - Auditoría pre-MVP (Parcial)
 Semántica, links externos, controles de formulario, densidad mobile y documentación del sistema visual.
 
-### Fase 5 - QA visual final (En ejecución / RC pre-MVP realizado)
+### Fase 5 - QA visual final (RC pre-MVP realizado)
 - QA Release Candidate pre-MVP ejecutada (2026-05-19): lint/build en verde, validación transversal por code review y checklist consolidado en `docs/QA_RELEASE_CANDIDATE.md`.
-- Pendiente: validación visual cross-browser/manual con navegador real y QA funcional multi-cuenta por rol.
+- Pendiente: QA manual cross-browser con navegador real y QA funcional multi-cuenta por rol.

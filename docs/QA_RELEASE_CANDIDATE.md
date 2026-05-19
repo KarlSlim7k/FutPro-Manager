@@ -3,9 +3,10 @@
 ## Meta
 - **Fecha:** 2026-05-19
 - **Repositorio:** `FutPro-Manager`
-- **Branch probado:** `work`
-- **Commit base probado:** `b55b7b0`
+- **Branch probado:** `main`
+- **Commit base probado:** `5069204`
 - **Entorno de prueba:** Local CLI (sin navegador gráfico), build de Next.js, revisión de código, sin mutaciones de datos reales.
+- **Nota de trazabilidad:** Incluye cambios previos de standings hardening mergeados en PR #11 / `383770d`.
 
 ## Comandos ejecutados
 - `npm run lint` ✅
