@@ -91,3 +91,6 @@ Semántica, links externos, controles de formulario, densidad mobile y documenta
 ### Fase 5 - QA visual final (RC pre-MVP realizado)
 - QA Release Candidate pre-MVP ejecutada (2026-05-19): lint/build en verde, validación transversal por code review y checklist consolidado en `docs/QA_RELEASE_CANDIDATE.md`.
 - Pendiente: QA manual cross-browser con navegador real y QA funcional multi-cuenta por rol.
+
+
+- Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.

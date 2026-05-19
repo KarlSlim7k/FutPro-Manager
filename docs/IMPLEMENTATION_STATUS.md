@@ -172,3 +172,6 @@ Estado actual del MVP:
 - 2026-05-04: QA publico real y fix menor en `PublicNav` (`4840694e`).
 - 2026-05-04: Hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas segun rol).
 - 2026-05-04: Detalle publico de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
+
+
+- Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.

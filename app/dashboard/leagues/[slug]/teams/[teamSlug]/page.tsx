@@ -6,6 +6,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { EntityImagePreview } from "@/components/media/entity-image-preview";
+import { EntityImageUploadForm } from "@/components/media/entity-image-upload-form";
+import { updateTeamLogoAction } from "@/app/dashboard/leagues/[slug]/teams/[teamSlug]/media/actions";
 import type { League, Team } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -80,6 +84,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   }
 
   const team = teamData as TeamDetail;
+  const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: league.id });
 
   return (
     <section className="space-y-6">
@@ -180,6 +185,13 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           </div>
         </CardContent>
       </Card>
+
+      <Card><CardHeader><CardTitle>Logo de equipo</CardTitle></CardHeader><CardContent className="space-y-4">
+        <EntityImagePreview imageUrl={team.logo_url} alt={`Logo de ${team.name}`} label="Logo" />
+        {permissions.canManageCatalog ? (
+          <EntityImageUploadForm action={updateTeamLogoAction.bind(null, league.slug, team.slug)} helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB." buttonText="Actualizar logo" />
+        ) : null}
+      </CardContent></Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>

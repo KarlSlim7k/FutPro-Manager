@@ -2,6 +2,9 @@ import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
+import { EntityImagePreview } from "@/components/media/entity-image-preview";
+import { EntityImageUploadForm } from "@/components/media/entity-image-upload-form";
+import { updateLeagueLogoAction } from "@/app/dashboard/leagues/[slug]/media/actions";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
@@ -9,7 +12,7 @@ import type { League } from "@/types/database";
 
 type LeagueDetail = Pick<
   League,
-  "id" | "name" | "slug" | "region" | "city" | "state" | "country" | "status" | "is_public" | "created_at"
+  "id" | "name" | "slug" | "logo_url" | "region" | "city" | "state" | "country" | "status" | "is_public" | "created_at"
 >;
 
 interface LeagueDetailPageProps {
@@ -46,7 +49,7 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
 
   const { data, error } = await supabase
     .from("leagues")
-    .select("id, name, slug, region, city, state, country, status, is_public, created_at")
+    .select("id, name, slug, logo_url, region, city, state, country, status, is_public, created_at")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -120,6 +123,20 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
             <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDate(league.created_at)}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Logo de liga</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <EntityImagePreview imageUrl={league.logo_url} alt={`Logo de ${league.name}`} label="Logo" />
+          {permissions.canManageLeague ? (
+            <EntityImageUploadForm
+              action={updateLeagueLogoAction.bind(null, league.slug)}
+              helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB."
+              buttonText="Actualizar logo"
+            />
+          ) : null}
         </CardContent>
       </Card>
 

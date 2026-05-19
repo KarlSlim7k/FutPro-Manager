@@ -6,6 +6,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { EntityImagePreview } from "@/components/media/entity-image-preview";
+import { EntityImageUploadForm } from "@/components/media/entity-image-upload-form";
+import { updatePlayerPhotoAction } from "@/app/dashboard/leagues/[slug]/players/[playerId]/media/actions";
 import type { DominantFoot, League, Player, PlayerStatus } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -86,6 +90,7 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
   }
 
   const player = playerData as PlayerDetail;
+  const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: league.id });
 
   return (
     <section className="space-y-6">
@@ -155,6 +160,13 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
           </div>
         </CardContent>
       </Card>
+
+      <Card><CardHeader><CardTitle>Foto de jugador</CardTitle></CardHeader><CardContent className="space-y-4">
+        <EntityImagePreview imageUrl={player.photo_url} alt={`Foto de ${player.full_name}`} label="Foto" />
+        {permissions.canManageCatalog ? (
+          <EntityImageUploadForm action={updatePlayerPhotoAction.bind(null, league.slug, player.id)} helpText="Permitidos: JPG, PNG, WEBP. Máximo: 3 MB." buttonText="Actualizar foto" />
+        ) : null}
+      </CardContent></Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>

@@ -211,3 +211,18 @@ export interface AuditLog {
   /** Schema artifact — audit records are immutable; this field is not updated in practice. */
   updated_at: string;
 }
+
+
+export interface MediaUpload {
+  id: string;
+  league_id: string;
+  uploaded_by: string;
+  bucket: string;
+  path: string;
+  entity_type: string;
+  entity_id: string | null;
+  mime_type: string | null;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
+}

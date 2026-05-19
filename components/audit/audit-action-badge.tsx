@@ -7,6 +7,9 @@ const actionVariantMap: Record<string, StatusBadgeVariant> = {
   "standings.recalculated_manual": "success",
   "standings.recalculated_auto": "info",
   "standings.recalculate_failed": "danger",
+  "media.league_logo_updated": "info",
+  "media.team_logo_updated": "info",
+  "media.player_photo_updated": "success",
 };
 
 interface AuditActionBadgeProps {
