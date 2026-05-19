@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input";
 
 type AuthMode = "login" | "register";
 
+type LoginFormProps = {
+  initialMode?: AuthMode;
+};
+
 function mapAuthError(message: string) {
   const normalizedMessage = message.toLowerCase();
 
@@ -30,10 +34,10 @@ function mapAuthError(message: string) {
   return "No se pudo completar la operación. Inténtalo nuevamente.";
 }
 
-export function LoginForm() {
+export function LoginForm({ initialMode = "login" }: LoginFormProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
