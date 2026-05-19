@@ -123,7 +123,17 @@ Estado actual del MVP:
 1. Consolidar ejecución event-driven real para standings (jobs/background/queue/triggers), manteniendo auditoría ya instrumentada.
 2. ~~Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).~~ ✅ Implementado.
 3. ~~Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).~~ ✅ Hardening UX implementado (ocultar CTAs administrativas para usuarios sin permisos). QA funcional por rol pendiente si hay segunda cuenta disponible.
-4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados.
+4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados (RC pre-MVP ejecutado el 2026-05-19; pendientes: validación multi-cuenta real y navegador gráfico).
+
+
+## QA Release Candidate pre-MVP (2026-05-19)
+
+- **Documento fuente:** `docs/QA_RELEASE_CANDIDATE.md`.
+- **Resultado de comandos:** `npm run lint` ✅, `npm run build` ✅, `npm test` no configurado.
+- **Validado:** build/lint, árbol de rutas públicas y dashboard, preservación de guardrails de permisos/auditoría/standings por code review.
+- **Code-reviewed only:** flujos funcionales con mutación real (roles, árbitros, recálculo manual/automático) y responsive visual real.
+- **Pendiente por entorno:** QA multi-cuenta por rol y validación responsive con navegador gráfico.
+- **Recomendación:** **Go with caveats** → MVP candidate listo para pruebas controladas, no para producción comercial completa.
 
 ## Pendientes post-MVP
 
