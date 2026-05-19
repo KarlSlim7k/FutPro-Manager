@@ -157,15 +157,22 @@ Estado actual del MVP:
 - Fecha: 2026-05-19
 - Branch: main
 - Commit/PR:
-  - Standings hardening: PR #11 / merge `383770d`
-  - QA RC pre-MVP: commit `5069204`
+  - Media Uploads MVP: `a4f6e86`
+  - Storage setup: `ace2702`
+  - QA real media uploads: `5f748f7`
+  - Public player reads/RLS: `1c1fb58`
 - Nota:
-  - Standings hardening MVP implementado.
-  - QA Release Candidate pre-MVP ejecutada.
-  - Resultado: Go with caveats → MVP controlled test.
+  - Media Uploads MVP implementado y validado con usuario QA.
+  - Storage `league-media` configurado.
+  - Detalle público de jugador habilitado para ligas públicas activas.
+  - Resultado sigue siendo: Go with caveats → MVP controlled test.
 
 ### Historial relevante
 
+- 2026-05-19: Media Uploads MVP implementado (`a4f6e86`).
+- 2026-05-19: Setup real de Storage completado para `league-media` (`ace2702`).
+- 2026-05-19: QA real de media uploads validada con usuario dedicado (`5f748f7`).
+- 2026-05-19: Policy pública mínima para `players` en ligas públicas activas (`1c1fb58`).
 - 2026-05-18: Hardening Fase 6 - filtros de auditoria validados server-side (`action`/`entityType`) y cleanup documental de Fase 6.
 - 2026-05-18: Fase 6C - Auditoria visible en UI (`app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`, `lib/audit/create-audit-log.ts`, helper extendido con `canViewAuditLogs`/`canManageAuditLogs`).
 - 2026-05-18: Fase 6B - Asignacion basica de arbitros a partidos (`app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/*`, helper extendido con `canAssignReferees`/`canViewRefereeAssignments`).

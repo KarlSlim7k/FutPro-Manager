@@ -60,11 +60,11 @@
 - **Fase 6C - Auditoria visible en UI (Implementado + hardening menor):** Vista de auditoria por liga en `/dashboard/leagues/[slug]/audit`. Solo accesible para `super_admin` y `league_admin`. Filtros por accion, tipo de entidad, actor y rango de fechas via query params; `action` y `entityType` con validacion server-side por allowlist (valores invalidos se ignoran sin crash). Instrumentacion best-effort en `updateMemberRoleAction` (`member.role_updated`) y `updateMatchRefereeAction` (`match.referee_updated` / `match.referee_removed`). Sin cambios a schema, RLS ni migraciones. Sin service role.
 - Pendiente: asignaciones avanzadas con historial, permisos granulares por feature, consola completa de roles.
 
-### Media Uploads MVP (Implementado; setup operativo externo)
+### Media Uploads MVP (Implementado y validado; hardening post-MVP pendiente)
 - ✅ Upload de logo de liga, logo de equipo y foto de jugador implementado en dashboard.
 - ✅ Validación server-side de MIME/tamaño + registro de metadata en `media_uploads` + auditoría best-effort (`media.*`).
 - ✅ Hardening UX: `accept` configurable por tipo de entidad (SVG solo para logos).
-- ⚠️ Requiere setup manual por entorno en Supabase Storage: bucket `league-media` + policies.
+- ✅ Bucket `league-media` y policies de Supabase Storage configuradas y verificadas en entorno real (2026-05-19).
 - **Post-MVP:** cleanup de huérfanos, borrado físico, crop/resize, múltiples imágenes, avatares y CDN/custom domain.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)
