@@ -4,6 +4,9 @@ const actionVariantMap: Record<string, StatusBadgeVariant> = {
   "member.role_updated": "info",
   "match.referee_updated": "success",
   "match.referee_removed": "warning",
+  "standings.recalculated_manual": "success",
+  "standings.recalculated_auto": "info",
+  "standings.recalculate_failed": "danger",
 };
 
 interface AuditActionBadgeProps {

@@ -7,7 +7,7 @@ El MVP de FutPro Manager ya cuenta con autenticación, rutas protegidas de dashb
 Estado actual del MVP:
 
 - **Funcionando**: login, protección de rutas, navegación de dashboard, CRUD base de ligas/temporadas/equipos/jugadores/sedes/partidos, captura de resultado y eventos, y consulta de standings.
-- **Parcialmente listo**: standings (vista activa, recálculo manual y recálculo automático al guardar resultados que impactan `completed`; pendientes avanzados de automatización/eventos).
+- **Funcionando**: standings con hardening MVP (recálculo manual + automático, auditoría best-effort de recálculos, warnings controlados por inconsistencias y revalidación dashboard/pública).
 - **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI y cobertura de QA end-to-end.
 - **Solo en base técnica (schema/RLS)**: media uploads, auditoría y suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
 
@@ -70,10 +70,11 @@ Estado actual del MVP:
 - **Pendiente:** mayor trazabilidad y auditoría de cambios en UI.
 
 ### Tabla de posiciones
-- **Estado:** Implementado (con mejoras pendientes).
+- **Estado:** Implementado con hardening MVP.
 - **Evidencia en repo:** `app/dashboard/leagues/[slug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/actions.ts`, `components/standings/*`.
 - **Funcionalidad existente:** consulta por temporada desde datos reales (`leagues`, `seasons`, `standings`, `teams`), vista desktop/mobile, recálculo manual y recálculo automático al guardar resultados de partidos cuando el estado queda en `completed` o deja de estarlo.
-- **Pendiente:** automatización avanzada por eventos, auditoría de recalculos y estrategia de jobs/background para cargas mayores.
+- **Implementado en hardening MVP:** resultado enriquecido del recálculo (`rowsCount`, `skippedMatchesCount`, resumen de filas), auditoría manual (`standings.recalculated_manual`), auditoría automática (`standings.recalculated_auto`) y auditoría de fallo (`standings.recalculate_failed`) con best-effort sin bloquear guardado del partido.
+- **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial de standings y reglas avanzadas de desempate.
 
 ### Roles y permisos
 - **Estado:** Parcial (base tecnica + hardening UX + administracion de miembros por liga + asignacion basica de arbitros implementada).
@@ -119,7 +120,7 @@ Estado actual del MVP:
 
 ## Pendientes críticos antes del MVP
 
-1. Consolidar automatización avanzada de standings (event-driven/auditable) y estrategia de ejecución en background.
+1. Consolidar ejecución event-driven real para standings (jobs/background/queue/triggers), manteniendo auditoría ya instrumentada.
 2. ~~Completar vista pública mínima para consulta externa (ligas, calendario/partidos y tabla).~~ ✅ Implementado.
 3. ~~Validar end-to-end permisos por rol en flujos críticos (partidos, resultados, eventos, edición de entidades).~~ ✅ Hardening UX implementado (ocultar CTAs administrativas para usuarios sin permisos). QA funcional por rol pendiente si hay segunda cuenta disponible.
 4. Ejecutar QA funcional y responsive completa sobre módulos ya implementados.
@@ -141,10 +142,10 @@ Estado actual del MVP:
 
 ## Última actualización
 
-- Fecha: 2026-05-18
-- Branch: main
-- Commit/PR: PR #9 / merge fba1e3d
-- Nota: Fase 6C implementada y hardening posterior de filtros de auditoria (validacion server-side de `action` y `entityType`, con fallback seguro para valores invalidos).
+- Fecha: 2026-05-19
+- Branch: (actual)
+- Commit/PR: Working tree local (hardening standings pre-MVP)
+- Nota: Hardening pre-MVP de standings implementado con auditoría manual/automática, warning por inconsistencias y revalidación de rutas dashboard/públicas.
 
 ### Historial relevante
 
