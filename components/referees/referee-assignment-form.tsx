@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateMatchRefereeAction } from "@/app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions";
+import { Button } from "@/components/ui/button";
 
 interface RefereeAssignmentFormProps {
   leagueSlug: string;
@@ -24,32 +25,31 @@ export function RefereeAssignmentForm({
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
+      <label htmlFor="referee-select" className="sr-only">
+        Árbitro
+      </label>
       <select
+        id="referee-select"
         name="refereeId"
         defaultValue={currentRefereeId ?? ""}
-        className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+        disabled={isPending}
+        className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
       >
-        <option value="">Sin arbitro (quitar asignacion)</option>
+        <option value="">Sin árbitro (quitar asignación)</option>
         {availableReferees.map((referee) => (
           <option key={referee.id} value={referee.id}>
             {referee.name}
           </option>
         ))}
       </select>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-      >
-        {isPending ? "..." : "Asignar"}
-      </button>
-      {state.message && (
-        <p
-          className={`text-xs ${state.success ? "text-emerald-600" : "text-red-600"}`}
-        >
+      <Button type="submit" size="sm" disabled={isPending}>
+        {isPending ? "Guardando..." : "Asignar"}
+      </Button>
+      {state.message ? (
+        <p className={`text-xs ${state.success ? "text-emerald-600" : "text-red-600"}`}>
           {state.message}
         </p>
-      )}
+      ) : null}
     </form>
   );
 }

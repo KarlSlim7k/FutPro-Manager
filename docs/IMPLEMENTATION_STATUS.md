@@ -137,6 +137,21 @@ Estado actual del MVP:
 - **Pendiente por entorno:** QA multi-cuenta por rol y validación responsive con navegador gráfico.
 - **Recomendación:** **Go with caveats** → MVP candidate listo para pruebas controladas, no para producción comercial completa.
 
+## QA UI/UX pre-MVP (2026-05-19)
+
+- **Documento fuente:** `docs/QA_UI_UX_PRE_MVP.md`.
+- **Commit base:** `dfcea05`.
+- **Resultado de comandos:** `npm run lint` ✅, `npm run build` ✅ (34 rutas).
+- **Validado:** auditoría visual, semántica, accesibilidad, formularios, consistencia visual y permisos por code review.
+- **Fixes aplicados:**
+  - `entity-image-upload-form.tsx`: label en input file, botón `Button` component.
+  - `referee-assignment-form.tsx`: label `sr-only` en select, botón `Button` component, `disabled` en select.
+  - `league-member-role-form.tsx`: label `sr-only` en select, botón `Button` component, `disabled` en select.
+  - `standings-table-view.tsx`: `scope="col"` y `title` descriptivos en todos los `<th>`.
+  - `create-player-form.tsx`: help text en campo `photo_url`.
+- **UI/UX Fase 4:** Completada para MVP.
+- **UI/UX Fase 5:** QA visual pre-MVP ejecutado; pendientes cross-browser/multi-cuenta documentados.
+
 ## Pendientes post-MVP
 
 1. Auditoría avanzada/global/exportable y cobertura exhaustiva de acciones.
@@ -161,14 +176,17 @@ Estado actual del MVP:
   - Storage setup: `ace2702`
   - QA real media uploads: `5f748f7`
   - Public player reads/RLS: `1c1fb58`
+  - QA UI/UX pre-MVP + fixes accesibilidad: `dfcea05` (base)
 - Nota:
   - Media Uploads MVP implementado y validado con usuario QA.
   - Storage `league-media` configurado.
   - Detalle público de jugador habilitado para ligas públicas activas.
+  - QA UI/UX Fase 4 y Fase 5 completadas para MVP: accesibilidad, semántica, formularios y consistencia visual corregidos.
   - Resultado sigue siendo: Go with caveats → MVP controlled test.
 
 ### Historial relevante
 
+- 2026-05-19: QA UI/UX pre-MVP completado — fixes de accesibilidad, semántica y consistencia visual (`docs/QA_UI_UX_PRE_MVP.md`).
 - 2026-05-19: Media Uploads MVP implementado (`a4f6e86`).
 - 2026-05-19: Setup real de Storage completado para `league-media` (`ace2702`).
 - 2026-05-19: QA real de media uploads validada con usuario dedicado (`5f748f7`).

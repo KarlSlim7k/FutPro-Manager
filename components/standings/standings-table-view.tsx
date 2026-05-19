@@ -16,34 +16,34 @@ export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/le
       <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
         <thead className="bg-gray-50">
           <tr className="text-left text-gray-500">
-            <th className="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               <Eyebrow as="span">#</Eyebrow>
             </th>
-            <th className="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               <Eyebrow as="span">Equipo</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Partidos jugados">
               <Eyebrow as="span">PJ</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Ganados">
               <Eyebrow as="span">G</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Empatados">
               <Eyebrow as="span">E</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Perdidos">
               <Eyebrow as="span">P</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Goles a favor">
               <Eyebrow as="span">GF</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Goles en contra">
               <Eyebrow as="span">GC</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Diferencia de goles">
               <Eyebrow as="span">DG</Eyebrow>
             </th>
-            <th className="px-4 py-3 text-center">
+            <th scope="col" className="px-4 py-3 text-center" title="Puntos">
               <Eyebrow as="span" className="font-bold text-gray-900">PTS</Eyebrow>
             </th>
           </tr>

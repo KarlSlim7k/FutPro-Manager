@@ -122,6 +122,9 @@ export function CreatePlayerForm({ leagueSlug }: CreatePlayerFormProps) {
           placeholder="https://..."
           defaultValue={state.values.photo_url}
         />
+        <p className="text-xs text-gray-500">
+          Preferible usar la opción de subir imagen desde el detalle del jugador.
+        </p>
         {state.fieldErrors.photo_url ? <p className="text-sm text-red-600">{state.fieldErrors.photo_url}</p> : null}
       </div>
 
