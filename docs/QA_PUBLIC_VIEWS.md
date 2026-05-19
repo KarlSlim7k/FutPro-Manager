@@ -155,3 +155,8 @@ docs: record public views qa
 - Validado fallback seguro cuando faltan `team_id`, `player_id` o `notes` (texto "No especificado" y layout sin ruptura).
 - Validado empty state general cuando no hay eventos y empty state específico cuando un filtro no tiene resultados.
 - Validado enlace público de jugador desde evento: `/liga/[slug]/players/[playerId]`.
+
+
+## Referencia cruzada
+
+- Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.

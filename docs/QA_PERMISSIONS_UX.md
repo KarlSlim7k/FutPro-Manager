@@ -175,3 +175,8 @@ Validación del hardening UX de permisos en el dashboard de FutPro Manager.
 ### Fecha
 
 2026-05-18
+
+
+## Referencia cruzada
+
+- Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.

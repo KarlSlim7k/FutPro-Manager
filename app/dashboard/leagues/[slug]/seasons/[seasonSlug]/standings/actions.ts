@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -120,14 +121,39 @@ export async function recalculateStandingsAction(
     };
   }
 
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "standings.recalculated_manual",
+    entityType: "season",
+    entityId: season.id,
+    metadata: {
+      league_slug: leagueSlug,
+      season_slug: seasonSlug,
+      teams_count: recalculateResult.teamsCount,
+      matches_count: recalculateResult.matchesCount,
+      rows_count: recalculateResult.rowsCount,
+      skipped_matches_count: recalculateResult.skippedMatchesCount,
+      trigger: "manual",
+    },
+  });
+
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/standings`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonSlug}/standings`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons/${seasonSlug}`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+  revalidatePath(`/dashboard`);
+  revalidatePath(`/liga/${leagueSlug}/standings`);
+  revalidatePath(`/liga/${leagueSlug}`);
 
   return {
     formError: null,
     success: true,
-    message: `Tabla recalculada correctamente: ${recalculateResult.teamsCount} equipos, ${recalculateResult.matchesCount} partidos finalizados.`,
+    message:
+      recalculateResult.skippedMatchesCount > 0
+        ? `Tabla recalculada correctamente: ${recalculateResult.teamsCount} equipos, ${recalculateResult.matchesCount} partidos finalizados. Advertencia: ${recalculateResult.skippedMatchesCount} partidos fueron ignorados por inconsistencias de equipos.`
+        : `Tabla recalculada correctamente: ${recalculateResult.teamsCount} equipos, ${recalculateResult.matchesCount} partidos finalizados.`,
     teamsCount: recalculateResult.teamsCount,
     matchesCount: recalculateResult.matchesCount,
   };
