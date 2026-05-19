@@ -10,7 +10,7 @@ Estado actual del MVP:
 - **Funcionando**: standings con hardening MVP (recálculo manual + automático, auditoría best-effort de recálculos, warnings controlados por inconsistencias y revalidación dashboard/pública).
 - **Falta para MVP operativo completo**: robustecer automatización avanzada de standings (eventos/auditoría/jobs), robustecer roles avanzados en UI y cobertura de QA end-to-end.
 - **Solo en base técnica (schema/RLS)**: suscripciones/pagos con tablas/políticas existentes pero sin flujo UI/negocio completo.
-- **Implementado con dependencia operativa externa**: media uploads MVP (requiere bucket/policies de Supabase Storage por entorno).
+- **Implementado con setup operativo externo verificado**: media uploads MVP (`league-media` y policies de Supabase Storage configuradas en el proyecto `wyntbcsgnbpznimcixqb`).
 
 ## Leyenda de estado
 
@@ -102,9 +102,9 @@ Estado actual del MVP:
 - **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
 
 ### Media uploads
-- **Estado:** Implementado para MVP; requiere setup operativo de Storage.
+- **Estado:** Implementado para MVP; setup operativo de Storage verificado.
 - **Evidencia en repo:** `lib/media/upload-media.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/entity-image-preview.tsx`, server actions de media en liga/equipo/jugador, `docs/QA_MEDIA_UPLOADS.md`, `docs/STORAGE_SETUP.md`.
-- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage.
+- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage. Bucket `league-media` público y policies de lectura/upload verificadas en Supabase (2026-05-19).
 - **Pendiente:** hardening post-MVP (cleanup de huérfanos, borrado físico, transformaciones/crop/resize, múltiples imágenes, avatares, CDN/custom domain).
 
 ### Auditoría

@@ -23,13 +23,19 @@ Fecha: 2026-05-19
 - [x] No se tocaron migraciones/schema/RLS.
 
 ## Setup manual requerido
-- Crear bucket `league-media` en Supabase Storage.
-- Configurar políticas de Storage compatibles con usuarios autenticados autorizados.
+- Bucket `league-media` creado/verificado en Supabase Storage (2026-05-19).
+- Bucket público verificado (`public = true`) porque la app usa `getPublicUrl`.
+- Policies de Storage creadas/verificadas:
+  - `Public read league media`: `SELECT` para `public` con `bucket_id = 'league-media'`.
+  - `Authenticated upload league media`: `INSERT` para `authenticated` con `bucket_id = 'league-media'` y `name like 'leagues/%'`.
 - Mantener RLS de `media_uploads` permitiendo inserts a actores autorizados.
 
 ## QA operativo pendiente / real
-- [ ] Bucket `league-media` existe.
-- [ ] Bucket es público o la app usa URLs públicas compatibles.
+- [x] Bucket `league-media` existe.
+- [x] Bucket es público o la app usa URLs públicas compatibles.
+- [x] Policy de lectura pública existe para `league-media`.
+- [x] Policy de insert autenticado existe bajo `leagues/%`.
+- [x] Validación segura sin persistencia: `anon` puede leer sin error y `authenticated` puede insertar bajo `leagues/%` dentro de transacción revertida.
 - [ ] Usuario `league_admin` puede subir logo de liga.
 - [ ] Usuario `league_admin` puede subir logo de equipo.
 - [ ] Usuario `league_admin` puede subir foto de jugador.
@@ -40,6 +46,10 @@ Fecha: 2026-05-19
 - [ ] Audit logs aparecen en auditoría.
 - [ ] Vistas públicas muestran imagen o fallback.
 - [ ] Error controlado cuando bucket/policy falta.
+
+## Smoke test Storage
+- Smoke test físico por Storage API no ejecutado porque este entorno no tiene una sesión de usuario autenticado de la app para probar el flujo real sin usar `service_role`.
+- No se dejaron objetos de prueba persistidos en `league-media`.
 
 ## Pendientes post-MVP
 - Borrado físico y cleanup de huérfanos.

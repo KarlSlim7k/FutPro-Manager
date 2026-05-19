@@ -2,7 +2,20 @@
 
 Fecha: 2026-05-19
 
-Este documento describe el setup operativo manual de Supabase Storage para que Media Uploads MVP funcione end-to-end.
+Este documento describe el setup operativo de Supabase Storage para que Media Uploads MVP funcione end-to-end.
+
+## Setup real verificado
+
+- Fecha: 2026-05-19
+- Proyecto Supabase: `wyntbcsgnbpznimcixqb`
+- URL del proyecto: `https://wyntbcsgnbpznimcixqb.supabase.co`
+- Bucket `league-media`: creado/verificado.
+- Bucket público: `true`.
+- Policy `Public read league media`: creada/verificada para `SELECT` con rol `public`.
+- Policy `Authenticated upload league media`: creada/verificada para `INSERT` con rol `authenticated`.
+- Condición de upload: `bucket_id = 'league-media'` y `name like 'leagues/%'`.
+- Smoke test físico por Storage API: no ejecutado porque no hay sesión de usuario autenticado de la app disponible en este entorno.
+- Validación segura ejecutada: lectura como `anon` sin error e inserción como `authenticated` bajo `leagues/storage-smoke-test/test.txt` dentro de transacción revertida. No quedaron objetos de prueba persistidos.
 
 ## Bucket requerido
 
