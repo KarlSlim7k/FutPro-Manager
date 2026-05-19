@@ -2,11 +2,11 @@
 
 ## Diagnóstico Breve
 
-- La landing actual está en `app/page.tsx`; ya tiene hero, CTAs y una card de “Plataforma SaaS”, pero el CTA principal actual prioriza “Iniciar sesión”, “Crear cuenta” apunta a `/login` sin abrir registro y todavía aparece copy interno tipo “MVP”.
-- No existe ruta `/register`; el flujo real de registro está dentro de `components/auth/login-form.tsx` como modo interno `login/register`.
+- La landing actual está en `app/page.tsx`; ya tiene hero, CTAs y una card de “Plataforma SaaS”, pero el CTA principal actual prioriza “Iniciar sesión”, “Crear cuenta” apunta a `/login` sin abrir registro y todavía aparece copy interno tipo “MVP”. La landing tiene **4 CTAs** activos: “Iniciar sesión”, “Crear cuenta”, un anchor interno `#sistema` (“Conocer el sistema”) y “Consultar Liga Municipal Perote”; el plan de cambio debe contemplar los 4.
+- No existe ruta `/register`; el flujo real de registro está dentro de `components/auth/login-form.tsx` como modo interno `login/register`. `LoginForm` no acepta props; siempre arranca en modo `login`. `app/login/page.tsx` tampoco lee `searchParams`; ambos archivos deben modificarse para soportar `/login?mode=register`.
 - Las vistas públicas bajo `/liga/[slug]` ya funcionan con Supabase/RLS y tienen metadata básica, pero OpenGraph/Twitter aún son mínimos y no hay imagen OG ni `metadataBase`.
 - Las páginas públicas de detalle de partido, equipo y jugador no tienen breadcrumbs. El detalle de jugador es el punto más débil visualmente: JSX comprimido, estados crudos, poca jerarquía y links incompletos.
-- No existe `/liga/[slug]/teams`; los equipos son descubribles desde standings o partidos, pero no desde una lista pública dedicada.
+- No existe `app/liga/[slug]/teams/page.tsx` (el directorio `app/liga/[slug]/teams/` sí existe con su subruta `[teamSlug]`); los equipos son descubribles desde standings o partidos, pero no desde una lista pública dedicada. Solo se necesita crear el archivo `page.tsx`, no el directorio.
 
 ## Fase 1: Quick Wins de Conversión y Copy
 
@@ -24,8 +24,9 @@ Alinear la landing con conversión SaaS: una acción principal clara, registro d
 
 - Cambiar el orden de CTAs del hero:
   - Primario: `Crear cuenta` → `/login?mode=register`
-  - Secundario: `Ver liga demo` → `/liga/liga-municipal-perote`
+  - Secundario: `Ver liga demo` → `/liga/liga-municipal-perote` (renombra el CTA actual “Consultar Liga Municipal Perote”)
   - Link menor: `Iniciar sesión` → `/login`
+  - Anchor `Conocer el sistema` → eliminar o convertir en link menor de texto; no es CTA de conversión
 - Hacer que `LoginForm` acepte un `initialMode` y que `app/login/page.tsx` lea `searchParams.mode`.
 - Mantener `/login` como login por defecto; usar `/login?mode=register` para abrir registro sin crear una ruta nueva.
 - Reemplazar el texto “MVP enfocado…” por copy comercial, por ejemplo: “Diseñado para reducir trabajo administrativo, publicar información clara y mantener a equipos y jugadores al día.”
@@ -107,7 +108,7 @@ Mejorar orientación y descubribilidad en vistas públicas.
 - `app/liga/[slug]/matches/[matchId]/page.tsx`
 - `app/liga/[slug]/teams/[teamSlug]/page.tsx`
 - `app/liga/[slug]/players/[playerId]/page.tsx`
-- Nuevo: `app/liga/[slug]/teams/page.tsx`
+- Nuevo archivo (directorio ya existe): `app/liga/[slug]/teams/page.tsx`
 
 **Cambios concretos**
 
