@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LeagueCard } from "@/components/leagues/league-card";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
@@ -38,9 +38,12 @@ export default async function LeaguesPage() {
         title="Ligas"
         description="Visualiza las ligas disponibles para tu usuario según las políticas RLS."
         action={
-          <Button variant="secondary" disabled>
-            Crear liga (próximamente)
-          </Button>
+          <Link
+            href="/dashboard/leagues/new"
+            className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+          >
+            Crear liga
+          </Link>
         }
       />
 
