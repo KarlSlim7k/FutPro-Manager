@@ -31,7 +31,7 @@ Estado actual del MVP:
 ### Dashboard
 - **Estado:** Implementado.
 - **Evidencia en repo:** `app/dashboard/page.tsx`, `components/dashboard/header.tsx`, `components/dashboard/sidebar.tsx`.
-- **Funcionalidad existente:** home de dashboard y navegación base a módulos de liga.
+- **Funcionalidad existente:** home de dashboard y navegación base a módulos de liga. Sidebar con active state via `usePathname`. Accesos globales de Equipos, Jugadores y Partidos funcionan como hubs de selección de liga; "Tipos" tiene página placeholder/roadmap honesta.
 - **Pendiente:** métricas avanzadas y widgets operativos adicionales.
 
 ### Ligas
@@ -114,7 +114,11 @@ Estado actual del MVP:
 - **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas; `action` y `entityType` validados server-side con allowlist (valores invalidos se ignoran sin crash); helper best-effort de insercion `createAuditLog`; instrumentacion en cambio de rol de miembro (`member.role_updated`) y asignacion/remocion de arbitro (`match.referee_updated`/`match.referee_removed`). Visible solo para `super_admin` y `league_admin`. Sin cambios a schema/RLS/migraciones.
 - **Pendiente:** Instrumentacion exhaustiva de todos los server actions; auditoria automatica via triggers SQL o event bus; auditoria global para `super_admin`; exportacion CSV/PDF; retencion avanzada; filtros full-text.
 
-### Suscripciones / pagos
+### Tipos y catálogos
+- **Estado:** Pendiente / Roadmap.
+- **Evidencia en repo:** `app/dashboard/types/page.tsx`.
+- **Funcionalidad existente:** página placeholder honesta que documenta los catálogos actuales (tipos de evento, estados de jugador, categorías, tipos de temporada) y su estado actual (definidos en schema/código, sin UI de configuración).
+- **Pendiente:** diseño de tablas de catálogo, CRUD de valores controlados, integración con módulos consumidores.
 - **Estado:** Base técnica existente.
 - **Evidencia en repo:** `subscription_plans` y `league_subscriptions` en docs/schema.
 - **Funcionalidad existente:** modelo de datos inicial para evolución SaaS.
