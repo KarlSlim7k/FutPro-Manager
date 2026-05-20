@@ -76,12 +76,22 @@ export default function Home() {
             </Eyebrow>
             <p className="text-xs text-gray-500">Perote, Veracruz</p>
           </div>
-          <Link
-            href="/login"
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
-          >
-            Iniciar sesión
-          </Link>
+          <nav className="flex items-center gap-3">
+            <Link
+              href="/liga/liga-municipal-perote"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-gray-600 transition hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+            >
+              Ver demo
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+            >
+              Iniciar sesión
+            </Link>
+          </nav>
         </header>
 
         {/* Hero */}
@@ -100,19 +110,15 @@ export default function Home() {
                 href="/login?mode=register"
                 className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
               >
-                Crear cuenta
+                Crear cuenta gratis
               </Link>
               <Link
                 href="/liga/liga-municipal-perote"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
               >
-                Ver liga demo
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition hover:border-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-              >
-                Iniciar sesión
+                Ver liga demo ↗
               </Link>
             </div>
           </div>
@@ -420,10 +426,10 @@ export default function Home() {
               Crear cuenta gratis
             </Link>
             <Link
-              href="/liga/liga-municipal-perote"
-              className="inline-flex items-center justify-center rounded-lg border border-emerald-700 bg-white px-6 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              href="/login"
+              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-800 transition hover:border-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             >
-              Ver liga demo
+              Iniciar sesión
             </Link>
           </div>
         </div>
