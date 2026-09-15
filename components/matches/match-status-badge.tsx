@@ -22,6 +22,18 @@ function formatStatusLabel(status: MatchStatus) {
 }
 
 export function MatchStatusBadge({ status }: MatchStatusBadgeProps) {
+  if (status === "in_progress") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600" />
+        </span>
+        EN VIVO
+      </span>
+    );
+  }
+
   const styles: Record<MatchStatus, BadgeStyle> = {
     completed: { variant: "success" },
     in_progress: { variant: "info" },

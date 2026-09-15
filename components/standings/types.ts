@@ -2,6 +2,7 @@ export type StandingTeamSummary = {
   id: string;
   name: string;
   slug: string | null;
+  logo_url?: string | null;
 };
 
 export type StandingRowViewModel = {
@@ -17,4 +18,5 @@ export type StandingRowViewModel = {
   points: number;
   updated_at?: string | null;
   team: StandingTeamSummary | null;
+  form?: ("W" | "D" | "L")[];
 };

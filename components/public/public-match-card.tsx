@@ -13,6 +13,8 @@ type PublicMatchCardProps = {
   awayScore: number;
   roundName: string | null;
   detailHref?: string;
+  homeTeamLogo?: string | null;
+  awayTeamLogo?: string | null;
 };
 
 function formatDateTime(date: string) {
@@ -32,33 +34,75 @@ export function PublicMatchCard({
   awayScore,
   roundName,
   detailHref,
+  homeTeamLogo,
+  awayTeamLogo,
 }: PublicMatchCardProps) {
   return (
     <Card className="transition hover:shadow-sm">
-      <CardHeader className="space-y-3 pb-2">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="text-lg">
-            {homeTeamName} vs {awayTeamName}
-          </CardTitle>
+      <CardHeader className="space-y-3 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {roundName || "Jornada"}
+          </span>
           <MatchStatusBadge status={status} />
         </div>
-        <p className="text-sm text-gray-600">{roundName || "Jornada no definida"}</p>
+
+        {/* Enfrentamiento con logos */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {homeTeamLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={homeTeamLogo}
+                alt=""
+                className="h-8 w-8 rounded border border-gray-200 object-contain shrink-0"
+              />
+            ) : null}
+            <CardTitle className="text-sm font-semibold truncate text-gray-900">
+              {homeTeamName}
+            </CardTitle>
+          </div>
+
+          <div className="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-center min-w-[58px]">
+            {status === "completed" || status === "in_progress" ? (
+              <span className="text-base font-bold tracking-tight text-gray-900">
+                {homeScore} – {awayScore}
+              </span>
+            ) : (
+              <span className="text-xs font-semibold text-gray-400">vs</span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 flex-1 min-w-0 text-right">
+            <CardTitle className="text-sm font-semibold truncate text-gray-900">
+              {awayTeamName}
+            </CardTitle>
+            {awayTeamLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={awayTeamLogo}
+                alt=""
+                className="h-8 w-8 rounded border border-gray-200 object-contain shrink-0"
+              />
+            ) : null}
+          </div>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-2 text-sm text-gray-700">
-        <p>
-          <span className="font-medium text-gray-900">Fecha y hora:</span> {formatDateTime(scheduledAt)}
-        </p>
-        <p>
-          <span className="font-medium text-gray-900">Sede:</span> {venueName || "Sin sede asignada"}
-        </p>
-        <p>
-          <span className="font-medium text-gray-900">Marcador:</span>{" "}
-          {status === "completed" ? `${homeScore} - ${awayScore}` : "Pendiente"}
-        </p>
+      <CardContent className="space-y-2 text-xs sm:text-sm text-gray-600 border-t border-gray-50 pt-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate">
+            <span className="font-medium text-gray-800">Fecha:</span> {formatDateTime(scheduledAt)}
+          </p>
+        </div>
+        {venueName ? (
+          <p className="truncate">
+            <span className="font-medium text-gray-800">Sede:</span> {venueName}
+          </p>
+        ) : null}
         {detailHref ? (
-          <div className="pt-1">
-            <TextLink href={detailHref}>Ver detalle</TextLink>
+          <div className="pt-2">
+            <TextLink href={detailHref}>Ver detalle del partido →</TextLink>
           </div>
         ) : null}
       </CardContent>

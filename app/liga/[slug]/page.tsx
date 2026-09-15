@@ -117,7 +117,10 @@ export default async function LeaguePublicPage({
   const resolvedMatchCount = matchCount ?? 0;
 
   const teamsMap = new Map(
-    (allTeamsData ?? []).map((t) => [t.id, { name: t.name, slug: t.slug }])
+    (allTeamsData ?? []).map((t) => [
+      t.id,
+      { name: t.name, slug: t.slug, logo_url: t.logo_url ?? null },
+    ])
   );
   const venuesMap = new Map((allVenuesData ?? []).map((v) => [v.id, v.name]));
 
@@ -267,6 +270,12 @@ export default async function LeaguePublicPage({
                           awayTeamName={
                             teamsMap.get(m.away_team_id)?.name ??
                             "Equipo visitante"
+                          }
+                          homeTeamLogo={
+                            teamsMap.get(m.home_team_id)?.logo_url ?? null
+                          }
+                          awayTeamLogo={
+                            teamsMap.get(m.away_team_id)?.logo_url ?? null
                           }
                           venueName={
                             m.venue_id ? venuesMap.get(m.venue_id) ?? null : null

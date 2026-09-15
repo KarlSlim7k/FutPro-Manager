@@ -163,18 +163,53 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
   const teamIds = [...new Set(standings.map((standing) => standing.team_id))];
 
   let teams: StandingTeamSummary[] = [];
+  const formMap = new Map<string, ("W" | "D" | "L")[]>();
+
   if (teamIds.length > 0) {
-    const { data: teamsData, error: teamsError } = await supabase
-      .from("teams")
-      .select("id, name, slug")
-      .eq("league_id", league.id)
-      .in("id", teamIds);
+    const [
+      { data: teamsData, error: teamsError },
+      { data: completedMatchesData },
+    ] = await Promise.all([
+      supabase
+        .from("teams")
+        .select("id, name, slug, logo_url")
+        .eq("league_id", league.id)
+        .in("id", teamIds),
+      supabase
+        .from("matches")
+        .select("home_team_id, away_team_id, home_score, away_score, scheduled_at")
+        .eq("league_id", league.id)
+        .eq("season_id", selectedSeason.id)
+        .eq("status", "completed")
+        .order("scheduled_at", { ascending: true }),
+    ]);
 
     if (teamsError) {
       throw teamsError;
     }
 
     teams = (teamsData ?? []) as StandingTeamSummary[];
+
+    for (const match of completedMatchesData ?? []) {
+      const hScore = match.home_score ?? 0;
+      const aScore = match.away_score ?? 0;
+      let hResult: "W" | "D" | "L" = "D";
+      let aResult: "W" | "D" | "L" = "D";
+      if (hScore > aScore) {
+        hResult = "W";
+        aResult = "L";
+      } else if (hScore < aScore) {
+        hResult = "L";
+        aResult = "W";
+      }
+      const hList = formMap.get(match.home_team_id) || [];
+      hList.push(hResult);
+      formMap.set(match.home_team_id, hList);
+
+      const aList = formMap.get(match.away_team_id) || [];
+      aList.push(aResult);
+      formMap.set(match.away_team_id, aList);
+    }
   }
 
   const teamMap = new Map(teams.map((team) => [team.id, team]));
@@ -183,6 +218,7 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
     .map((standing) => ({
       ...standing,
       team: teamMap.get(standing.team_id) ?? null,
+      form: (formMap.get(standing.team_id) || []).slice(-5),
     }))
     .sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;

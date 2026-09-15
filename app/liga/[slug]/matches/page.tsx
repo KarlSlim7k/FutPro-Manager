@@ -11,7 +11,7 @@ import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
 type SeasonOption = Pick<Season, "id" | "name" | "start_date">;
-type TeamOption = Pick<Team, "id" | "name">;
+type TeamOption = Pick<Team, "id" | "name" | "logo_url">;
 type VenueOption = Pick<Venue, "id" | "name">;
 type MatchListItem = Pick<
   Match,
@@ -101,7 +101,7 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
       .order("start_date", { ascending: false }),
     supabase
       .from("teams")
-      .select("id, name")
+      .select("id, name, logo_url")
       .eq("league_id", league.id)
       .order("name", { ascending: true }),
     supabase.from("venues").select("id, name").eq("league_id", league.id).order("name", { ascending: true }),
@@ -157,7 +157,7 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
   });
   const availableRounds = [...new Set(((matchesData ?? []) as MatchListItem[]).map((m) => m.round_name).filter(Boolean))] as string[];
 
-  const teamsMap = new Map(teams.map((team) => [team.id, team.name]));
+  const teamsMap = new Map(teams.map((team) => [team.id, team]));
   const venuesMap = new Map(venues.map((venue) => [venue.id, venue.name]));
 
   return (
@@ -210,8 +210,10 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
             {matches.map((match) => (
               <PublicMatchCard
                 key={match.id}
-                homeTeamName={teamsMap.get(match.home_team_id) ?? "Equipo local"}
-                awayTeamName={teamsMap.get(match.away_team_id) ?? "Equipo visitante"}
+                homeTeamName={teamsMap.get(match.home_team_id)?.name ?? "Equipo local"}
+                awayTeamName={teamsMap.get(match.away_team_id)?.name ?? "Equipo visitante"}
+                homeTeamLogo={teamsMap.get(match.home_team_id)?.logo_url ?? null}
+                awayTeamLogo={teamsMap.get(match.away_team_id)?.logo_url ?? null}
                 venueName={match.venue_id ? (venuesMap.get(match.venue_id) ?? null) : null}
                 scheduledAt={match.scheduled_at}
                 status={match.status}
