@@ -19,7 +19,26 @@ export default async function LoginPage({
   }
 
   const { mode } = await searchParams;
-  const initialMode = mode === "register" ? "register" : "login";
+  const initialMode =
+    mode === "register"
+      ? "register"
+      : mode === "forgot_password"
+      ? "forgot_password"
+      : "login";
+
+  const getHeading = () => {
+    if (initialMode === "register") return "Crear cuenta";
+    if (initialMode === "forgot_password") return "Recuperar contraseña";
+    return "Iniciar sesión";
+  };
+
+  const getSubheading = () => {
+    if (initialMode === "register")
+      return "Regístrate gratis para administrar tu liga desde el dashboard.";
+    if (initialMode === "forgot_password")
+      return "Recibe un enlace en tu correo para restablecer el acceso a tu cuenta.";
+    return "Ingresa con tu cuenta para acceder al panel de control.";
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950 px-4 py-8 text-white sm:px-6 lg:px-8">
@@ -47,14 +66,8 @@ export default async function LoginPage({
 
         <section className="rounded-2xl border border-white/10 bg-white p-6 text-gray-900 shadow-2xl shadow-black/20 sm:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold">
-              {initialMode === "register" ? "Crear cuenta" : "Iniciar sesión"}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {initialMode === "register"
-                ? "Regístrate gratis para administrar tu liga desde el dashboard."
-                : "Ingresa con tu cuenta para acceder al panel de control."}
-            </p>
+            <h2 className="text-2xl font-semibold">{getHeading()}</h2>
+            <p className="mt-2 text-sm text-gray-600">{getSubheading()}</p>
           </div>
           <LoginForm initialMode={initialMode} />
         </section>

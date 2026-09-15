@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PublicFooter } from "@/components/public/public-footer";
 
 export const metadata: Metadata = {
   title: "FutPro Manager — Administra ligas de fútbol amateur",
@@ -434,6 +435,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <PublicFooter />
     </main>
   );
 }
