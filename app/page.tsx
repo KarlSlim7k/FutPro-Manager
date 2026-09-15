@@ -65,30 +65,74 @@ const benefits = [
   },
 ];
 
+const faqs = [
+  {
+    q: "¿Los jugadores o aficionados necesitan registrarse para ver los partidos?",
+    a: "No. Toda la consulta pública (calendarios, resultados, tabla de posiciones y ficha de jugadores) es abierta y no requiere contraseña ni descarga de aplicaciones.",
+  },
+  {
+    q: "¿Cómo se actualiza la tabla de posiciones?",
+    a: "Automáticamente. En cuanto el árbitro o administrador de la liga registra el marcador de un partido finalizado, el sistema recalcula puntos, goles a favor, goles en contra y diferencia de goles de forma instantánea.",
+  },
+  {
+    q: "¿Puedo administrar más de una categoría o torneo?",
+    a: "Sí. FutPro Manager permite gestionar múltiples temporadas y torneos dentro de una misma liga, como categorías Libre, Veteranos, Femenil o Juvenil.",
+  },
+  {
+    q: "¿Se pueden generar cédulas arbitrales e imprimir?",
+    a: "Sí. El sistema cuenta con vistas de cédula arbitral y formatos listos para imprimir o consultar en cancha desde cualquier smartphone.",
+  },
+  {
+    q: "¿Tiene algún costo durante el lanzamiento?",
+    a: "No. Durante el periodo de lanzamiento la plataforma es 100% gratuita para todas las ligas de fútbol amateur, sin requerir tarjeta de crédito.",
+  },
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
       <section className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         {/* Header */}
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <Eyebrow tone="brand" className="text-sm tracking-[0.18em]">
-              FutPro Manager
-            </Eyebrow>
-            <p className="text-xs text-gray-500">Perote, Veracruz</p>
-          </div>
-          <nav className="flex items-center gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <Link href="/" className="group flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-700 text-lg shadow-sm group-hover:bg-emerald-600 transition">
+              ⚽
+            </div>
+            <div>
+              <Eyebrow tone="brand" className="text-sm tracking-[0.18em]">
+                FutPro Manager
+              </Eyebrow>
+              <p className="text-[11px] text-gray-500">Gestión de Fútbol Amateur</p>
+            </div>
+          </Link>
+          <nav className="flex flex-wrap items-center gap-3 sm:gap-5 text-sm font-medium">
             <Link
-              href="/liga/liga-municipal-perote"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-gray-600 transition hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              href="/explorar"
+              className="text-gray-600 transition hover:text-emerald-700"
             >
-              Ver demo
+              Explorar ligas
+            </Link>
+            <Link
+              href="#planes"
+              className="text-gray-600 transition hover:text-emerald-700"
+            >
+              Planes
+            </Link>
+            <Link
+              href="#faq"
+              className="text-gray-600 transition hover:text-emerald-700"
+            >
+              Preguntas
+            </Link>
+            <Link
+              href="/contacto"
+              className="text-gray-600 transition hover:text-emerald-700"
+            >
+              Contacto
             </Link>
             <Link
               href="/login"
-              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              className="rounded-lg border border-gray-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
             >
               Iniciar sesión
             </Link>
@@ -103,10 +147,26 @@ export default function Home() {
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
               FutPro Manager centraliza equipos, jugadores, partidos, resultados
-              y tablas de posiciones para ligas de fútbol amateur en Perote,
-              Veracruz.
+              y tablas de posiciones para ligas y torneos de fútbol amateur.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+            {/* Buscador Rápido de Ligas */}
+            <form action="/explorar" method="GET" className="mt-6 flex max-w-md items-center gap-2">
+              <input
+                type="search"
+                name="q"
+                placeholder="¿Buscas tu liga o equipo? Ej. Perote..."
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+              >
+                Buscar
+              </button>
+            </form>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/login?mode=register"
                 className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
@@ -411,8 +471,143 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Sección de Planes y Precios */}
+        <div id="planes" className="mt-20 scroll-mt-10">
+          <div className="text-center">
+            <Eyebrow tone="brand" className="text-sm tracking-[0.15em]">
+              Precios Transparentes
+            </Eyebrow>
+            <h2 className="mt-3 text-2xl font-semibold text-gray-900 sm:text-3xl">
+              Planes para cualquier tamaño de liga
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-gray-600">
+              Comienza hoy mismo sin costos ocultos y escala conforme tu torneo crezca.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+            {/* Plan Lanzamiento */}
+            <div className="relative rounded-2xl border-2 border-emerald-600 bg-white p-6 sm:p-8 shadow-lg">
+              <div className="absolute -top-3.5 right-6 rounded-full bg-emerald-600 px-3 py-0.5 text-xs font-semibold text-white uppercase tracking-wider">
+                Activo / Gratuito
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Plan Lanzamiento</h3>
+              <p className="mt-1 text-xs text-gray-500">
+                Todo lo esencial para digitalizar tu liga amateur de inmediato.
+              </p>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-extrabold text-gray-900">$0</span>
+                <span className="text-sm text-gray-500">/ mes (100% gratis)</span>
+              </div>
+              <ul className="mt-6 space-y-3 text-sm text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> 1 liga o torneo completo
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> Equipos y jugadores ilimitados
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> Tabla de posiciones y resultados en tiempo real
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> Estadísticas individuales (goleo y tarjetas)
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> Cuadro de liguilla y fases finales
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-600 font-bold">✓</span> Tarjetas para compartir en WhatsApp
+                </li>
+              </ul>
+              <div className="mt-8">
+                <Link
+                  href="/login?mode=register"
+                  className="block w-full text-center rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 transition"
+                >
+                  Comenzar gratis ahora
+                </Link>
+              </div>
+            </div>
+
+            {/* Plan Pro */}
+            <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-6 sm:p-8 flex flex-col justify-between">
+              <div>
+                <div className="inline-block rounded-full bg-blue-100 text-blue-800 px-3 py-0.5 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Próximamente
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Plan Pro & Torneos</h3>
+                <p className="mt-1 text-xs text-gray-500">
+                  Para organizaciones grandes, múltiples categorías y marcas deportivas.
+                </p>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-3xl font-extrabold text-gray-700">Personalizado</span>
+                </div>
+                <ul className="mt-6 space-y-3 text-sm text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-600 font-bold">✓</span> Múltiples torneos y categorías simultáneas
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-600 font-bold">✓</span> Dominio web propio (ej. miliga.com)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-600 font-bold">✓</span> Cédula arbitral digital con firma en cancha
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-600 font-bold">✓</span> Espacio para patrocinadores de la liga
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-600 font-bold">✓</span> Soporte prioritario 24/7 por WhatsApp
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-8">
+                <Link
+                  href="/contacto"
+                  className="block w-full text-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-100 transition"
+                >
+                  Solicitar información o demo
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección FAQ */}
+        <div id="faq" className="mt-20 scroll-mt-10">
+          <div className="text-center">
+            <Eyebrow tone="brand" className="text-sm tracking-[0.15em]">
+              Preguntas Frecuentes
+            </Eyebrow>
+            <h2 className="mt-3 text-2xl font-semibold text-gray-900 sm:text-3xl">
+              Resolvemos tus dudas
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-gray-600">
+              Todo lo que necesitas saber antes de empezar a usar FutPro Manager.
+            </p>
+          </div>
+
+          <div className="mt-10 max-w-3xl mx-auto divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
+            {faqs.map((faq, index) => (
+              <details
+                key={index}
+                className="group py-4 first:pt-0 last:pb-0 cursor-pointer"
+              >
+                <summary className="flex items-center justify-between font-semibold text-gray-900 hover:text-emerald-700 list-none">
+                  <span>{faq.q}</span>
+                  <span className="ml-4 shrink-0 transition-transform group-open:rotate-180 text-gray-400">
+                    ▼
+                  </span>
+                </summary>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
         {/* CTA final */}
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-6 py-10 text-center sm:px-10">
+        <div className="mt-20 flex flex-col items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-6 py-10 text-center sm:px-10">
           <h2 className="text-xl font-semibold text-gray-900 sm:text-2xl">
             Empieza a digitalizar tu liga hoy
           </h2>
@@ -435,6 +630,19 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/522821105432?text=Hola%20FutPro%20Manager,%20quisiera%20informaci%C3%B3n%20sobre%20la%20plataforma"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-emerald-900/20 transition hover:bg-emerald-600 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+        aria-label="Contactar por WhatsApp"
+      >
+        <span className="text-base">💬</span>
+        <span className="hidden sm:inline text-xs font-medium">¿Dudas? Chatea con nosotros</span>
+      </a>
+
       <PublicFooter />
     </main>
   );
