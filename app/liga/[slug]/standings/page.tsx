@@ -12,6 +12,13 @@ import { PublicNav } from "@/components/public/public-nav";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Season, Standing } from "@/types/database";
 
+import { SeasonStatsTabs, type StatsTabType } from "@/components/stats/season-stats-tabs";
+import { TopScorersTable } from "@/components/stats/top-scorers-table";
+import { FairPlayTable } from "@/components/stats/fair-play-table";
+import { PlayoffBracket } from "@/components/playoffs/playoff-bracket";
+import { getSeasonStats } from "@/lib/stats/get-season-stats";
+import { getSeasonPlayoffs } from "@/lib/playoffs/get-season-playoffs";
+
 type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
 type SeasonItem = Pick<Season, "id" | "name" | "slug" | "status" | "start_date" | "end_date">;
 type StandingItem = Pick<
@@ -31,7 +38,7 @@ type StandingItem = Pick<
 
 interface LeagueStandingsPublicPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ seasonId?: string | string[] }>;
+  searchParams: Promise<{ seasonId?: string | string[]; tab?: string | string[] }>;
 }
 
 function formatLabel(value: string) {
@@ -73,8 +80,13 @@ export async function generateMetadata({ params }: LeagueStandingsPublicPageProp
 
 export default async function LeagueStandingsPublicPage({ params, searchParams }: LeagueStandingsPublicPageProps) {
   const { slug } = await params;
-  const { seasonId: rawSeasonId } = await searchParams;
+  const { seasonId: rawSeasonId, tab: rawTab } = await searchParams;
   const seasonId = Array.isArray(rawSeasonId) ? rawSeasonId[0] : rawSeasonId;
+  const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
+  const currentTab: StatsTabType =
+    tabValue === "scorers" || tabValue === "fair-play" || tabValue === "playoffs"
+      ? tabValue
+      : "standings";
 
   const supabase = await createClient();
 
@@ -181,6 +193,19 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
       return aName.localeCompare(bName, "es", { sensitivity: "base" });
     });
 
+  const [seasonStats, playoffsData] = await Promise.all([
+    getSeasonStats({
+      supabase,
+      leagueId: league.id,
+      seasonId: selectedSeason.id,
+    }),
+    getSeasonPlayoffs({
+      supabase,
+      leagueId: league.id,
+      seasonId: selectedSeason.id,
+    }),
+  ]);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -192,7 +217,7 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
             <CardTitle>Temporadas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">Selecciona una temporada para consultar su clasificación.</p>
+            <p className="text-sm text-gray-600">Selecciona una temporada para consultar sus estadísticas.</p>
             <StandingsSeasonSelector
               leagueSlug={league.slug}
               seasons={seasons.map((seasonItem) => ({ id: seasonItem.id, name: seasonItem.name }))}
@@ -230,32 +255,85 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
           </CardContent>
         </Card>
 
-        {sortedStandings.length === 0 ? (
-          <EmptyState
-            title="Sin tabla para la temporada seleccionada"
-            description="Aún no hay tabla de posiciones generada para esta temporada. La tabla se actualiza automáticamente cuando se guardan resultados de partidos finalizados."
-          />
-        ) : (
+        <SeasonStatsTabs
+          currentTab={currentTab}
+          basePath={`/liga/${league.slug}/standings`}
+        />
+
+        {currentTab === "standings" && (
+          sortedStandings.length === 0 ? (
+            <EmptyState
+              title="Sin tabla para la temporada seleccionada"
+              description="Aún no hay tabla de posiciones generada para esta temporada. La tabla se actualiza automáticamente cuando se guardan resultados de partidos finalizados."
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Clasificación General</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 md:hidden">
+                  {sortedStandings.map((standing, index) => (
+                    <StandingMobileCard
+                      key={`${standing.team_id}-${standing.id}`}
+                      row={standing}
+                      position={index + 1}
+                      leagueSlug={league.slug}
+                      basePath="/liga"
+                    />
+                  ))}
+                </div>
+
+                <div className="hidden md:block">
+                  <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} basePath="/liga" />
+                </div>
+              </CardContent>
+            </Card>
+          )
+        )}
+
+        {currentTab === "playoffs" && (
           <Card>
             <CardHeader>
-              <CardTitle>Clasificación</CardTitle>
+              <CardTitle>Liguilla y Fases Finales</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 md:hidden">
-                {sortedStandings.map((standing, index) => (
-                  <StandingMobileCard
-                    key={`${standing.team_id}-${standing.id}`}
-                    row={standing}
-                    position={index + 1}
-                    leagueSlug={league.slug}
-                    basePath="/liga"
-                  />
-                ))}
-              </div>
+              <PlayoffBracket
+                bracket={playoffsData}
+                leagueSlug={league.slug}
+                basePath="/liga"
+              />
+            </CardContent>
+          </Card>
+        )}
 
-              <div className="hidden md:block">
-                <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} basePath="/liga" />
-              </div>
+        {currentTab === "scorers" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Tabla de Goleo Individual</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TopScorersTable
+                scorers={seasonStats.topScorers}
+                leagueSlug={league.slug}
+                basePath="/liga"
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {currentTab === "fair-play" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Fair Play y Amonestaciones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FairPlayTable
+                teams={seasonStats.fairPlayTeams}
+                players={seasonStats.fairPlayPlayers}
+                leagueSlug={league.slug}
+                basePath="/liga"
+              />
             </CardContent>
           </Card>
         )}

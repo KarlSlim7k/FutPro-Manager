@@ -8,6 +8,8 @@ import { PublicNav } from "@/components/public/public-nav";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { PublicMatchEvents } from "@/components/public/public-match-events";
+import { PublicLiveMatchHeader } from "@/components/public/public-live-match-header";
+import { MatchShareCard } from "@/components/social/match-share-card";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue, MatchEvent, Player } from "@/types/database";
 
@@ -183,6 +185,20 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
   const homeTeam = teamsMap.get(match.home_team_id);
   const awayTeam = teamsMap.get(match.away_team_id);
 
+  const homeTeamData = {
+    id: homeTeam?.id ?? match.home_team_id,
+    name: homeTeam?.name ?? "Equipo local",
+    slug: homeTeam?.slug ?? "",
+    logo_url: homeTeam?.logo_url ?? null,
+  };
+
+  const awayTeamData = {
+    id: awayTeam?.id ?? match.away_team_id,
+    name: awayTeam?.name ?? "Equipo visitante",
+    slug: awayTeam?.slug ?? "",
+    logo_url: awayTeam?.logo_url ?? null,
+  };
+
   let venue: VenueDetail | null = null;
   if (match.venue_id) {
     const { data: venueData, error: venueError } = await supabase
@@ -232,15 +248,21 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
           items={[
             { label: league.name, href: `/liga/${league.slug}` },
             { label: "Partidos", href: `/liga/${league.slug}/matches` },
-            { label: `${homeTeam?.name ?? "Local"} vs ${awayTeam?.name ?? "Visitante"}` },
+            { label: `${homeTeamData.name} vs ${awayTeamData.name}` },
           ]}
+        />
+
+        <PublicLiveMatchHeader
+          initialMatch={match}
+          homeTeam={homeTeamData}
+          awayTeam={awayTeamData}
         />
 
         <Card>
           <CardHeader className="space-y-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <CardTitle className="text-xl">
-                {homeTeam?.name ?? "Equipo local"} vs {awayTeam?.name ?? "Equipo visitante"}
+                {homeTeamData.name} vs {awayTeamData.name}
               </CardTitle>
               <MatchStatusBadge status={match.status} />
             </div>
@@ -314,6 +336,29 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
                   <p className="mt-1 text-sm text-gray-900">{season.name}</p>
                 </div>
               ) : null}
+            </div>
+
+            {/* Difusión y Redes */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
+              <div className="space-y-0.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Difusión y Redes
+                </span>
+                <p className="text-xs text-gray-600">
+                  Comparte el marcador por WhatsApp o descarga la imagen oficial para redes sociales.
+                </p>
+              </div>
+              <MatchShareCard
+                leagueName={league.name}
+                seasonName={season?.name}
+                roundName={match.round_name}
+                homeTeamName={homeTeamData.name}
+                awayTeamName={awayTeamData.name}
+                homeScore={match.home_score}
+                awayScore={match.away_score}
+                matchStatus={match.status}
+                matchDate={formatDateTime(match.scheduled_at)}
+              />
             </div>
 
             <div className="flex flex-wrap gap-4 border-t border-gray-100 pt-4">

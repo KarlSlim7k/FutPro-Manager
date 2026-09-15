@@ -42,6 +42,24 @@ export const MATCH_STATUS_VALUES = [
   "cancelled",
 ] as const;
 export type MatchStatus = (typeof MATCH_STATUS_VALUES)[number];
+
+export const MATCH_STAGE_VALUES = [
+  "regular_season",
+  "round_of_16",
+  "quarter_finals",
+  "semi_finals",
+  "third_place",
+  "final",
+] as const;
+export type MatchStage = (typeof MATCH_STAGE_VALUES)[number];
+
+export const MATCH_LEG_VALUES = [
+  "single",
+  "first_leg",
+  "second_leg",
+] as const;
+export type MatchLeg = (typeof MATCH_LEG_VALUES)[number];
+
 export const MATCH_EVENT_TYPE_VALUES = [
   "goal",
   "own_goal",
@@ -161,6 +179,11 @@ export interface Match {
   home_score: number;
   away_score: number;
   round_name: string | null;
+  stage?: MatchStage | null;
+  leg?: MatchLeg | null;
+  series_id?: string | null;
+  home_penalty_score?: number | null;
+  away_penalty_score?: number | null;
   created_at: string;
   updated_at: string;
 }

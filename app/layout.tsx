@@ -1,5 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#059669",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -10,7 +16,12 @@ export const metadata: Metadata = {
     template: "%s | FutPro Manager",
   },
   description:
-    "Plataforma SaaS para administrar ligas, equipos, jugadores y partidos de fútbol amateur.",
+    "Plataforma para administrar ligas, equipos, jugadores y partidos de fútbol amateur.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "FutPro Manager",
+  },
   openGraph: {
     siteName: "FutPro Manager",
     locale: "es_MX",

@@ -9,6 +9,7 @@ import { ExternalTextLink } from "@/components/ui/external-text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
+import { MatchShareCard } from "@/components/social/match-share-card";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
@@ -229,6 +230,9 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
                 Eventos
               </TextLink>
             ) : null}
+            <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/cedula`}>
+              📄 Cédula oficial
+            </TextLink>
           </ToolbarActions>
         }
       />
@@ -290,6 +294,26 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <div className="sm:col-span-2">
             <Eyebrow>Fecha de creación</Eyebrow>
             <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.created_at)}</p>
+          </div>
+          <div className="sm:col-span-2 border-t border-gray-100 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <Eyebrow>Difusión y Redes Sociales</Eyebrow>
+              <p className="mt-1 text-xs text-gray-500">
+                Genera la tarjeta gráfica oficial en formato PNG o comparte el resultado directo a WhatsApp.
+              </p>
+            </div>
+            <MatchShareCard
+              leagueName={league.name}
+              seasonName={season?.name}
+              roundName={match.round_name}
+              homeTeamName={homeTeam?.name ?? "Local"}
+              awayTeamName={awayTeam?.name ?? "Visitante"}
+              homeScore={match.home_score}
+              awayScore={match.away_score}
+              matchStatus={match.status}
+              matchDate={formatDateTime(match.scheduled_at)}
+              matchUrl={`/liga/${league.slug}/matches/${match.id}`}
+            />
           </div>
         </CardContent>
       </Card>

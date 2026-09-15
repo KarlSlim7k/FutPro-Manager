@@ -103,6 +103,27 @@ const catalogs: Catalog[] = [
       { value: "viewer", label: "Consulta", variant: "neutral" },
     ],
   },
+  {
+    title: "Fases de Liguilla / Torneo",
+    description: "Etapas de eliminación directa en temporadas.",
+    entries: [
+      { value: "regular_season", label: "Fase Regular", variant: "neutral" },
+      { value: "round_of_16", label: "Octavos de final", variant: "info" },
+      { value: "quarter_finals", label: "Cuartos de final", variant: "info" },
+      { value: "semi_finals", label: "Semifinales", variant: "warning" },
+      { value: "third_place", label: "Tercer lugar", variant: "neutral" },
+      { value: "final", label: "🏆 Gran Final", variant: "success" },
+    ],
+  },
+  {
+    title: "Formatos de Eliminatoria",
+    description: "Configuración de series de liguilla.",
+    entries: [
+      { value: "single", label: "Partido único", variant: "neutral" },
+      { value: "first_leg", label: "Partido de Ida", variant: "info" },
+      { value: "second_leg", label: "Partido de Vuelta", variant: "success" },
+    ],
+  },
 ];
 
 export default function TypesPage() {

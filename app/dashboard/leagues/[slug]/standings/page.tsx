@@ -13,6 +13,13 @@ import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Season, Standing } from "@/types/database";
 
+import { SeasonStatsTabs, type StatsTabType } from "@/components/stats/season-stats-tabs";
+import { TopScorersTable } from "@/components/stats/top-scorers-table";
+import { FairPlayTable } from "@/components/stats/fair-play-table";
+import { PlayoffBracket } from "@/components/playoffs/playoff-bracket";
+import { getSeasonStats } from "@/lib/stats/get-season-stats";
+import { getSeasonPlayoffs } from "@/lib/playoffs/get-season-playoffs";
+
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
 type SeasonItem = Pick<Season, "id" | "name" | "slug" | "status" | "start_date" | "end_date">;
 type StandingItem = Pick<
@@ -32,7 +39,7 @@ type StandingItem = Pick<
 
 interface LeagueStandingsPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ seasonId?: string | string[] }>;
+  searchParams: Promise<{ seasonId?: string | string[]; tab?: string | string[] }>;
 }
 
 function formatLabel(value: string) {
@@ -52,8 +59,13 @@ function formatDateTime(value: string) {
 
 export default async function LeagueStandingsPage({ params, searchParams }: LeagueStandingsPageProps) {
   const { slug } = await params;
-  const { seasonId: rawSeasonId } = await searchParams;
+  const { seasonId: rawSeasonId, tab: rawTab } = await searchParams;
   const seasonId = Array.isArray(rawSeasonId) ? rawSeasonId[0] : rawSeasonId;
+  const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
+  const currentTab: StatsTabType =
+    tabValue === "scorers" || tabValue === "fair-play" || tabValue === "playoffs"
+      ? tabValue
+      : "standings";
 
   const supabase = await createClient();
   const {
@@ -194,15 +206,28 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
     return latest;
   }, null);
 
+  const [seasonStats, playoffsData] = await Promise.all([
+    getSeasonStats({
+      supabase,
+      leagueId: league.id,
+      seasonId: selectedSeason.id,
+    }),
+    getSeasonPlayoffs({
+      supabase,
+      leagueId: league.id,
+      seasonId: selectedSeason.id,
+    }),
+  ]);
+
   return (
     <section className="space-y-6">
       <PageHeader
         backHref={`/dashboard/leagues/${league.slug}`}
         backLabel="Volver al detalle de liga"
-        title="Tabla de posiciones"
+        title="Tabla de posiciones y estadísticas"
         description={
           <>
-            Consulta la clasificación de equipos de{" "}
+            Consulta la clasificación de equipos y estadísticas de{" "}
             <span className="font-medium text-gray-900">{league.name}</span> por temporada.
           </>
         }
@@ -213,7 +238,7 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
           <CardTitle>Temporadas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-gray-600">Selecciona una temporada para consultar su clasificación.</p>
+          <p className="text-sm text-gray-600">Selecciona una temporada para consultar sus estadísticas.</p>
           <StandingsSeasonSelector
             leagueSlug={league.slug}
             seasons={seasons.map((seasonItem) => ({ id: seasonItem.id, name: seasonItem.name }))}
@@ -264,53 +289,106 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
         </CardContent>
       </Card>
 
-      {sortedStandings.length === 0 ? (
-        <EmptyState
-          title="Sin tabla para la temporada seleccionada"
-          description={
-            <>
-              <p>Aún no hay tabla de posiciones generada para esta temporada.</p>
-              <p className="mt-2">
-                La tabla se actualiza automáticamente cuando se guardan resultados de partidos
-                finalizados.
-                {permissions.canRecalculateStandings
-                  ? " También puedes recalcularla manualmente desde la temporada."
-                  : " El recálculo manual está disponible para administradores de liga."}
-              </p>
-            </>
-          }
-          action={
-            <ToolbarActions>
-              <TextLink href={`/dashboard/leagues/${league.slug}/matches`}>Ver partidos</TextLink>
-              <TextLink href={`/dashboard/leagues/${league.slug}/teams`}>Ver equipos</TextLink>
-              {permissions.canRecalculateStandings ? (
-                <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
-                  Recalcular tabla
-                </TextLink>
-              ) : null}
-            </ToolbarActions>
-          }
-        />
-      ) : (
+      <SeasonStatsTabs
+        currentTab={currentTab}
+        basePath={`/dashboard/leagues/${league.slug}/standings`}
+      />
+
+      {currentTab === "standings" && (
+        sortedStandings.length === 0 ? (
+          <EmptyState
+            title="Sin tabla para la temporada seleccionada"
+            description={
+              <>
+                <p>Aún no hay tabla de posiciones generada para esta temporada.</p>
+                <p className="mt-2">
+                  La tabla se actualiza automáticamente cuando se guardan resultados de partidos
+                  finalizados.
+                  {permissions.canRecalculateStandings
+                    ? " También puedes recalcularla manualmente desde la temporada."
+                    : " El recálculo manual está disponible para administradores de liga."}
+                </p>
+              </>
+            }
+            action={
+              <ToolbarActions>
+                <TextLink href={`/dashboard/leagues/${league.slug}/matches`}>Ver partidos</TextLink>
+                <TextLink href={`/dashboard/leagues/${league.slug}/teams`}>Ver equipos</TextLink>
+                {permissions.canRecalculateStandings ? (
+                  <TextLink href={`/dashboard/leagues/${league.slug}/seasons/${selectedSeason.slug}/standings`}>
+                    Recalcular tabla
+                  </TextLink>
+                ) : null}
+              </ToolbarActions>
+            }
+          />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Clasificación General</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 md:hidden">
+                {sortedStandings.map((standing, index) => (
+                  <StandingMobileCard
+                    key={`${standing.team_id}-${standing.id}`}
+                    row={standing}
+                    position={index + 1}
+                    leagueSlug={league.slug}
+                  />
+                ))}
+              </div>
+
+              <div className="hidden md:block">
+                <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} />
+              </div>
+            </CardContent>
+          </Card>
+        )
+      )}
+
+      {currentTab === "playoffs" && (
         <Card>
           <CardHeader>
-            <CardTitle>Clasificación</CardTitle>
+            <CardTitle>Liguilla y Fases Finales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 md:hidden">
-              {sortedStandings.map((standing, index) => (
-                <StandingMobileCard
-                  key={`${standing.team_id}-${standing.id}`}
-                  row={standing}
-                  position={index + 1}
-                  leagueSlug={league.slug}
-                />
-              ))}
-            </div>
+            <PlayoffBracket
+              bracket={playoffsData}
+              leagueSlug={league.slug}
+              basePath="/dashboard/leagues"
+            />
+          </CardContent>
+        </Card>
+      )}
 
-            <div className="hidden md:block">
-              <StandingsTableView rows={sortedStandings} leagueSlug={league.slug} />
-            </div>
+      {currentTab === "scorers" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tabla de Goleo Individual</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TopScorersTable
+              scorers={seasonStats.topScorers}
+              leagueSlug={league.slug}
+              basePath="/dashboard/leagues"
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {currentTab === "fair-play" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Fair Play y Amonestaciones</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FairPlayTable
+              teams={seasonStats.fairPlayTeams}
+              players={seasonStats.fairPlayPlayers}
+              leagueSlug={league.slug}
+              basePath="/dashboard/leagues"
+            />
           </CardContent>
         </Card>
       )}

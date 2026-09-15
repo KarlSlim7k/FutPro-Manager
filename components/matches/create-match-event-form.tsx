@@ -21,6 +21,9 @@ interface CreateMatchEventFormProps {
     full_name: string;
     preferred_position: string | null;
     team_id: string;
+    isEligible?: boolean;
+    eligibilityReason?: string;
+    eligibilityWarning?: string;
   }>;
 }
 
@@ -112,8 +115,10 @@ export function CreateMatchEventForm({
             <optgroup label={homeTeam.name}>
               {homePlayers.map((player) => (
                 <option key={player.id} value={player.id}>
+                  {player.isEligible === false ? "⛔ [No elegible] " : player.eligibilityWarning ? "⚠️ " : ""}
                   {player.full_name}
                   {player.preferred_position ? ` - ${player.preferred_position}` : ""}
+                  {player.isEligible === false && player.eligibilityReason ? ` (${player.eligibilityReason})` : ""}
                 </option>
               ))}
             </optgroup>
@@ -122,8 +127,10 @@ export function CreateMatchEventForm({
             <optgroup label={awayTeam.name}>
               {awayPlayers.map((player) => (
                 <option key={player.id} value={player.id}>
+                  {player.isEligible === false ? "⛔ [No elegible] " : player.eligibilityWarning ? "⚠️ " : ""}
                   {player.full_name}
                   {player.preferred_position ? ` - ${player.preferred_position}` : ""}
+                  {player.isEligible === false && player.eligibilityReason ? ` (${player.eligibilityReason})` : ""}
                 </option>
               ))}
             </optgroup>

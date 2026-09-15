@@ -178,9 +178,12 @@ export function CreateMatchForm({
           name="round_name"
           maxLength={80}
           disabled={isPending}
-          placeholder="Jornada 1"
+          placeholder="Ej. Jornada 1, Cuartos de Final, Semifinal Ida, Gran Final"
           defaultValue={state.values.round_name}
         />
+        <p className="text-xs text-gray-500">
+          Para fases de eliminación, indica si es Cuartos, Semifinal o Final (y si es Ida o Vuelta).
+        </p>
         {state.fieldErrors.round_name ? (
           <p className="text-sm text-red-600">{state.fieldErrors.round_name}</p>
         ) : null}

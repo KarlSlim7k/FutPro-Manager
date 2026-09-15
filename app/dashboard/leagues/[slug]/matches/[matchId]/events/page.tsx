@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { checkPlayerEligibility } from "@/lib/eligibility/player-eligibility";
 import type { League, Match, MatchEvent, Player, PlayerTeamRegistration, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -27,7 +28,7 @@ type SeasonSummary = Pick<Season, "id" | "name">;
 type TeamSummary = Pick<Team, "id" | "name">;
 type VenueSummary = Pick<Venue, "id" | "name">;
 type RegistrationSummary = Pick<PlayerTeamRegistration, "id" | "player_id" | "team_id" | "status">;
-type PlayerSummary = Pick<Player, "id" | "full_name" | "preferred_position">;
+type PlayerSummary = Pick<Player, "id" | "full_name" | "preferred_position" | "status">;
 type EventSummary = Pick<
   MatchEvent,
   "id" | "match_id" | "team_id" | "player_id" | "event_type" | "minute" | "notes" | "created_by" | "created_at" | "updated_at"
@@ -37,6 +38,9 @@ type FormPlayerOption = {
   full_name: string;
   preferred_position: string | null;
   team_id: string;
+  isEligible: boolean;
+  eligibilityReason?: string;
+  eligibilityWarning?: string;
 };
 
 interface MatchEventsPageProps {
@@ -130,7 +134,7 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
   if (playerIds.length > 0) {
     const { data: playersData, error: playersError } = await supabase
       .from("players")
-      .select("id, full_name, preferred_position")
+      .select("id, full_name, preferred_position, status")
       .eq("league_id", league.id)
       .in("id", playerIds);
 
@@ -147,11 +151,22 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
       const player = playersById.get(registration.player_id);
       if (!player) return null;
 
+      const eligibility = checkPlayerEligibility({
+        player: {
+          playerId: player.id,
+          fullName: player.full_name,
+          status: player.status,
+        },
+      });
+
       return {
         id: player.id,
         full_name: player.full_name,
         preferred_position: player.preferred_position,
         team_id: registration.team_id,
+        isEligible: eligibility.isEligible,
+        eligibilityReason: eligibility.reason,
+        eligibilityWarning: eligibility.warning,
       };
     })
     .filter((player): player is FormPlayerOption => player !== null)
