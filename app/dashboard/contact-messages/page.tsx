@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getContactMessageStatsAction } from "@/app/dashboard/contact-messages/actions";
+import { ContactRetention } from "@/components/contact/contact-retention";
 
 interface ContactMessageRow {
   id: string;
@@ -68,6 +70,7 @@ export default async function ContactMessagesPage() {
     .limit(200);
 
   const messages = (error ? [] : (data ?? [])) as ContactMessageRow[];
+  const stats = await getContactMessageStatsAction();
 
   return (
     <section className="space-y-6">
@@ -78,10 +81,12 @@ export default async function ContactMessagesPage() {
         description="Bandeja de entrada del formulario público (solo super_admin)."
       />
 
+      <ContactRetention stats={stats} />
+
       {error ? (
         <EmptyState
           title="No fue posible cargar los mensajes"
-          description="La política RLS actual no permite lecturas autenticadas de contact_messages. Se requiere una migración que agregue una política SELECT para super_admin (o consultar vía service_role)."
+          description="La política RLS actual no permite lecturas autenticadas de contact_messages. Aplica la migración 20260917120000_admin_rpcs_super_admin.sql para habilitar la lectura para super_admin."
         />
       ) : messages.length === 0 ? (
         <EmptyState

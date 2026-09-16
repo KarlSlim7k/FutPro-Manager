@@ -8,6 +8,8 @@ import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filter
 import { filterAuditLogsByQuery } from "@/lib/audit/audit-search";
 import { GlobalAuditFilters } from "@/components/audit/global-audit-filters";
 import { GlobalAuditTable, type GlobalAuditRow } from "@/components/audit/global-audit-table";
+import { GlobalAuditRetention } from "@/components/audit/global-audit-retention";
+import { getGlobalAuditStatsAction } from "@/app/dashboard/audit/actions";
 
 interface GlobalAuditPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -161,6 +163,8 @@ export default async function GlobalAuditPage({ searchParams }: GlobalAuditPageP
     filterQuery
   );
 
+  const auditStats = await getGlobalAuditStatsAction();
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -169,6 +173,7 @@ export default async function GlobalAuditPage({ searchParams }: GlobalAuditPageP
         title="Auditoría global"
         description="Historial multi-liga (solo super_admin)"
       />
+      <GlobalAuditRetention stats={auditStats} />
       <GlobalAuditFilters
         currentAction={filterAction}
         currentEntityType={filterEntityType}

@@ -2,17 +2,17 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Avatar } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/members/role-badge";
 import { createClient } from "@/lib/supabase/server";
+import { listUsersViaRpcAction } from "@/app/dashboard/users/actions";
 import type { AppRole } from "@/types/database";
 
 interface UsersPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_ROLES: AppRole[] = [
   "super_admin",
   "league_admin",
@@ -72,55 +72,97 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   const filterRole = VALID_ROLES.includes(getString(sp, "role") as AppRole)
     ? (getString(sp, "role") as AppRole)
     : undefined;
-  const rawId = getString(sp, "id");
-  const filterId = rawId && UUID_REGEX.test(rawId) ? rawId : undefined;
   const filterQuery = getString(sp, "q");
+  const page = Math.max(0, Number(getString(sp, "page") ?? "0") || 0);
+  const PAGE_SIZE = 200;
 
-  let query = supabase
-    .from("profiles")
-    .select("id, full_name, display_name, avatar_url, phone, global_role, created_at")
-    .order("created_at", { ascending: false })
-    .limit(200);
-
-  if (filterRole) query = query.eq("global_role", filterRole);
-  if (filterId) query = query.eq("id", filterId);
-
-  const { data: profilesData, error: profilesError } = await query;
-
-  if (profilesError) {
-    return (
-      <section className="space-y-6">
-        <PageHeader
-          backHref="/dashboard"
-          backLabel="Volver al panel"
-          title="Usuarios"
-          description="Directorio de usuarios registrados (solo super_admin)"
-        />
-        <EmptyState
-          title="Error al cargar usuarios"
-          description="No fue posible cargar el directorio de usuarios. Intenta nuevamente."
-        />
-      </section>
-    );
-  }
-
-  // Búsqueda textual client-side (nombre para mostrar o teléfono). El email vive en
-  // auth.users y no es legible con el cliente autenticado (sin service role por diseño).
-  const q = filterQuery?.toLowerCase();
-  const users = (profilesData ?? []).filter((p) => {
-    if (!q) return true;
-    const name = (p.full_name ?? p.display_name ?? "").toLowerCase();
-    const phone = (p.phone ?? "").toLowerCase();
-    return name.includes(q) || phone.includes(q);
+  // RPC admin_list_users (migracion 20260917120000): incluye email, ultimo login y
+  // membresias; busca tambien por email en auth.users. Si la migracion no se ha
+  // aplicado aun, cae al query directo por profiles (sin email).
+  const rpcResult = await listUsersViaRpcAction({
+    role: filterRole,
+    search: filterQuery,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
   });
 
-  const totalRoles = new Map<AppRole, number>();
-  for (const p of profilesData ?? []) {
-    totalRoles.set(p.global_role, (totalRoles.get(p.global_role) ?? 0) + 1);
+  type UserRow = {
+    id: string;
+    email: string | null;
+    full_name: string | null;
+    display_name: string | null;
+    avatar_url: string | null;
+    phone: string | null;
+    global_role: AppRole;
+    created_at: string;
+    last_sign_in_at: string | null;
+    league_memberships: number;
+  };
+
+  let users: UserRow[] = [];
+  let totalShown = 0;
+  let usingFallback = false;
+
+  if (!rpcResult.error) {
+    users = rpcResult.users;
+    totalShown = users.length;
+  } else {
+    usingFallback = true;
+    let query = supabase
+      .from("profiles")
+      .select("id, full_name, display_name, avatar_url, phone, global_role, created_at")
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+    if (filterRole) query = query.eq("global_role", filterRole);
+    const { data } = await query;
+    const rows = data ?? [];
+    const q = filterQuery?.toLowerCase();
+    users = rows
+      .filter((p) => {
+        if (!q) return true;
+        const name = (p.full_name ?? p.display_name ?? "").toLowerCase();
+        const phone = (p.phone ?? "").toLowerCase();
+        return name.includes(q) || phone.includes(q);
+      })
+      .map((p) => ({
+        id: p.id,
+        email: null,
+        full_name: p.full_name,
+        display_name: p.display_name,
+        avatar_url: p.avatar_url,
+        phone: p.phone,
+        global_role: p.global_role,
+        created_at: p.created_at,
+        last_sign_in_at: null,
+        league_memberships: 0,
+      }));
+    totalShown = users.length;
+  }
+
+  // Conteos por rol: con RPC usamos una segunda llamada ligera; con fallback, perfiles visibles.
+  let countsByRole = new Map<AppRole, number>();
+  if (!usingFallback) {
+    for (const role of VALID_ROLES) {
+      const { users: roleUsers } = await listUsersViaRpcAction({ role, limit: 500 });
+      countsByRole.set(role, roleUsers.length);
+    }
+  } else {
+    const { data: allProfiles } = await supabase
+      .from("profiles")
+      .select("global_role")
+      .limit(1000);
+    for (const p of allProfiles ?? []) {
+      countsByRole.set(p.global_role, (countsByRole.get(p.global_role) ?? 0) + 1);
+    }
   }
 
   const buildRoleHref = (role: AppRole) =>
     filterRole === role ? "/dashboard/users" : `/dashboard/users?role=${role}`;
+
+  function formatDateTime(value: string | null) {
+    if (!value) return null;
+    return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" }).format(new Date(value));
+  }
 
   return (
     <section className="space-y-6">
@@ -140,10 +182,10 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
               : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
           }`}
         >
-          Todos ({(profilesData ?? []).length})
+          Todos
         </a>
         {VALID_ROLES.map((role) =>
-          totalRoles.get(role) ? (
+          (countsByRole.get(role) ?? 0) > 0 ? (
             <a
               key={role}
               href={`/dashboard/users?role=${role}`}
@@ -153,15 +195,19 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                   : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
               }`}
             >
-              {role} ({totalRoles.get(role)})
+              {role} ({countsByRole.get(role)})
             </a>
           ) : null
         )}
       </div>
 
       <p className="text-sm text-gray-500">
-        Mostrando {users.length} de {(profilesData ?? []).length} usuario(s) registrados
-        {(profilesData ?? []).length === 200 ? " (primeros 200)" : ""}.
+        Mostrando {users.length} usuario(s)
+        {filterQuery ? ` que coinciden con "${filterQuery}"` : ""}
+        {users.length === PAGE_SIZE ? " (primeros 200; usa filtros para acotar)" : ""}.
+        {usingFallback
+          ? " Modo reducido: aplica la migración 20260917120000 para ver email, último acceso y membresías."
+          : ""}
       </p>
 
       {users.length === 0 ? (
@@ -178,14 +224,29 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                 key={u.id}
                 className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs"
               >
-                <Avatar src={u.avatar_url} alt={u.full_name ?? u.display_name ?? "Usuario"} fallback={u.full_name ?? u.display_name ?? undefined} size="md" />
+                <Avatar
+                  src={u.avatar_url}
+                  alt={u.full_name ?? u.display_name ?? "Usuario"}
+                  fallback={u.full_name ?? u.display_name ?? undefined}
+                  size="md"
+                />
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-gray-900">
                     {u.full_name ?? u.display_name ?? "Sin nombre"}
                   </span>
-                  {u.phone ? <span className="block text-xs text-gray-500">{u.phone}</span> : null}
+                  {u.email ? (
+                    <a
+                      href={`mailto:${u.email}`}
+                      className="block truncate text-xs text-emerald-700 hover:underline"
+                    >
+                      {u.email}
+                    </a>
+                  ) : null}
                   <span className="block text-[11px] text-gray-400">
-                    Registrado: {new Date(u.created_at).toLocaleDateString("es-MX")}
+                    Registro: {formatDateTime(u.created_at)}
+                    {u.last_sign_in_at
+                      ? ` · Último acceso: ${formatDateTime(u.last_sign_in_at)}`
+                      : ""}
                   </span>
                 </div>
                 <RoleBadge role={u.global_role} />
@@ -199,9 +260,11 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
               <thead className="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
                 <tr>
                   <th className="px-4 py-3">Usuario</th>
-                  <th className="px-4 py-3">Teléfono</th>
+                  <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Rol global</th>
+                  <th className="px-4 py-3">Ligas</th>
                   <th className="px-4 py-3">Registro</th>
+                  <th className="px-4 py-3">Último acceso</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -209,22 +272,41 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                   <tr key={u.id}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <Avatar src={u.avatar_url} alt={u.full_name ?? u.display_name ?? "Usuario"} fallback={u.full_name ?? u.display_name ?? undefined} size="sm" />
+                        <Avatar
+                          src={u.avatar_url}
+                          alt={u.full_name ?? u.display_name ?? "Usuario"}
+                          fallback={u.full_name ?? u.display_name ?? undefined}
+                          size="sm"
+                        />
                         <div>
                           <span className="block font-medium text-gray-900">
                             {u.full_name ?? u.display_name ?? "Sin nombre"}
                           </span>
-                          <span className="block font-mono text-[11px] text-gray-400">{u.id}</span>
+                          {u.phone ? (
+                            <span className="block text-[11px] text-gray-500">{u.phone}</span>
+                          ) : null}
+                          <span className="block font-mono text-[10px] text-gray-400">{u.id}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{u.phone ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      {u.email ? (
+                        <a
+                          href={`mailto:${u.email}`}
+                          className="text-emerald-700 hover:underline"
+                        >
+                          {u.email}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <RoleBadge role={u.global_role} />
                     </td>
-                    <td className="px-4 py-3">
-                      {new Date(u.created_at).toLocaleDateString("es-MX")}
-                    </td>
+                    <td className="px-4 py-3">{u.league_memberships}</td>
+                    <td className="px-4 py-3">{formatDateTime(u.created_at)}</td>
+                    <td className="px-4 py-3">{formatDateTime(u.last_sign_in_at) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
