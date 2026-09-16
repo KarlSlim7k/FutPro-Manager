@@ -122,7 +122,7 @@ export async function createMatchEventAction(
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, season_id, home_team_id, away_team_id, status")
+    .select("id, season_id, home_team_id, away_team_id, status, referee_id")
     .eq("id", matchId)
     .eq("league_id", leagueData.id)
     .maybeSingle();
@@ -165,7 +165,8 @@ export async function createMatchEventAction(
     leagueId: leagueData.id,
   });
 
-  const isAssignedReferee = permissions.assignedMatchIds.includes(matchData.id);
+  const isAssignedReferee =
+    permissions.assignedMatchIds.includes(matchData.id) || matchData.referee_id === user.id;
   const canManageThisTeam =
     permissions.canManageLeague ||
     isAssignedReferee ||

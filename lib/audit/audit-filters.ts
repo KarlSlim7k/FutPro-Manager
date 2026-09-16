@@ -1,11 +1,15 @@
 export const AUDIT_ACTION_OPTIONS = [
   "member.role_updated",
+  "team_member.created",
+  "team_member.role_updated",
+  "team_member.removed",
   "match.referee_updated",
   "match.referee_removed",
   "match.created",
   "match.updated",
   "match.result_updated",
   "match.event_created",
+  "match.event_deleted",
   "league.created",
   "season.created",
   "team.created",
@@ -13,6 +17,8 @@ export const AUDIT_ACTION_OPTIONS = [
   "player.created",
   "player.updated",
   "player.registration_created",
+  "player.registration_updated",
+  "player.registration_deleted",
   "venue.created",
   "audit.purged",
   "standings.recalculated_manual",
@@ -26,6 +32,7 @@ export const AUDIT_ACTION_OPTIONS = [
 
 export const AUDIT_ENTITY_TYPE_OPTIONS = [
   "league_member",
+  "team_member",
   "match",
   "match_event",
   "season",

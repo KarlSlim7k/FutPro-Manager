@@ -5,7 +5,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TextLink } from "@/components/ui/text-link";
 import { PageHeader } from "@/components/ui/page-header";
+import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { createClient } from "@/lib/supabase/server";
+import type { MatchStatus } from "@/types/database";
 
 function buildCards(
   leaguesCount: number,
@@ -103,8 +105,18 @@ export default async function DashboardPage() {
   let recentActivity: Array<{ id: string; action: string; created_at: string; leagueName: string | null }> = [];
   let isSuperAdmin = false;
   let userTeams: Array<{ id: string; name: string; slug: string; role: string; leagueSlug: string }> = [];
+  let userAssignedMatches: Array<{
+    id: string;
+    leagueName: string;
+    leagueSlug: string;
+    homeTeamName: string;
+    awayTeamName: string;
+    scheduledAt: string;
+    status: MatchStatus;
+    roundName: string | null;
+  }> = [];
   if (user) {
-    const [{ data: profile }, { data: auditRows }, { data: userTeamMembers }] = await Promise.all([
+    const [{ data: profile }, { data: auditRows }, { data: userTeamMembers }, { data: userAssignedMatchesData }] = await Promise.all([
       supabase.from("profiles").select("global_role").eq("id", user.id).maybeSingle(),
       supabase
         .from("audit_logs")
@@ -115,6 +127,12 @@ export default async function DashboardPage() {
         .from("team_members")
         .select("team_id, role, teams(id, name, slug, leagues(slug))")
         .eq("profile_id", user.id),
+      supabase
+        .from("matches")
+        .select("id, league_id, scheduled_at, status, home_team_id, away_team_id, round_name, leagues(name, slug)")
+        .eq("referee_id", user.id)
+        .order("scheduled_at", { ascending: true })
+        .limit(6),
     ]);
     isSuperAdmin = profile?.global_role === "super_admin";
     if (userTeamMembers && userTeamMembers.length > 0) {
@@ -126,6 +144,36 @@ export default async function DashboardPage() {
           slug: t?.slug ?? "",
           role: m.role as string,
           leagueSlug: t?.leagues?.slug ?? "",
+        };
+      });
+    }
+    if (userAssignedMatchesData && userAssignedMatchesData.length > 0) {
+      const extraTeamIds = [
+        ...new Set(
+          userAssignedMatchesData
+            .flatMap((m) => [m.home_team_id, m.away_team_id])
+            .filter((id) => !teamNames.has(id))
+        ),
+      ];
+      if (extraTeamIds.length > 0) {
+        const { data: extraTeams } = await supabase.from("teams").select("id, name").in("id", extraTeamIds);
+        if (extraTeams) {
+          for (const t of extraTeams) {
+            teamNames.set(t.id, t.name);
+          }
+        }
+      }
+      userAssignedMatches = userAssignedMatchesData.map((m) => {
+        const lg = m.leagues as unknown as { name: string; slug: string } | null;
+        return {
+          id: m.id,
+          leagueName: lg?.name ?? "Liga",
+          leagueSlug: lg?.slug ?? "",
+          homeTeamName: teamNames.get(m.home_team_id) ?? "Local",
+          awayTeamName: teamNames.get(m.away_team_id) ?? "Visitante",
+          scheduledAt: m.scheduled_at,
+          status: m.status as MatchStatus,
+          roundName: m.round_name,
         };
       });
     }
@@ -244,6 +292,66 @@ export default async function DashboardPage() {
                       </TextLink>
                       <TextLink href={`/dashboard/leagues/${t.leagueSlug}/teams/${t.slug}/staff`}>
                         Staff
+                      </TextLink>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {userAssignedMatches.length > 0 ? (
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Mis partidos asignados</CardTitle>
+                <p className="mt-1 text-xs text-gray-500">
+                  Partidos oficiales donde tienes designación arbitral activa.
+                </p>
+              </div>
+              <TextLink href="/dashboard/matches">Ver módulo de partidos</TextLink>
+            </CardHeader>
+            <CardContent>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {userAssignedMatches.map((m) => (
+                  <li
+                    key={m.id}
+                    className="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-3 shadow-sm"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                          Árbitro asignado
+                        </span>
+                        <MatchStatusBadge status={m.status} />
+                      </div>
+                      <span className="mt-2 block font-medium text-gray-900">
+                        {m.homeTeamName} vs {m.awayTeamName}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-gray-500">
+                        {m.leagueName} • {m.roundName || "Jornada no definida"}
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-600">
+                        {formatDateTime(m.scheduledAt)}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-2 text-sm">
+                      <TextLink href={`/dashboard/leagues/${m.leagueSlug}/matches/${m.id}`}>
+                        Detalle
+                      </TextLink>
+                      {m.status !== "cancelled" ? (
+                        <TextLink href={`/dashboard/leagues/${m.leagueSlug}/matches/${m.id}/result`}>
+                          Resultado
+                        </TextLink>
+                      ) : null}
+                      {m.status !== "cancelled" ? (
+                        <TextLink href={`/dashboard/leagues/${m.leagueSlug}/matches/${m.id}/events`}>
+                          Eventos
+                        </TextLink>
+                      ) : null}
+                      <TextLink href={`/dashboard/leagues/${m.leagueSlug}/matches/${m.id}/cedula`}>
+                        Cédula
                       </TextLink>
                     </div>
                   </li>

@@ -4,6 +4,7 @@ import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -106,6 +107,32 @@ export default async function EditMatchPage({ params }: EditMatchPageProps) {
   const teamsMap = new Map(teams.map((team) => [team.id, team.name]));
   const homeTeamName = teamsMap.get(match.home_team_id) ?? "Equipo local";
   const awayTeamName = teamsMap.get(match.away_team_id) ?? "Equipo visitante";
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!permissions.canManageMatches) {
+    return (
+      <section className="space-y-6">
+        <PageHeader
+          backHref={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
+          backLabel="Volver al detalle del partido"
+          title="Editar partido"
+          description={`${homeTeamName} vs ${awayTeamName}`}
+        />
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Acceso restringido: Solo los administradores de liga pueden modificar la programación, sede y jornada de este partido.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-6">

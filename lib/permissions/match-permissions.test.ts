@@ -116,4 +116,23 @@ describe("match-permissions", () => {
     expect(perms.canManageEvents).toBe(false);
     expect(perms.canUpdateResult).toBe(false);
   });
+
+  it("denies referee on matches where they are not the assigned referee", async () => {
+    const supabase = createMockSupabase({
+      leagueRole: "referee",
+      assignedMatches: [{ id: "m-other" }],
+      matchDetail: { referee_id: "other-ref", home_team_id: "t1", away_team_id: "t2" },
+    });
+    const perms = await getMatchPermissions({
+      supabase,
+      userId: "uref",
+      leagueId: "lg1",
+      matchId: "m-target",
+    });
+    expect(perms.isAssignedReferee).toBe(false);
+    expect(perms.isTeamStaffForMatch).toBe(false);
+    expect(perms.canUpdateResult).toBe(false);
+    expect(perms.canManageEvents).toBe(false);
+  });
 });
+

@@ -222,7 +222,7 @@ Filtros via query params: `action`, `entityType`, `actorId` (UUID validado), `fr
 | `league_admin` | 100% | Completo | Gestión total dentro de su liga: temporadas, equipos, sedes, partidos, resultados, standings, miembros de liga, asignación de árbitros, auditoría de liga, exportación CSV y purga de logs. |
 | `team_admin` | 100% | Completo | Gestión de datos y logo de sus equipos, administración de staff de equipo (agregar/roles/remover con guardrail de último admin), gestión de plantilla/roster (inscribir/dorsal/estado/baja), foto de jugadores, captura y eliminación de eventos en sus partidos (filtrado por equipo), y Hub "Mis equipos". |
 | `coach` | 100% | Completo | Gestión deportiva integral: alta, edición y foto de jugadores de la liga; inscripción, dorsal, estado y baja en plantilla de sus equipos; registro y eliminación de eventos en partidos donde participa su club; acceso directo en Hub "Mis equipos". Bloqueo estricto de edición de equipo, logo, staff, marcadores y liga. |
-| `referee` | ~80% | Operativo base | Asignación en partidos, captura de marcador y eventos en partidos asignados. |
+| `referee` | 100% | Completo | Gestión arbitral total: designación en partidos, captura y ajuste de resultado (marcador/estado), registro y eliminación de eventos para ambos equipos participantes, consulta e impresión de cédula oficial, filtro por partidos asignados en calendario, y hub "Mis partidos asignados" en dashboard. |
 | `viewer` | 100% | Completo | Consulta y lectura permitida por RLS en el dashboard y vistas públicas. |
 
 
@@ -298,5 +298,43 @@ El rol `coach` (cuerpo técnico / entrenador) alcanza una cobertura operativa de
 - **Cuerpo Técnico (`team_members`):** La página `/staff` se presenta en modo de consulta informativa (sin formularios para agregar o alterar roles ni remover integrantes).
 - **Marcador y Resultado de Partido (`matches`):** No tiene acceso a captura de resultado final (reservado para administradores de liga y árbitros asignados).
 - **Administración de Liga, Miembros y Auditoría:** Formularios y accesos administrativos permanecen completamente ocultos y fail-closed.
+
+
+## Operación Arbitral: referee (100%)
+
+### Descripción
+El rol `referee` (árbitro oficial) alcanza una cobertura operativa del 100% de acuerdo con las facultades permitidas por el modelo de datos y las políticas RLS. El árbitro tiene control total sobre el acta arbitral de sus partidos asignados (captura de marcador, cambio de estado, registro integral de incidencias disciplinarias para ambos clubes participantes y emisión de cédula oficial física y digital), manteniendo un bloqueo estricto sobre la programación de partidos, asignación de árbitros y administración institucional o deportiva de los clubes.
+
+### Capacidades Arbitrales Implementadas (Permitidas)
+1. **Hub Centralizado y Widget "Mis partidos asignados":**
+   - Vista en `/dashboard/matches` con la sección destacada "Mis partidos asignados", con insignias de rol (`Árbitro asignado`), estados, sedes, fechas formateadas en `es-MX`, marcadores actuales y accesos directos a **Detalle**, **Resultado**, **Eventos** y **Cédula**.
+   - Widget dedicado en la pantalla principal del dashboard (`/dashboard`) para salto directo a los encuentros donde tiene designación arbitral activa.
+2. **Captura y Ajuste de Marcador y Estado (`matches`):**
+   - Captura de resultado en `/dashboard/leagues/[slug]/matches/[matchId]/result` mediante `MatchResultForm` y `updateMatchResultAction`.
+   - Ajuste técnico de marcador y estado en partidos finalizados (`completed`) desde el detalle del partido.
+   - Restricción estricta garantizada por RLS (`can_manage_match(id)`) y el trigger de base de datos `ensure_match_update_scope()`, el cual valida que un árbitro solo pueda alterar `home_score`, `away_score` y `status`.
+3. **Registro y Gestión de Eventos Deportivos para Ambos Equipos (`match_events`):**
+   - Ruta: `/dashboard/leagues/[slug]/matches/[matchId]/events`.
+   - A diferencia del cuerpo técnico o administración de un club (cuyo alcance está limitado a su propio equipo), el árbitro asignado cuenta con selector habilitado para ambos equipos participantes (`allowedTeamIds = [home_team_id, away_team_id]`).
+   - Registro de goles, autogoles, tarjetas amarillas, tarjetas rojas, asistencias, sustituciones y penales con minuto y notas reglamentarias.
+   - Eliminación de eventos con confirmación previa y registro de auditoría (`deleteMatchEventAction`).
+4. **Cédula Oficial de Partido (`/cedula`):**
+   - Ruta: `/dashboard/leagues/[slug]/matches/[matchId]/cedula`.
+   - Formato oficial físico y digital listo para impresión con alineaciones completas por equipo, números de dorsal validados, reporte cronológico de goles y desglose disciplinario de amonestaciones y expulsiones.
+   - Acceso directo mediante botón "Cédula" en cards de partidos, detalle de encuentro y hubs operativos.
+5. **Filtro e Identificación en el Calendario de Liga:**
+   - En `/dashboard/leagues/[slug]/matches`, filtro rápido "Solo mis partidos asignados" en `MatchListFilters` para árbitros de la liga.
+   - Insignia distintiva visual `Mi partido asignado` en las tarjetas `MatchCard` correspondientes al usuario.
+6. **Panel Arbitral en Detalle de Partido:**
+   - En `/dashboard/leagues/[slug]/matches/[matchId]`, bloque destacado `Panel arbitral del encuentro` para el árbitro asignado con accesos directos a resultado, eventos y cédula.
+   - En la tarjeta `RefereeAssignmentCard`, indicación explícita `(Tú / Designado)` cuando el árbitro es el usuario actual.
+
+### Capacidades Administrativas Restringidas (Bloqueadas por Diseño, Trigger y RLS)
+- **Programación y Sede (`matches`):** No puede crear partidos ni eliminarlos (`matches_insert_manage_league`, `matches_delete_manage_league`); la ruta `/matches/[matchId]/edit` valida `canManageMatches` y muestra un aviso fail-closed de acceso restringido; cualquier intento en base de datos es bloqueado por el trigger `ensure_match_update_scope()`.
+- **Asignación de Árbitros (`canAssignReferees`):** Solo visible en modo lectura en `RefereeAssignmentCard`; sin acceso al formulario de asignación (`RefereeAssignmentForm`).
+- **Administración Institucional y de Clubes:** Sin acceso a edición de ligas, temporadas, equipos, escudos, sedes ni miembros de liga.
+- **Gestión de Plantillas y Jugadores:** Sin permisos para crear jugadores o inscribir deportistas a equipos (`canManagePlayers = false`, `canManageRegistrations = false`).
+- **Auditoría y Standings:** Sin acceso a la vista de auditoría de liga ni recálculo manual de la tabla general.
+
 
 

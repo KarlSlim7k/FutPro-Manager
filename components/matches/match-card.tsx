@@ -16,6 +16,7 @@ type MatchCardProps = {
   awayScore: number;
   roundName: string | null;
   refereeName?: string | null;
+  isAssignedReferee?: boolean;
   canEdit?: boolean;
   canUpdateResult?: boolean;
   canManageEvents?: boolean;
@@ -40,6 +41,7 @@ export function MatchCard({
   awayScore,
   roundName,
   refereeName,
+  isAssignedReferee = false,
   canEdit = true,
   canUpdateResult = true,
   canManageEvents = true,
@@ -51,7 +53,14 @@ export function MatchCard({
           <CardTitle className="text-lg">
             {homeTeamName} vs {awayTeamName}
           </CardTitle>
-          <MatchStatusBadge status={status} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            {isAssignedReferee ? (
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
+                Mi partido asignado
+              </span>
+            ) : null}
+            <MatchStatusBadge status={status} />
+          </div>
         </div>
         <p className="text-sm text-gray-600">{roundName || "Jornada no definida"}</p>
       </CardHeader>
@@ -95,6 +104,9 @@ export function MatchCard({
           ) : canManageEvents ? (
             <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`}>Eventos</TextLink>
           ) : null}
+          <TextLink href={`/dashboard/leagues/${leagueSlug}/matches/${matchId}/cedula`}>
+            Cédula
+          </TextLink>
         </ToolbarActions>
       </CardContent>
     </Card>

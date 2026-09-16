@@ -16,11 +16,15 @@ export function MatchListFilters({
   currentStatus,
   currentTeamId,
   currentRound,
+  showMyMatchesFilter = false,
+  onlyMyMatches = false,
 }: {
   teams: Array<{ id: string; name: string }>;
   currentStatus?: string;
   currentTeamId?: string;
   currentRound?: string;
+  showMyMatchesFilter?: boolean;
+  onlyMyMatches?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,6 +91,20 @@ export function MatchListFilters({
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
         />
       </div>
+
+      {showMyMatchesFilter ? (
+        <div className="flex flex-col justify-end pb-2">
+          <label className="flex cursor-pointer items-center gap-2 select-none text-xs font-medium text-gray-700">
+            <input
+              type="checkbox"
+              defaultChecked={onlyMyMatches}
+              onChange={(e) => updateParam("myMatches", e.target.checked ? "1" : "")}
+              className="h-4 w-4 rounded border-gray-300 text-emerald-700 focus:ring-emerald-700"
+            />
+            <span>Solo mis partidos asignados</span>
+          </label>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -59,15 +59,15 @@ Estado actual del MVP:
 - **Pendiente:** validaciones deportivas/reglamentarias avanzadas y reportes.
 
 ### Partidos
-- **Estado:** Implementado.
-- **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `components/matches/create-match-form.tsx`, `components/matches/match-list-filters.tsx`, `components/referees/referee-assignment-card.tsx`, `components/referees/referee-assignment-form.tsx`, `components/referees/referee-history.tsx`.
-- **Funcionalidad existente:** creacion, edicion y detalle de partidos por liga; filtros de calendario por estado/equipo/jornada; asignacion basica de arbitros a partidos (asignar/quitar desde detalle de partido, visualizacion en listado) con historial de arbitraje desde auditoria (`match.referee_updated`/`match.referee_removed`); permisos por tarjeta (arbitro asignado y staff del encuentro ven Capturar resultado/Eventos).
-- **Pendiente:** multi-arbitro (principal/asistentes), disponibilidad y notificaciones.
+- **Estado:** Implementado (cobertura 100% para league_admin y referee).
+- **Evidencia en repo:** `app/dashboard/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/cedula/page.tsx`, `components/matches/*`, `components/referees/*`.
+- **Funcionalidad existente:** creación, edición y detalle de partidos por liga; filtros de calendario por estado/equipo/jornada y filtro rápido "Solo mis partidos asignados"; asignación básica de árbitros a partidos (asignar/quitar desde detalle de partido, visualización en listado) con historial de arbitraje desde auditoría (`match.referee_updated`/`match.referee_removed`); hub "Mis partidos asignados" en `/dashboard/matches` y widget en `/dashboard`; panel arbitral destacado en detalle de partido; cédula oficial física y digital (`/cedula`) lista para impresión; tarjetas de partido con insignia `Mi partido asignado` y enlaces directos a detalle, resultado, eventos y cédula; protección fail-closed en edición de programación/sede para roles no administradores.
+- **Pendiente:** multi-árbitro (ternas con principal/asistentes), disponibilidad y notificaciones.
 
 ### Resultados y eventos de partido
 - **Estado:** Implementado.
 - **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/[matchId]/result/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/events/page.tsx`, `components/matches/update-match-result-form.tsx`, `components/matches/create-match-event-form.tsx`.
-- **Funcionalidad existente:** captura/actualización de marcadores y registro de eventos deportivos, incluyendo ajuste administrativo de marcador/estado para partidos `completed` desde el detalle del partido.
+- **Funcionalidad existente:** captura/actualización de marcadores y registro de eventos deportivos (goles, tarjetas, autogoles, sustituciones, penales) para ambos equipos por parte del árbitro asignado y filtrado por club para cuerpo técnico; ajuste administrativo de marcador/estado para partidos `completed` desde el detalle del partido; eliminación de eventos con auditoría.
 - **Pendiente:** mayor trazabilidad y auditoría de cambios en UI.
 
 ### Tabla de posiciones
@@ -78,15 +78,15 @@ Estado actual del MVP:
 - **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial de standings y reglas avanzadas de desempate.
 
 ### Roles y permisos
-- **Estado:** Implementado (super_admin 100%, league_admin 100%, team_admin 100%, coach 100%, viewer 100%, referee ~80%).
-- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `lib/permissions/match-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/staff/`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/roster/`, `components/teams/*`, `components/registrations/*`, `components/members/*`, `components/referees/*`.
+- **Estado:** Implementado (super_admin 100%, league_admin 100%, team_admin 100%, coach 100%, referee 100%, viewer 100%).
+- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migración inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `lib/permissions/match-permissions.ts`, `app/dashboard/matches/page.tsx`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/staff/`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/roster/`, `components/teams/*`, `components/registrations/*`, `components/members/*`, `components/referees/*`.
 - **Funcionalidad existente:**
   - Modelo de roles y RLS estricto; protección en server actions y rutas dashboard.
   - `super_admin`: 100% (auditoría global, exportación CSV, gestión de suscripciones).
   - `league_admin`: 100% (gestión total de liga, temporadas, equipos, sedes, partidos, miembros, árbitros, auditoría de liga con exportación y retención).
   - `team_admin`: 100% (edición y logo de equipo, administración de staff de equipo con guardrail de último admin, gestión de plantilla/roster con alta/dorsal/estatus/baja, carga de foto de jugadores, registro y eliminación de eventos en partidos con filtro estricto por equipo, y hub centralizado "Mis equipos").
   - `coach`: 100% (gestión deportiva integral: alta, edición y foto de jugadores; inscripción, dorsal, estado y baja en plantilla de sus equipos; registro y eliminación de eventos en partidos donde participa su club; acceso directo en Hub "Mis equipos"; bloqueo estricto en UI y server actions de edición de equipo, logo, staff, marcadores y administración de liga).
-  - `referee`: ~80% (asignación a partidos y captura de marcador/eventos en partidos asignados).
+  - `referee`: 100% (gestión arbitral completa: hubs y widgets "Mis partidos asignados" en dashboard y partidos, captura y ajuste de resultado técnico con restricción estricta de trigger RLS `ensure_match_update_scope`, captura y eliminación de eventos para ambos equipos participantes, consulta e impresión de cédula oficial de partido, panel arbitral en detalle, filtros dedicados en calendario, y bloqueo estricto de edición de programación, sedes, asignación de árbitros y administración institucional o deportiva).
   - `viewer`: 100% (modo consulta informativo sin acciones de mutación).
 - **Pendiente:** multi-árbitro con ternas arbitrales completas y disponibilidad de árbitros.
 

@@ -299,6 +299,44 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         }
       />
 
+      {isAssignedReferee ? (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader className="pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                Árbitro oficial designado
+              </span>
+              <MatchStatusBadge status={match.status} />
+            </div>
+            <CardTitle className="text-base text-blue-950">
+              Panel arbitral del encuentro
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-blue-900">
+              Tienes la designación oficial para este partido. Puedes capturar el resultado técnico, registrar eventos disciplinarios e incidencias, y emitir o imprimir la cédula oficial del partido.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-sm">
+              {match.status !== "cancelled" ? (
+                <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}>
+                  Capturar resultado
+                </TextLink>
+              ) : null}
+              {match.status !== "cancelled" ? (
+                <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}>
+                  Registrar eventos
+                </TextLink>
+              ) : null}
+              <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/cedula`}>
+                <span className="inline-flex items-center gap-1">
+                  <FileText className="h-3.5 w-3.5" aria-hidden /> Cédula oficial
+                </span>
+              </TextLink>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Información del encuentro</CardTitle>
@@ -382,7 +420,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
       {permissions.canViewRefereeAssignments ? (
         <RefereeAssignmentCard
-          refereeName={refereeName}
+          refereeName={isAssignedReferee ? `${refereeName ?? "Tú"} (Tú / Designado)` : refereeName}
           refereeId={match.referee_id}
           canAssign={permissions.canAssignReferees}
           assignmentForm={

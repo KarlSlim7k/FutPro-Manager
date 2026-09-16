@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 
 const EDITABLE_MATCH_STATUS_VALUES = ["scheduled", "postponed", "cancelled"] as const;
@@ -106,6 +107,20 @@ export async function updateMatchAction(
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso para editar partidos.",
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: leagueData.id,
+  });
+
+  if (!permissions.canManageMatches) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para modificar la programación de partidos en esta liga.",
     };
   }
 

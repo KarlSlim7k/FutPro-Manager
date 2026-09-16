@@ -220,7 +220,7 @@ export async function updateMatchResultAction(
 
     if (!recalculateResult.success) {
       standingsWarning =
-        "Resultado guardado correctamente, pero no se pudo actualizar la tabla de posiciones automáticamente. Puedes recalcularla manualmente desde la temporada.";
+        "Resultado guardado correctamente. La tabla de posiciones no se actualizó automáticamente (requiere permisos de administración de liga).";
 
       await createAuditLog({
         supabase,

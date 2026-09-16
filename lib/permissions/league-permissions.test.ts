@@ -287,5 +287,47 @@ describe("league-permissions", () => {
     expect(perms.canManageAuditLogs).toBe(false);
     expect(perms.isReadOnly).toBe(false);
   });
+
+  it("verifies full operational permissions for referee: referee operations allowed, administrative blocked", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "referee",
+      teamRows: [],
+      matchRows: [{ id: "match-assigned-10" }, { id: "match-assigned-20" }],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-referee-pro",
+      leagueId: "lg-1",
+    });
+
+    // Referee operations: allowed
+    expect(perms.leagueRole).toBe("referee");
+    expect(perms.assignedMatchIds).toEqual(["match-assigned-10", "match-assigned-20"]);
+    expect(perms.canUpdateResults).toBe(true);
+    expect(perms.canUpdateMatchResults).toBe(true);
+    expect(perms.canManageEvents).toBe(true);
+    expect(perms.canCreateMatchEvents).toBe(true);
+    expect(perms.canViewRefereeAssignments).toBe(true);
+    expect(perms.isReadOnly).toBe(false);
+
+    // Administrative operations: strictly blocked
+    expect(perms.canManageLeague).toBe(false);
+    expect(perms.canManageCatalog).toBe(false);
+    expect(perms.canManageMatches).toBe(false);
+    expect(perms.canRecalculateStandings).toBe(false);
+    expect(perms.canManageMembers).toBe(false);
+    expect(perms.canManageRoles).toBe(false);
+    expect(perms.canAssignReferees).toBe(false);
+    expect(perms.canViewAuditLogs).toBe(false);
+    expect(perms.canManageAuditLogs).toBe(false);
+    expect(perms.canManagePlayers).toBe(false);
+    expect(perms.canManageRegistrations).toBe(false);
+    expect(perms.managedTeamIds).toEqual([]);
+    expect(perms.staffTeamIds).toEqual([]);
+    expect(canManageTeam(perms, "team-any")).toBe(false);
+    expect(isTeamStaff(perms, "team-any")).toBe(false);
+  });
 });
+
 

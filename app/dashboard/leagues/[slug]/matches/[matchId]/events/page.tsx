@@ -24,6 +24,7 @@ type MatchSummary = Pick<
   | "home_score"
   | "away_score"
   | "round_name"
+  | "referee_id"
 >;
 type SeasonSummary = Pick<Season, "id" | "name">;
 type TeamSummary = Pick<Team, "id" | "name">;
@@ -77,7 +78,7 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, status, home_score, away_score, round_name")
+    .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, status, home_score, away_score, round_name, referee_id")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -99,7 +100,8 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
     leagueId: league.id,
   });
 
-  const isAssignedReferee = permissions.assignedMatchIds.includes(match.id);
+  const isAssignedReferee =
+    permissions.assignedMatchIds.includes(match.id) || match.referee_id === user.id;
   const isHomeStaff = permissions.staffTeamIds.includes(match.home_team_id);
   const isAwayStaff = permissions.staffTeamIds.includes(match.away_team_id);
   const isStaffForMatch = isHomeStaff || isAwayStaff;

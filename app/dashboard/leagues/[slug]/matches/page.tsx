@@ -35,7 +35,13 @@ type MatchListItem = Pick<
 
 interface MatchesPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ seasonId?: string | string[]; status?: string | string[]; teamId?: string | string[]; round?: string | string[] }>;
+  searchParams: Promise<{
+    seasonId?: string | string[];
+    status?: string | string[];
+    teamId?: string | string[];
+    round?: string | string[];
+    myMatches?: string | string[];
+  }>;
 }
 
 function getSingleParam(value: string | string[] | undefined): string | undefined {
@@ -53,6 +59,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
     : undefined;
   const filterTeamId = getSingleParam(sp.teamId);
   const filterRound = getSingleParam(sp.round);
+  const filterMyMatches = getSingleParam(sp.myMatches) === "1";
 
   const supabase = await createClient();
   const {
@@ -151,6 +158,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
   if (filterStatus) matchesQuery = matchesQuery.eq("status", filterStatus);
   if (filterTeamId) matchesQuery = matchesQuery.or(`home_team_id.eq.${filterTeamId},away_team_id.eq.${filterTeamId}`);
   if (filterRound) matchesQuery = matchesQuery.ilike("round_name", `%${filterRound}%`);
+  if (filterMyMatches) matchesQuery = matchesQuery.eq("referee_id", user.id);
 
   const { data: matchesData, error: matchesError } = await matchesQuery;
 
@@ -231,12 +239,18 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
             currentStatus={filterStatus}
             currentTeamId={filterTeamId}
             currentRound={filterRound}
+            showMyMatchesFilter={
+              permissions.assignedMatchIds.length > 0 ||
+              permissions.leagueRole === "referee" ||
+              permissions.canManageLeague
+            }
+            onlyMyMatches={filterMyMatches}
           />
           {matches.length === 0 ? (
             <EmptyState
               title="Sin partidos programados"
               description={
-                filterStatus || filterTeamId || filterRound
+                filterStatus || filterTeamId || filterRound || filterMyMatches
                   ? "Ningún partido coincide con los filtros seleccionados."
                   : permissions.canManageMatches
                     ? "Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
@@ -246,8 +260,9 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {matches.map((match) => {
-                const isAssignedReferee =
-                  permissions.canManageLeague || match.referee_id === user.id;
+                const isRefereeOfThisMatch = match.referee_id === user.id;
+                const canUpdateThisResult =
+                  permissions.canManageLeague || isRefereeOfThisMatch;
                 const isStaffForMatch = permissions.staffTeamIds.some(
                   (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
                 );
@@ -265,10 +280,11 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
                     awayScore={match.away_score}
                     roundName={match.round_name}
                     refereeName={match.referee_id ? (refereesMap.get(match.referee_id) ?? null) : null}
+                    isAssignedReferee={isRefereeOfThisMatch}
                     canEdit={permissions.canManageMatches}
-                    canUpdateResult={permissions.canManageLeague || isAssignedReferee}
+                    canUpdateResult={canUpdateThisResult}
                     canManageEvents={
-                      permissions.canManageLeague || isAssignedReferee || isStaffForMatch
+                      permissions.canManageLeague || isRefereeOfThisMatch || isStaffForMatch
                     }
                   />
                 );
