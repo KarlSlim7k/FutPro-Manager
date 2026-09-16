@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_EVENT_TYPE_VALUES, type MatchEventType } from "@/types/database";
 
@@ -154,6 +155,26 @@ export async function createMatchEventAction(
         player_id: "",
       },
       fieldErrors: { team_id: "El equipo seleccionado no participa en este partido." },
+      formError: null,
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: leagueData.id,
+  });
+
+  const isAssignedReferee = permissions.assignedMatchIds.includes(matchData.id);
+  const canManageThisTeam =
+    permissions.canManageLeague ||
+    isAssignedReferee ||
+    permissions.staffTeamIds.includes(values.team_id);
+
+  if (!canManageThisTeam) {
+    return {
+      values,
+      fieldErrors: { team_id: "No tienes permisos para registrar eventos para este equipo." },
       formError: null,
     };
   }

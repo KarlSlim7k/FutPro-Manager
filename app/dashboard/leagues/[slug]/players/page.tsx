@@ -100,7 +100,12 @@ export default async function LeaguePlayersPage({ params }: LeaguePlayersPagePro
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {players.map((player) => (
-            <PlayerCard key={player.id} leagueSlug={league.slug} player={player} />
+            <PlayerCard
+              key={player.id}
+              leagueSlug={league.slug}
+              player={player}
+              canEdit={permissions.canManagePlayers}
+            />
           ))}
         </div>
       )}

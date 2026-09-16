@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import {
   DOMINANT_FOOT_VALUES,
@@ -165,6 +166,20 @@ export async function createPlayerAction(
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso para crear jugadores.",
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!permissions.canManagePlayers) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para crear jugadores en esta liga.",
     };
   }
 

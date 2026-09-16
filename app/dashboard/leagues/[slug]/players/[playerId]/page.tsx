@@ -104,11 +104,13 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
           </>
         }
         action={
-          <ToolbarActions>
-            <TextLink href={`/dashboard/leagues/${league.slug}/players/${player.id}/edit`}>
-              Editar jugador
-            </TextLink>
-          </ToolbarActions>
+          permissions.canManagePlayers ? (
+            <ToolbarActions>
+              <TextLink href={`/dashboard/leagues/${league.slug}/players/${player.id}/edit`}>
+                Editar jugador
+              </TextLink>
+            </ToolbarActions>
+          ) : null
         }
       />
 

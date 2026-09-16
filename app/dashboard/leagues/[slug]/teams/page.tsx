@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { FormSectionCard } from "@/components/ui/form-section-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
-import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { getLeaguePermissions, canManageTeam } from "@/lib/permissions/league-permissions";
 import type { League, Team } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -100,7 +100,12 @@ export default async function LeagueTeamsPage({ params }: LeagueTeamsPageProps) 
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {teams.map((team) => (
-            <TeamCard key={team.id} leagueSlug={league.slug} team={team} />
+            <TeamCard
+              key={team.id}
+              leagueSlug={league.slug}
+              team={team}
+              canEdit={canManageTeam(permissions, team.id)}
+            />
           ))}
         </div>
       )}

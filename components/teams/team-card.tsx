@@ -14,6 +14,7 @@ type TeamCardData = Pick<
 interface TeamCardProps {
   leagueSlug: string;
   team: TeamCardData;
+  canEdit?: boolean;
 }
 
 const statusVariants: Record<Team["status"], StatusBadgeVariant> = {
@@ -26,7 +27,7 @@ function formatStatus(status: Team["status"]) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-export function TeamCard({ leagueSlug, team }: TeamCardProps) {
+export function TeamCard({ leagueSlug, team, canEdit = true }: TeamCardProps) {
   return (
     <Card className="flex h-full flex-col justify-between">
       <div>
@@ -102,12 +103,14 @@ export function TeamCard({ leagueSlug, team }: TeamCardProps) {
           >
             Plantilla
           </TextLink>
-          <TextLink
-            href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/edit`}
-            variant="muted"
-          >
-            Editar
-          </TextLink>
+          {canEdit ? (
+            <TextLink
+              href={`/dashboard/leagues/${leagueSlug}/teams/${team.slug}/edit`}
+              variant="muted"
+            >
+              Editar
+            </TextLink>
+          ) : null}
         </ToolbarActions>
       </CardContent>
     </Card>

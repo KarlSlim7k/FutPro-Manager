@@ -78,16 +78,17 @@ Estado actual del MVP:
 - **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial de standings y reglas avanzadas de desempate.
 
 ### Roles y permisos
-- **Estado:** Implementado (super_admin 100%, league_admin 100%, team_admin 100%, viewer 100%, referee ~80%, coach ~70%).
+- **Estado:** Implementado (super_admin 100%, league_admin 100%, team_admin 100%, coach 100%, viewer 100%, referee ~80%).
 - **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `lib/permissions/match-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/staff/`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/roster/`, `components/teams/*`, `components/registrations/*`, `components/members/*`, `components/referees/*`.
 - **Funcionalidad existente:**
   - Modelo de roles y RLS estricto; protección en server actions y rutas dashboard.
   - `super_admin`: 100% (auditoría global, exportación CSV, gestión de suscripciones).
   - `league_admin`: 100% (gestión total de liga, temporadas, equipos, sedes, partidos, miembros, árbitros, auditoría de liga con exportación y retención).
   - `team_admin`: 100% (edición y logo de equipo, administración de staff de equipo con guardrail de último admin, gestión de plantilla/roster con alta/dorsal/estatus/baja, carga de foto de jugadores, registro y eliminación de eventos en partidos con filtro estricto por equipo, y hub centralizado "Mis equipos").
+  - `coach`: 100% (gestión deportiva integral: alta, edición y foto de jugadores; inscripción, dorsal, estado y baja en plantilla de sus equipos; registro y eliminación de eventos en partidos donde participa su club; acceso directo en Hub "Mis equipos"; bloqueo estricto en UI y server actions de edición de equipo, logo, staff, marcadores y administración de liga).
   - `referee`: ~80% (asignación a partidos y captura de marcador/eventos en partidos asignados).
   - `viewer`: 100% (modo consulta informativo sin acciones de mutación).
-- **Pendiente:** optimización de flujos de captura deportiva para `coach`, multi-árbitro con ternas arbitrales completas.
+- **Pendiente:** multi-árbitro con ternas arbitrales completas y disponibilidad de árbitros.
 
 ### Vista pública
 - **Estado:** Implementado para MVP.
@@ -176,21 +177,21 @@ Estado actual del MVP:
 
 ## Última actualización
 
-- Fecha: 2026-09-15
+- Fecha: 2026-09-16
 - Branch: main
 - Nota:
-  - Cierre operativo del rol `team_admin` al 100%:
-    - Subida de logo de equipo habilitada para `team_admin` (`canManageTeam`).
-    - Subida de foto de jugadores habilitada para roles con `canManagePlayers`.
-    - Módulo de administración de cuerpo técnico (`/staff`) con alta, cambio de rol, remoción, guardrail de último admin y auditoría.
-    - Gestión de plantilla (`/roster`) con formulario de inscripción de jugadores, actualización de dorsal/estatus y baja con auditoría.
-    - Captura de eventos deportivos (`/events`) con filtrado estricto al equipo autorizado y eliminación con confirmación y auditoría.
-    - Hub centralizado "Mis equipos" en `/dashboard/teams` y widget en `/dashboard`.
-  - Cobertura de roles al día: `super_admin` 100%, `league_admin` 100%, `team_admin` 100%, `viewer` 100%, `referee` ~80%, `coach` ~70%.
-  - Build, tests (44/44) y lint en verde.
+  - Cierre operativo del rol `coach` al 100%:
+    - Gestión deportiva de jugadores (alta, edición y fotos vía `canManagePlayers`).
+    - Gestión deportiva de plantilla (`/roster`: inscripción de jugadores, actualización de estatus/dorsal y baja vía `isTeamStaff`).
+    - Captura y eliminación de eventos en partidos donde participa su equipo (`/events` con `allowedTeamIds`).
+    - Hub "Mis equipos" con insignia "Cuerpo técnico" y accesos directos.
+    - Bloqueo fail-closed estricto en UI y Server Actions para edición de equipo, logo, staff, marcadores y liga.
+  - Cobertura de roles al día: `super_admin` 100%, `league_admin` 100%, `team_admin` 100%, `coach` 100%, `viewer` 100%, `referee` ~80%.
+  - Build, tests (45/45) y lint en verde.
 
 ### Historial relevante
 
+- 2026-09-16: Cierre operativo al 100% del rol `coach` (operaciones deportivas completas en jugadores, plantilla, eventos y Hub; controles administrativos bloqueados).
 - 2026-09-15: Cierre operativo al 100% del rol `team_admin` (staff, plantilla, logo, foto jugador, eventos filtrados, eliminación de eventos y Hub "Mis equipos").
 - 2026-09-15: Auditoría exhaustiva completada (instrumentación, vista global, exportación CSV, retención/purga) y RBAC granular v1.
 - 2026-05-19: QA UI/UX pre-MVP completado — fixes de accesibilidad, semántica y consistencia visual (`docs/QA_UI_UX_PRE_MVP.md`).

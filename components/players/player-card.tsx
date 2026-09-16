@@ -13,6 +13,7 @@ type PlayerCardData = Pick<
 interface PlayerCardProps {
   leagueSlug: string;
   player: PlayerCardData;
+  canEdit?: boolean;
 }
 
 const statusVariants: Record<PlayerStatus, StatusBadgeVariant> = {
@@ -41,7 +42,7 @@ function formatBirthDate(date: string | null) {
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "long" }).format(new Date(`${date}T00:00:00`));
 }
 
-export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
+export function PlayerCard({ leagueSlug, player, canEdit = true }: PlayerCardProps) {
   return (
     <Card className="flex h-full flex-col justify-between">
       <div>
@@ -84,12 +85,14 @@ export function PlayerCard({ leagueSlug, player }: PlayerCardProps) {
           >
             Ver detalle
           </TextLink>
-          <TextLink
-            href={`/dashboard/leagues/${leagueSlug}/players/${player.id}/edit`}
-            variant="muted"
-          >
-            Editar
-          </TextLink>
+          {canEdit ? (
+            <TextLink
+              href={`/dashboard/leagues/${leagueSlug}/players/${player.id}/edit`}
+              variant="muted"
+            >
+              Editar
+            </TextLink>
+          ) : null}
         </ToolbarActions>
       </CardContent>
     </Card>

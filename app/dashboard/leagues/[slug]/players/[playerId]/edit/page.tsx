@@ -3,6 +3,7 @@ import { EditPlayerForm } from "@/components/players/edit-player-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Player } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -59,6 +60,12 @@ export default async function EditPlayerPage({ params }: EditPlayerPageProps) {
 
   const player = playerData as PlayerEditable;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -73,14 +80,24 @@ export default async function EditPlayerPage({ params }: EditPlayerPageProps) {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos del jugador</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EditPlayerForm leagueSlug={league.slug} playerId={player.id} currentPlayer={player} />
-        </CardContent>
-      </Card>
+      {!permissions.canManagePlayers ? (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Acceso restringido: Solo los administradores de liga y miembros del cuerpo técnico (administradores de equipo y entrenadores) pueden editar jugadores.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Datos del jugador</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EditPlayerForm leagueSlug={league.slug} playerId={player.id} currentPlayer={player} />
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 }

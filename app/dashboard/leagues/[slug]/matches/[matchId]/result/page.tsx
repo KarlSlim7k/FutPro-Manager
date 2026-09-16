@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -20,6 +21,7 @@ type MatchSummary = Pick<
   | "home_score"
   | "away_score"
   | "round_name"
+  | "referee_id"
 >;
 type SeasonSummary = Pick<Season, "id" | "name">;
 type TeamSummary = Pick<Team, "id" | "name">;
@@ -65,7 +67,7 @@ export default async function MatchResultPage({ params }: MatchResultPageProps) 
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name")
+    .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, referee_id")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -122,6 +124,34 @@ export default async function MatchResultPage({ params }: MatchResultPageProps) 
   const homeTeamName = homeTeam?.name ?? "Equipo local";
   const awayTeamName = awayTeam?.name ?? "Equipo visitante";
   const hasValidTeams = homeTeam !== null && awayTeam !== null;
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  const isAssignedReferee = match.referee_id === user.id;
+  const canUpdateResult = permissions.canManageLeague || isAssignedReferee;
+
+  if (!canUpdateResult) {
+    return (
+      <section className="space-y-6">
+        <PageHeader
+          backHref={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
+          backLabel="Volver al detalle del partido"
+          title="Capturar resultado"
+          description={`${homeTeamName} vs ${awayTeamName}`}
+        />
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Acceso restringido: Solo los administradores de liga y el árbitro asignado pueden capturar o modificar el resultado de este partido.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-6">

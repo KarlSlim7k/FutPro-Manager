@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions, canManageTeam } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { TEAM_STATUS_VALUES, type TeamStatus } from "@/types/database";
 
@@ -174,6 +175,20 @@ export async function updateTeamAction(
       values,
       fieldErrors: {},
       formError: "Equipo no encontrado o sin acceso para editar.",
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!canManageTeam(permissions, currentTeam.id)) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para editar los datos de este equipo.",
     };
   }
 

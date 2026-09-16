@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -121,7 +122,7 @@ export async function updateMatchResultAction(
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, season_id, status, home_team_id, away_team_id")
+    .select("id, season_id, status, home_team_id, away_team_id, referee_id")
     .eq("id", matchId)
     .eq("league_id", leagueData.id)
     .maybeSingle();
@@ -135,6 +136,23 @@ export async function updateMatchResultAction(
       values,
       fieldErrors: {},
       formError: "Partido no encontrado o sin acceso para capturar resultado.",
+      success: false,
+      standingsWarning: null,
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: leagueData.id,
+  });
+
+  const isAssignedReferee = matchData.referee_id === user.id;
+  if (!permissions.canManageLeague && !isAssignedReferee) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para capturar el resultado de este partido.",
       success: false,
       standingsWarning: null,
     };

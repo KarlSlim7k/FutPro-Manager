@@ -156,6 +156,20 @@ export async function createPlayerRegistrationAction(
     };
   }
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!isTeamStaff(permissions, team.id)) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para inscribir jugadores en esta plantilla.",
+    };
+  }
+
   const { data: season, error: seasonError } = await supabase
     .from("seasons")
     .select("id")
