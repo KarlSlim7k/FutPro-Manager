@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { PublicMatchCard } from "@/components/public/public-match-card";
 import { createClient } from "@/lib/supabase/server";
@@ -270,6 +271,7 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
           />
         )}
       </section>
+      <PublicFooter />
     </main>
   );
 }

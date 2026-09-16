@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
@@ -106,6 +107,7 @@ export default async function PublicTeamsPage({ params }: Props) {
           </div>
         )}
       </section>
+      <PublicFooter />
     </main>
   );
 }

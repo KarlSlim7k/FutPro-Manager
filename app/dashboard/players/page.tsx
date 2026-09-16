@@ -29,7 +29,7 @@ export default async function PlayersHubPage() {
         title="Jugadores"
         description="Selecciona una liga para gestionar sus jugadores."
         backHref="/dashboard"
-        backLabel="← Dashboard"
+        backLabel="Dashboard"
       />
       {leagues.length === 0 ? (
         <EmptyState

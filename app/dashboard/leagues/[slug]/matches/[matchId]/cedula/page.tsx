@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { TextLink } from "@/components/ui/text-link";
 import { PrintCedulaButton } from "@/components/matches/print-cedula-button";
@@ -149,7 +150,7 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
         {/* Barra de Navegación y Botón de Imprimir (Ocultos al imprimir) */}
         <div className="flex items-center justify-between print:hidden">
           <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}`}>
-            ← Volver al detalle del partido
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Volver al detalle del partido
           </TextLink>
           <PrintCedulaButton />
         </div>

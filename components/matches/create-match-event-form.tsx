@@ -115,7 +115,7 @@ export function CreateMatchEventForm({
             <optgroup label={homeTeam.name}>
               {homePlayers.map((player) => (
                 <option key={player.id} value={player.id}>
-                  {player.isEligible === false ? "⛔ [No elegible] " : player.eligibilityWarning ? "⚠️ " : ""}
+                  {player.isEligible === false ? "[No elegible] " : player.eligibilityWarning ? "[!] " : ""}
                   {player.full_name}
                   {player.preferred_position ? ` - ${player.preferred_position}` : ""}
                   {player.isEligible === false && player.eligibilityReason ? ` (${player.eligibilityReason})` : ""}
@@ -127,7 +127,7 @@ export function CreateMatchEventForm({
             <optgroup label={awayTeam.name}>
               {awayPlayers.map((player) => (
                 <option key={player.id} value={player.id}>
-                  {player.isEligible === false ? "⛔ [No elegible] " : player.eligibilityWarning ? "⚠️ " : ""}
+                  {player.isEligible === false ? "[No elegible] " : player.eligibilityWarning ? "[!] " : ""}
                   {player.full_name}
                   {player.preferred_position ? ` - ${player.preferred_position}` : ""}
                   {player.isEligible === false && player.eligibilityReason ? ` (${player.eligibilityReason})` : ""}

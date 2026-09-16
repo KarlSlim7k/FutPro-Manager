@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { FileText } from "lucide-react";
 import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { RefereeAssignmentCard } from "@/components/referees/referee-assignment-card";
@@ -231,7 +232,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
               </TextLink>
             ) : null}
             <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/cedula`}>
-              📄 Cédula oficial
+              <span className="inline-flex items-center gap-1.5"><FileText className="h-4 w-4" aria-hidden /> Cédula oficial</span>
             </TextLink>
           </ToolbarActions>
         }

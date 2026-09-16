@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Volleyball } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicMatchCard } from "@/components/public/public-match-card";
 import { createClient } from "@/lib/supabase/server";
 import { getSeasonStats } from "@/lib/stats/get-season-stats";
@@ -249,9 +251,9 @@ export default async function LeaguePublicPage({
                   </div>
                   <Link
                     href={`/liga/${league.slug}/matches`}
-                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
                   >
-                    Ver calendario →
+                    Ver calendario <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>
                 </CardHeader>
                 <CardContent>
@@ -307,9 +309,9 @@ export default async function LeaguePublicPage({
                     </div>
                     <Link
                       href={`/liga/${league.slug}/matches`}
-                      className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
                     >
-                      Todos los resultados →
+                      Todos los resultados <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                     </Link>
                   </CardHeader>
                   <CardContent>
@@ -341,8 +343,8 @@ export default async function LeaguePublicPage({
                                 {m.round_name || "Partido finalizado"}
                               </p>
                             </div>
-                            <span className="shrink-0 text-xs font-medium text-emerald-700">
-                              Detalle ↗
+                            <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-emerald-700">
+                              Detalle <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
                           </Link>
                         );
@@ -366,9 +368,9 @@ export default async function LeaguePublicPage({
                   </div>
                   <Link
                     href={`/liga/${league.slug}/standings`}
-                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
                   >
-                    Ver tabla completa →
+                    Ver tabla completa <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>
                 </CardHeader>
                 <CardContent>
@@ -456,7 +458,7 @@ export default async function LeaguePublicPage({
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-white shadow-sm">
-                        <span className="text-xs">⚽</span>
+                        <Volleyball className="h-4 w-4" aria-hidden />
                         <span className="text-base font-bold">
                           {topScorer.totalGoals}
                         </span>
@@ -468,9 +470,9 @@ export default async function LeaguePublicPage({
                     <div className="pt-1">
                       <Link
                         href={`/liga/${league.slug}/standings?tab=scorers`}
-                        className="text-xs font-semibold text-emerald-700 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
                       >
-                        Ver tabla completa de goleo →
+                        Ver tabla completa de goleo <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                       </Link>
                     </div>
                   </CardContent>
@@ -491,9 +493,9 @@ export default async function LeaguePublicPage({
                 </p>
                 <Link
                   href={`/liga/${league.slug}/standings?tab=playoffs`}
-                  className="mt-3 inline-flex text-xs font-semibold text-blue-700 hover:underline"
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline"
                 >
-                  Ver bracket de liguilla →
+                  Ver bracket de liguilla <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </Link>
               </div>
             </div>
@@ -505,6 +507,7 @@ export default async function LeaguePublicPage({
           />
         )}
       </section>
+      <PublicFooter />
     </main>
   );
 }

@@ -198,7 +198,7 @@ export function PlayoffBracket({
             {bracket.final && (
               <div className="space-y-2">
                 <div className="text-center pb-1 border-b border-amber-300">
-                  <Eyebrow as="div" className="text-amber-800 font-bold">🏆 Gran Final</Eyebrow>
+                  <Eyebrow as="div" className="inline-flex items-center gap-1.5 text-amber-800 font-bold"><Trophy className="h-3.5 w-3.5" aria-hidden /> Gran Final</Eyebrow>
                 </div>
                 <MatchSeriesCard
                   series={bracket.final}

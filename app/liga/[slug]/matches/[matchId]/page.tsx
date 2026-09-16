@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { PublicMatchEvents } from "@/components/public/public-match-events";
@@ -362,7 +364,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
             </div>
 
             <div className="flex flex-wrap gap-4 border-t border-gray-100 pt-4">
-              <TextLink href={`/liga/${league.slug}/matches`}>← Ver todos los partidos</TextLink>
+              <TextLink href={`/liga/${league.slug}/matches`}><ArrowLeft className="h-4 w-4" aria-hidden /> Ver todos los partidos</TextLink>
               <TextLink href={`/liga/${league.slug}/standings`}>Tabla de posiciones</TextLink>
             </div>
           </CardContent>
@@ -384,6 +386,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
           </CardContent>
         </Card>
       </section>
+      <PublicFooter />
     </main>
   );
 }

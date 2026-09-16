@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TextLink } from "@/components/ui/text-link";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -24,7 +25,12 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn("space-y-3", className)}>
-      {backHref ? <TextLink href={backHref}>{backLabel}</TextLink> : null}
+      {backHref ? (
+        <TextLink href={backHref} className="gap-1.5">
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          {backLabel}
+        </TextLink>
+      ) : null}
       <SectionHeader
         eyebrow={eyebrow}
         title={title}

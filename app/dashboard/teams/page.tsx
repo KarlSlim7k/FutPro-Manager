@@ -29,7 +29,7 @@ export default async function TeamsHubPage() {
         title="Equipos"
         description="Selecciona una liga para gestionar sus equipos."
         backHref="/dashboard"
-        backLabel="← Dashboard"
+        backLabel="Dashboard"
       />
       {leagues.length === 0 ? (
         <EmptyState

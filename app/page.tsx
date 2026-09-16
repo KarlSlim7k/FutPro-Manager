@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowUpRight, Check, ChevronDown, MessageCircle, Volleyball } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PublicFooter } from "@/components/public/public-footer";
@@ -96,7 +97,7 @@ export default function Home() {
         <header className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="group flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-700 text-lg shadow-sm group-hover:bg-emerald-600 transition">
-              ⚽
+              <Volleyball className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
               <Eyebrow tone="brand" className="text-sm tracking-[0.18em]">
@@ -174,12 +175,10 @@ export default function Home() {
                 Crear cuenta gratis
               </Link>
               <Link
-                href="/liga/liga-municipal-perote"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+                href="/explorar"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
               >
-                Ver liga demo ↗
+                Ver liga demo <ArrowUpRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>
           </div>
@@ -396,25 +395,25 @@ export default function Home() {
                   {[
                     {
                       min: "12'",
-                      tipo: "⚽ Gol",
+                      tipo: "Gol",
                       jugador: "R. Méndez",
                       equipo: "Águilas FC",
                     },
                     {
                       min: "34'",
-                      tipo: "⚽ Gol",
+                      tipo: "Gol",
                       jugador: "L. Torres",
                       equipo: "Real Perote",
                     },
                     {
                       min: "67'",
-                      tipo: "⚽ Gol",
+                      tipo: "Gol",
                       jugador: "C. Ríos",
                       equipo: "Águilas FC",
                     },
                     {
                       min: "78'",
-                      tipo: "🟨 Amarilla",
+                      tipo: "Amarilla",
                       jugador: "M. García",
                       equipo: "Real Perote",
                     },
@@ -501,22 +500,22 @@ export default function Home() {
               </div>
               <ul className="mt-6 space-y-3 text-sm text-gray-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> 1 liga o torneo completo
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> 1 liga o torneo completo
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Equipos y jugadores ilimitados
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> Equipos y jugadores ilimitados
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Tabla de posiciones y resultados en tiempo real
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> Tabla de posiciones y resultados en tiempo real
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Estadísticas individuales (goleo y tarjetas)
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> Estadísticas individuales (goleo y tarjetas)
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Cuadro de liguilla y fases finales
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> Cuadro de liguilla y fases finales
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Tarjetas para compartir en WhatsApp
+                  <Check className="h-4 w-4 text-emerald-600" aria-hidden /> Tarjetas para compartir en WhatsApp
                 </li>
               </ul>
               <div className="mt-8">
@@ -544,19 +543,19 @@ export default function Home() {
                 </div>
                 <ul className="mt-6 space-y-3 text-sm text-gray-600">
                   <li className="flex items-center gap-2">
-                    <span className="text-blue-600 font-bold">✓</span> Múltiples torneos y categorías simultáneas
+                    <Check className="h-4 w-4 text-blue-600" aria-hidden /> Múltiples torneos y categorías simultáneas
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-blue-600 font-bold">✓</span> Dominio web propio (ej. miliga.com)
+                    <Check className="h-4 w-4 text-blue-600" aria-hidden /> Dominio web propio (ej. miliga.com)
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-blue-600 font-bold">✓</span> Cédula arbitral digital con firma en cancha
+                    <Check className="h-4 w-4 text-blue-600" aria-hidden /> Cédula arbitral digital con firma en cancha
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-blue-600 font-bold">✓</span> Espacio para patrocinadores de la liga
+                    <Check className="h-4 w-4 text-blue-600" aria-hidden /> Espacio para patrocinadores de la liga
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-blue-600 font-bold">✓</span> Soporte prioritario 24/7 por WhatsApp
+                    <Check className="h-4 w-4 text-blue-600" aria-hidden /> Soporte prioritario 24/7 por WhatsApp
                   </li>
                 </ul>
               </div>
@@ -595,7 +594,7 @@ export default function Home() {
                 <summary className="flex items-center justify-between font-semibold text-gray-900 hover:text-emerald-700 list-none">
                   <span>{faq.q}</span>
                   <span className="ml-4 shrink-0 transition-transform group-open:rotate-180 text-gray-400">
-                    ▼
+                    <ChevronDown className="h-4 w-4" aria-hidden />
                   </span>
                 </summary>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
@@ -639,7 +638,7 @@ export default function Home() {
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-emerald-900/20 transition hover:bg-emerald-600 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
         aria-label="Contactar por WhatsApp"
       >
-        <span className="text-base">💬</span>
+        <MessageCircle className="h-5 w-5" aria-hidden />
         <span className="hidden sm:inline text-xs font-medium">¿Dudas? Chatea con nosotros</span>
       </a>
 

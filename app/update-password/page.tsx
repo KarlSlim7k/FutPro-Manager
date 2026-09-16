@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +132,7 @@ export default function UpdatePasswordPage() {
                 href="/login"
                 className="text-xs font-medium text-gray-600 hover:text-gray-900 hover:underline"
               >
-                ← Volver a inicio de sesión
+                <span className="inline-flex items-center gap-1.5"><ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Volver a inicio de sesión</span>
               </Link>
             </div>
           </form>

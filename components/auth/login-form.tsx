@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -250,9 +251,9 @@ export function LoginForm({ initialMode = "login" }: LoginFormProps) {
               setError(null);
               setSuccess(null);
             }}
-            className="text-xs font-medium text-gray-600 hover:text-gray-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded px-2 py-1"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded px-2 py-1"
           >
-            ← Volver a iniciar sesión
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Volver a iniciar sesión
           </button>
         </div>
       ) : (

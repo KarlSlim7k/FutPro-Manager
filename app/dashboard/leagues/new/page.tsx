@@ -15,7 +15,7 @@ export default async function NewLeaguePage() {
         title="Nueva liga"
         description="Crea una nueva liga para gestionar equipos, jugadores y partidos."
         backHref="/dashboard/leagues"
-        backLabel="← Volver a Ligas"
+        backLabel="Volver a Ligas"
       />
       <FormSectionCard title="Datos de la liga">
         <CreateLeagueForm />

@@ -29,7 +29,7 @@ export default async function MatchesHubPage() {
         title="Partidos"
         description="Selecciona una liga para gestionar sus partidos."
         backHref="/dashboard"
-        backLabel="← Dashboard"
+        backLabel="Dashboard"
       />
       {leagues.length === 0 ? (
         <EmptyState

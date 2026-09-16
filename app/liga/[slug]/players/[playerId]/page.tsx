@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -64,14 +65,14 @@ const REGISTRATION_STATUS_VARIANTS: Record<PlayerRegistrationStatus, StatusBadge
 };
 
 const EVENT_LABELS: Record<MatchEventType, string> = {
-  goal: "⚽ Gol",
-  own_goal: "⚽ Autogol",
-  assist: "🅰️ Asistencia",
-  yellow_card: "🟨 Tarjeta amarilla",
-  red_card: "🟥 Tarjeta roja",
-  substitution: "🔄 Sustitución",
-  penalty_goal: "⚽ Gol de penalti",
-  penalty_miss: "❌ Penalti fallado",
+  goal: "Gol",
+  own_goal: "Autogol",
+  assist: "Asistencia",
+  yellow_card: "Tarjeta amarilla",
+  red_card: "Tarjeta roja",
+  substitution: "Sustitución",
+  penalty_goal: "Gol de penalti",
+  penalty_miss: "Penalti fallado",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -290,6 +291,7 @@ export default async function PublicPlayerPage({ params }: Props) {
           </CardContent>
         </Card>
       </section>
+      <PublicFooter />
     </main>
   );
 }

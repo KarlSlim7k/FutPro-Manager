@@ -72,14 +72,14 @@ const catalogs: Catalog[] = [
     title: "Tipos de evento de partido",
     description: "Acciones registrables durante un partido.",
     entries: [
-      { value: "goal", label: "⚽ Gol", variant: "success" },
-      { value: "own_goal", label: "⚽ Autogol", variant: "danger" },
-      { value: "assist", label: "🅰️ Asistencia", variant: "info" },
-      { value: "yellow_card", label: "🟨 Tarjeta amarilla", variant: "warning" },
-      { value: "red_card", label: "🟥 Tarjeta roja", variant: "danger" },
-      { value: "substitution", label: "🔄 Sustitución", variant: "neutral" },
-      { value: "penalty_goal", label: "⚽ Gol de penalti", variant: "success" },
-      { value: "penalty_miss", label: "❌ Penalti fallado", variant: "danger" },
+      { value: "goal", label: "Gol", variant: "success" },
+      { value: "own_goal", label: "Autogol", variant: "danger" },
+      { value: "assist", label: "Asistencia", variant: "info" },
+      { value: "yellow_card", label: "Tarjeta amarilla", variant: "warning" },
+      { value: "red_card", label: "Tarjeta roja", variant: "danger" },
+      { value: "substitution", label: "Sustitución", variant: "neutral" },
+      { value: "penalty_goal", label: "Gol de penalti", variant: "success" },
+      { value: "penalty_miss", label: "Penalti fallado", variant: "danger" },
     ],
   },
   {
@@ -112,7 +112,7 @@ const catalogs: Catalog[] = [
       { value: "quarter_finals", label: "Cuartos de final", variant: "info" },
       { value: "semi_finals", label: "Semifinales", variant: "warning" },
       { value: "third_place", label: "Tercer lugar", variant: "neutral" },
-      { value: "final", label: "🏆 Gran Final", variant: "success" },
+      { value: "final", label: "Gran Final", variant: "success" },
     ],
   },
   {
@@ -133,7 +133,7 @@ export default function TypesPage() {
         title="Tipos y catálogos"
         description="Referencia de todos los valores controlados del sistema. Estos catálogos están definidos en el esquema y se usan en ligas, equipos, jugadores, partidos y eventos."
         backHref="/dashboard"
-        backLabel="← Dashboard"
+        backLabel="Dashboard"
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

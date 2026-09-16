@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Search, Volleyball } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -46,7 +47,7 @@ export function LeagueSearchExplorer({
           className="pr-10"
         />
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-          🔍
+          <Search className="h-4 w-4" aria-hidden />
         </div>
       </div>
 
@@ -85,7 +86,7 @@ export function LeagueSearchExplorer({
                     />
                   ) : (
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 font-bold text-emerald-800">
-                      ⚽
+                      <Volleyball className="h-6 w-6" aria-hidden />
                     </div>
                   )}
                   <div className="flex-1 truncate">
@@ -103,8 +104,8 @@ export function LeagueSearchExplorer({
 
               <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-3">
                 <StatusBadge variant="success">Liga activa</StatusBadge>
-                <span className="text-xs font-semibold text-emerald-700 group-hover:translate-x-0.5 transition-transform">
-                  Ver liga →
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 group-hover:translate-x-0.5 transition-transform">
+                  Ver liga <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </span>
               </div>
             </Link>

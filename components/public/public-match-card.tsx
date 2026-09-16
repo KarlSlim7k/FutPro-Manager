@@ -1,6 +1,7 @@
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TextLink } from "@/components/ui/text-link";
+import { ArrowRight } from "lucide-react";
 import type { MatchStatus } from "@/types/database";
 
 type PublicMatchCardProps = {
@@ -102,7 +103,7 @@ export function PublicMatchCard({
         ) : null}
         {detailHref ? (
           <div className="pt-2">
-            <TextLink href={detailHref}>Ver detalle del partido →</TextLink>
+            <TextLink href={detailHref}>Ver detalle del partido <ArrowRight className="h-4 w-4" aria-hidden /></TextLink>
           </div>
         ) : null}
       </CardContent>

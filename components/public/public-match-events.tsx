@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { EventIcon, getMatchEventVisual } from "@/components/ui/event-icon";
 import type { MatchEvent, Player, Team } from "@/types/database";
 
 type MatchEventItem = Pick<
@@ -56,18 +57,7 @@ function formatEventType(eventType: MatchEventItem["event_type"]): string {
 }
 
 function getEventVisual(eventType: MatchEventItem["event_type"]) {
-  const visuals: Record<MatchEventItem["event_type"], { icon: string; className: string }> = {
-    goal: { icon: "⚽", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
-    own_goal: { icon: "🥅", className: "border-orange-200 bg-orange-50 text-orange-700" },
-    assist: { icon: "🎯", className: "border-sky-200 bg-sky-50 text-sky-700" },
-    yellow_card: { icon: "🟨", className: "border-amber-200 bg-amber-50 text-amber-700" },
-    red_card: { icon: "🟥", className: "border-rose-200 bg-rose-50 text-rose-700" },
-    substitution: { icon: "🔁", className: "border-violet-200 bg-violet-50 text-violet-700" },
-    penalty_goal: { icon: "✅", className: "border-teal-200 bg-teal-50 text-teal-700" },
-    penalty_miss: { icon: "❌", className: "border-red-200 bg-red-50 text-red-700" },
-  };
-
-  return visuals[eventType];
+  return getMatchEventVisual(eventType);
 }
 
 function isGoalEvent(event: MatchEventItem): boolean {
@@ -198,13 +188,10 @@ export function PublicMatchEvents({
 
               return (
                 <li key={event.id} className="relative flex items-start gap-4">
-                  <span
-                    className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm shadow-sm ${eventVisual.className}`}
-                    title={eventTypeLabel}
-                    aria-label={eventTypeLabel}
-                  >
-                    <span aria-hidden>{eventVisual.icon}</span>
-                  </span>
+                  <EventIcon
+                    type={event.event_type}
+                    className={eventVisual.className}
+                  />
 
                   <article className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
                     <div className="flex flex-wrap items-center gap-2">

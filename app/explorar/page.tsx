@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicFooter } from "@/components/public/public-footer";
 import { LeagueSearchExplorer, type LeagueExplorerItem } from "@/components/leagues/league-search-explorer";
@@ -44,9 +45,9 @@ export default async function ExploreLeaguesPage({ searchParams }: SearchProps) 
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
           >
-            ← Volver al inicio
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Volver al inicio
           </Link>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>

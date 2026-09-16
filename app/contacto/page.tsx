@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft, ArrowUpRight, Mail, MessageCircle } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicFooter } from "@/components/public/public-footer";
 
@@ -16,9 +17,9 @@ export default function ContactPage() {
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
           >
-            ← Volver al inicio
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Volver al inicio
           </Link>
           <div className="mt-4">
             <Eyebrow tone="brand" className="text-sm tracking-[0.16em]">
@@ -40,8 +41,8 @@ export default function ContactPage() {
             {/* WhatsApp */}
             <div className="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-xl">
-                  💬
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                  <MessageCircle className="h-5 w-5 text-emerald-700" aria-hidden />
                 </span>
                 <div>
                   <h3 className="font-semibold text-gray-900">WhatsApp Directo</h3>
@@ -59,15 +60,15 @@ export default function ContactPage() {
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-600"
               >
                 <span>Enviar mensaje por WhatsApp</span>
-                <span>↗</span>
+                <ArrowUpRight className="h-4 w-4" aria-hidden />
               </a>
             </div>
 
             {/* Email */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-xl">
-                  ✉️
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                  <Mail className="h-5 w-5 text-blue-700" aria-hidden />
                 </span>
                 <div>
                   <h3 className="font-semibold text-gray-900">Correo Electrónico</h3>

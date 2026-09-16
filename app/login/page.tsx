@@ -72,6 +72,23 @@ export default async function LoginPage({
           <LoginForm initialMode={initialMode} />
         </section>
       </div>
+      <div className="mx-auto mt-10 flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400">
+        <Link href="/" className="transition hover:text-emerald-200 hover:underline">
+          Inicio
+        </Link>
+        <Link href="/explorar" className="transition hover:text-emerald-200 hover:underline">
+          Explorar ligas
+        </Link>
+        <Link href="/contacto" className="transition hover:text-emerald-200 hover:underline">
+          Contacto
+        </Link>
+        <Link href="/privacidad" className="transition hover:text-emerald-200 hover:underline">
+          Aviso de privacidad
+        </Link>
+        <Link href="/terminos" className="transition hover:text-emerald-200 hover:underline">
+          Términos y condiciones
+        </Link>
+      </div>
     </main>
   );
 }

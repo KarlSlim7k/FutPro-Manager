@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 
 export function PublicFooter() {
@@ -29,6 +30,14 @@ export function PublicFooter() {
             <ul className="mt-3 space-y-2 text-sm text-gray-600">
               <li>
                 <Link
+                  href="/"
+                  className="transition hover:text-emerald-700 hover:underline"
+                >
+                  Inicio
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/explorar"
                   className="transition hover:text-emerald-700 hover:underline"
                 >
@@ -37,7 +46,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/liga/liga-municipal-perote"
+                  href="/explorar"
                   className="transition hover:text-emerald-700 hover:underline"
                 >
                   Liga demo
@@ -84,7 +93,7 @@ export function PublicFooter() {
                   className="inline-flex items-center gap-1.5 transition hover:text-emerald-700 hover:underline"
                 >
                   <span>WhatsApp soporte</span>
-                  <span className="text-xs text-gray-400">↗</span>
+                  <ArrowUpRight className="h-3.5 w-3.5 text-gray-400" aria-hidden />
                 </a>
               </li>
               <li>

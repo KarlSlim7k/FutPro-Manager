@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicFooter } from "@/components/public/public-footer";
 
@@ -16,9 +17,9 @@ export default function PrivacyPage() {
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
           >
-            ← Volver al inicio
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Volver al inicio
           </Link>
           <div className="mt-4">
             <Eyebrow tone="brand" className="text-sm tracking-[0.16em]">
