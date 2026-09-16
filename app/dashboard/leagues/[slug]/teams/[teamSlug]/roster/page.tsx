@@ -6,11 +6,16 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 import { TextLink } from "@/components/ui/text-link";
+import { FormSectionCard } from "@/components/ui/form-section-card";
+import { CreatePlayerRegistrationForm } from "@/components/registrations/create-player-registration-form";
+import { RosterItemActions } from "@/components/registrations/roster-item-actions";
+import { getLeaguePermissions, isTeamStaff } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import type {
   League,
   Player,
   PlayerRegistrationStatus,
+  PlayerStatus,
   PlayerTeamRegistration,
   Season,
   Team,
@@ -118,6 +123,13 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
 
   const team = teamData as TeamSummary;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+  const canManageRoster = isTeamStaff(permissions, team.id);
+
   const { data: seasonsData, error: seasonsError } = await supabase
     .from("seasons")
     .select("id, name, slug, status, start_date, end_date")
@@ -212,6 +224,21 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
 
   const playersById = new Map(players.map((player) => [player.id, player]));
 
+  let availablePlayersForForm: Array<{ id: string; full_name: string; status: PlayerStatus }> = [];
+  if (canManageRoster) {
+    const { data: allLeaguePlayers } = await supabase
+      .from("players")
+      .select("id, full_name, status")
+      .eq("league_id", league.id)
+      .order("full_name", { ascending: true });
+    const registeredIds = new Set(registrations.map((r) => r.player_id));
+    availablePlayersForForm = ((allLeaguePlayers ?? []) as Array<{
+      id: string;
+      full_name: string;
+      status: PlayerStatus;
+    }>).filter((p) => !registeredIds.has(p.id));
+  }
+
   const rosterRegistrations: RosterRegistration[] = registrations.map((registration) => ({
     id: registration.id,
     jersey_number: registration.jersey_number,
@@ -300,6 +327,30 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
         </CardContent>
       </Card>
 
+      {canManageRoster ? (
+        <FormSectionCard title="Inscribir jugador en plantilla">
+          <CreatePlayerRegistrationForm
+            leagueSlug={league.slug}
+            teamSlug={team.slug}
+            seasons={seasons.map((s) => ({
+              id: s.id,
+              name: s.name,
+              slug: s.slug,
+              status: s.status,
+            }))}
+            players={availablePlayersForForm}
+          />
+        </FormSectionCard>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta a esta plantilla. La inscripción de jugadores está disponible para administradores y cuerpo técnico del equipo.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {rosterRegistrations.length === 0 ? (
         <EmptyState
           title="Sin jugadores registrados"
@@ -360,6 +411,17 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                       )}
                     </p>
                     <p>Fecha de registro: {formatDateTime(registration.registered_at)}</p>
+                    {canManageRoster ? (
+                      <div className="border-t border-gray-100 pt-3">
+                        <RosterItemActions
+                          leagueSlug={league.slug}
+                          teamSlug={team.slug}
+                          registrationId={registration.id}
+                          currentStatus={registration.status}
+                          currentJerseyNumber={registration.jersey_number}
+                        />
+                      </div>
+                    ) : null}
                   </CardContent>
                 </Card>
               ))}
@@ -387,6 +449,11 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                     <th className="px-4 py-3">
                       <Eyebrow as="span">Estado jugador</Eyebrow>
                     </th>
+                    {canManageRoster ? (
+                      <th className="px-4 py-3">
+                        <Eyebrow as="span">Acciones</Eyebrow>
+                      </th>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -426,6 +493,17 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                           "No disponible"
                         )}
                       </td>
+                      {canManageRoster ? (
+                        <td className="px-4 py-3">
+                          <RosterItemActions
+                            leagueSlug={league.slug}
+                            teamSlug={team.slug}
+                            registrationId={registration.id}
+                            currentStatus={registration.status}
+                            currentJerseyNumber={registration.jersey_number}
+                          />
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>

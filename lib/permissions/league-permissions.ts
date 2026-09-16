@@ -156,3 +156,20 @@ function safePermissions(): LeaguePermissions {
     canUpdateMatchResults: false,
   };
 }
+
+/**
+ * Determina si el usuario puede administrar un equipo especifico dentro de la liga
+ * (super_admin, league_admin, o team_admin del equipo).
+ */
+export function canManageTeam(permissions: LeaguePermissions, teamId: string): boolean {
+  return permissions.canManageLeague || permissions.managedTeamIds.includes(teamId);
+}
+
+/**
+ * Determina si el usuario es staff (team_admin o coach) de un equipo especifico dentro de la liga
+ * (super_admin, league_admin, o parte del cuerpo técnico/admin del equipo).
+ */
+export function isTeamStaff(permissions: LeaguePermissions, teamId: string): boolean {
+  return permissions.canManageLeague || permissions.staffTeamIds.includes(teamId);
+}
+

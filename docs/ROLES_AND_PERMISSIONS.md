@@ -210,9 +210,61 @@ Filtros via query params: `action`, `entityType`, `actorId` (UUID validado), `fr
 
 ### Pendientes post-MVP
 
-- Instrumentacion exhaustiva de todos los server actions.
 - Auditoria automatica via triggers SQL o event bus (sin pasar por server actions).
-- Auditoria global para `super_admin` (multi-liga).
-- Exportacion CSV/PDF.
-- Retencion avanzada y politicas de limpieza.
-- Filtros full-text y busqueda avanzada.
+- Filtros full-text y busqueda avanzada a nivel base de datos.
+
+
+## Cobertura Operativa de Roles
+
+| Rol | Cobertura | Estado | Capacidades principales |
+|---|---|---|---|
+| `super_admin` | 100% | Completo | Acceso global a todas las ligas, auditoría global, exportación CSV, gestión de suscripciones, configuración total. |
+| `league_admin` | 100% | Completo | Gestión total dentro de su liga: temporadas, equipos, sedes, partidos, resultados, standings, miembros de liga, asignación de árbitros, auditoría de liga, exportación CSV y purga de logs. |
+| `team_admin` | 100% | Completo | Gestión de datos y logo de sus equipos, administración de staff de equipo (agregar/roles/remover con guardrail de último admin), gestión de plantilla/roster (inscribir/dorsal/estado/baja), foto de jugadores, captura y eliminación de eventos en sus partidos (filtrado por equipo), y Hub "Mis equipos". |
+| `coach` | ~70% | Parcial | Consulta de sus equipos y plantilla, captura deportiva autorizada según políticas. |
+| `referee` | ~80% | Operativo base | Asignación en partidos, captura de marcador y eventos en partidos asignados. |
+| `viewer` | 100% | Completo | Consulta y lectura permitida por RLS en el dashboard y vistas públicas. |
+
+
+## Administracion Operativa de Equipos: team_admin (100%)
+
+### Descripcion
+El rol `team_admin` cuenta con cobertura operativa del 100%, permitiendo a los administradores de equipo gestionar de forma integral su club, staff, plantilla y participación deportiva sin depender del `league_admin`.
+
+### Capacidades Implementadas
+1. **Gestión de Identidad y Datos del Equipo:**
+   - Edición de información del equipo: nombre, slug y estado (`/dashboard/leagues/[slug]/teams/[teamSlug]/edit`).
+   - Carga y actualización de escudo/logo del equipo (`updateTeamLogoAction`) verificado mediante `canManageTeam`.
+2. **Gestión de Staff del Equipo (`/staff`):**
+   - Ruta: `/dashboard/leagues/[slug]/teams/[teamSlug]/staff`.
+   - Listado de cuerpo técnico con roles asignados (`team_admin`, `coach`).
+   - Agregar miembros al staff a partir de usuarios miembros de la liga (`addTeamMemberAction`).
+   - Cambio de roles dentro del staff (`updateTeamMemberRoleAction`).
+   - Remoción de miembros del staff (`removeTeamMemberAction`).
+   - **Guardrail de seguridad:** Protección estricta que impide remover o cambiar el rol al último `team_admin` del equipo.
+   - Auditoría: `team.member_added`, `team.member_role_updated`, `team.member_removed`.
+3. **Gestión de Plantilla / Roster (`/roster`):**
+   - Ruta: `/dashboard/leagues/[slug]/teams/[teamSlug]/roster`.
+   - Inscripción de jugadores existentes de la liga a la plantilla de una temporada activa (`registerPlayerAction`).
+   - Modificación de estatus de registro (`active`, `inactive`, `suspended`, `transferred`) y número de dorsal (`updatePlayerRegistrationStatusAction`).
+   - Baja/remoción de jugadores de la plantilla (`deletePlayerRegistrationAction`).
+   - Auditoría: `player.registered_to_team`, `registration.status_updated`, `registration.removed_from_team`.
+4. **Gestión de Jugadores:**
+   - Alta y edición de jugadores de la liga (`/players/new`, `/players/[playerId]/edit`).
+   - Carga y actualización de fotografía de jugadores (`updatePlayerPhotoAction`) con permiso de `canManagePlayers`.
+5. **Captura y Gestión de Eventos de Partido (`/events`):**
+   - Ruta: `/dashboard/leagues/[slug]/matches/[matchId]/events`.
+   - Acceso condicionado a que uno de sus equipos administrados participe en el encuentro (`managedTeamIds`).
+   - Selección de equipo en el formulario restringida estrictamente a los equipos que el usuario tiene potestad de gestionar (`allowedTeamIds`).
+   - Eliminación de eventos de partido con confirmación (`deleteMatchEventAction`).
+   - Auditoría: `match.event_created`, `match.event_deleted`.
+6. **Hub Centralizado "Mis Equipos":**
+   - Vista en `/dashboard/teams` con sección destacada de "Mis equipos", mostrando insignias de rol (`Administrador de equipo`, `Cuerpo técnico`) y accesos rápidos a Equipo, Plantilla y Staff.
+   - Widget dedicado en la página de inicio del dashboard (`/dashboard`) para salto directo a los equipos administrados.
+
+### Guardrails y Arquitectura de Seguridad
+- **Autoridad final en RLS:** `can_manage_team(team_id)`, políticas en `teams`, `team_members`, `players`, `player_team_registrations` y `match_events`.
+- **Fail-closed:** Si un usuario no es administrador del equipo específico, la interfaz oculta los formularios y los Server Actions abortan inmediatamente retornando error.
+- **Sin Service Role:** Todas las mutaciones se ejecutan exclusivamente con el token y cliente autenticado del usuario final.
+- **Auditoría best-effort:** Los registros en `audit_logs` se ejecutan sin bloquear ni interrumpir las mutaciones deportivas principales.
+

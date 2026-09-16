@@ -58,7 +58,9 @@
   - Tarjeta de arbitro visible en detalle de partido; nombre de arbitro visible en listado de partidos.
   - Sin cambios a schema, RLS ni migraciones.
 - **Fase 6C - Auditoria visible en UI (Implementado + hardening menor):** Vista de auditoria por liga en `/dashboard/leagues/[slug]/audit`. Solo accesible para `super_admin` y `league_admin`. Filtros por accion, tipo de entidad, actor y rango de fechas via query params; `action` y `entityType` con validacion server-side por allowlist (valores invalidos se ignoran sin crash). Instrumentacion best-effort en `updateMemberRoleAction` (`member.role_updated`) y `updateMatchRefereeAction` (`match.referee_updated` / `match.referee_removed`). Sin cambios a schema, RLS ni migraciones. Sin service role.
-- Pendiente: asignaciones avanzadas con historial, permisos granulares por feature, consola completa de roles.
+- **Fase 6D - Auditoría exhaustiva, vista global y retención (Implementado):** Instrumentación best-effort de todas las acciones de liga, vista global `/dashboard/audit` para `super_admin`, exportación a CSV con filtros, búsqueda textual y purga de logs antiguos por retención.
+- **Fase 6E - Cierre operativo team_admin al 100% (Implementado):** Administración completa de staff de equipo (`/staff`) con guardrail de último admin, gestión de plantilla/roster (`/roster`) con alta/dorsal/estado/baja, subida de logo de equipo y foto de jugador, captura y eliminación de eventos en partidos de sus equipos (con filtro estricto por equipo), y Hub "Mis equipos" en dashboard.
+- Pendiente: ternas arbitrales completas con asistentes, optimización de captura deportiva para `coach`.
 
 ### Media Uploads MVP (Implementado y validado; hardening post-MVP pendiente)
 - ✅ Upload de logo de liga, logo de equipo y foto de jugador implementado en dashboard.

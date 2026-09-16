@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { EditTeamForm } from "@/components/teams/edit-team-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { canManageTeam, getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import type { League, Team } from "@/types/database";
 
@@ -58,6 +59,12 @@ export default async function EditTeamPage({ params }: EditTeamPageProps) {
   }
 
   const team = teamData as TeamEditable;
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+  const canManage = canManageTeam(permissions, team.id);
 
   return (
     <section className="space-y-6">
@@ -73,14 +80,24 @@ export default async function EditTeamPage({ params }: EditTeamPageProps) {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos del equipo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EditTeamForm leagueSlug={league.slug} currentTeam={team} />
-        </CardContent>
-      </Card>
+      {!canManage ? (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Acceso restringido: Solo los administradores de liga o los administradores de este equipo pueden editar sus datos.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Datos del equipo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EditTeamForm leagueSlug={league.slug} currentTeam={team} />
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 }

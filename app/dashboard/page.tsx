@@ -101,12 +101,34 @@ export default async function DashboardPage() {
   }
 
   let recentActivity: Array<{ id: string; action: string; created_at: string; leagueName: string | null }> = [];
+  let isSuperAdmin = false;
+  let userTeams: Array<{ id: string; name: string; slug: string; role: string; leagueSlug: string }> = [];
   if (user) {
-    const { data: auditRows } = await supabase
-      .from("audit_logs")
-      .select("id, action, created_at, league_id")
-      .order("created_at", { ascending: false })
-      .limit(5);
+    const [{ data: profile }, { data: auditRows }, { data: userTeamMembers }] = await Promise.all([
+      supabase.from("profiles").select("global_role").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("audit_logs")
+        .select("id, action, created_at, league_id")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("team_members")
+        .select("team_id, role, teams(id, name, slug, leagues(slug))")
+        .eq("profile_id", user.id),
+    ]);
+    isSuperAdmin = profile?.global_role === "super_admin";
+    if (userTeamMembers && userTeamMembers.length > 0) {
+      userTeams = userTeamMembers.map((m) => {
+        const t = m.teams as unknown as { id: string; name: string; slug: string; leagues: { slug: string } | null } | null;
+        return {
+          id: m.team_id,
+          name: t?.name ?? "Equipo",
+          slug: t?.slug ?? "",
+          role: m.role as string,
+          leagueSlug: t?.leagues?.slug ?? "",
+        };
+      });
+    }
     const audits = auditRows ?? [];
     const auditLeagueIds = [...new Set(audits.map((a) => a.league_id).filter((id): id is string => id !== null))];
     let auditLeagueNames = new Map<string, string>();
@@ -182,11 +204,54 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             )}
-            <div className="mt-3">
-              <TextLink href="/dashboard/audit">Ver auditoría global</TextLink>
-            </div>
+            {isSuperAdmin ? (
+              <div className="mt-3">
+                <TextLink href="/dashboard/audit">Ver auditoría global</TextLink>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
+
+        {userTeams.length > 0 ? (
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Mis equipos</CardTitle>
+              <TextLink href="/dashboard/teams">Ver módulo de equipos</TextLink>
+            </CardHeader>
+            <CardContent>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {userTeams.map((t) => (
+                  <li
+                    key={t.id}
+                    className="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-3 shadow-sm"
+                  >
+                    <div>
+                      <span className="font-medium text-gray-900">{t.name}</span>
+                      <span className="mt-0.5 block text-xs text-gray-500">
+                        {t.role === "team_admin"
+                          ? "Administrador de equipo"
+                          : t.role === "coach"
+                          ? "Cuerpo técnico"
+                          : "Solo consulta"}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3 text-sm">
+                      <TextLink href={`/dashboard/leagues/${t.leagueSlug}/teams/${t.slug}`}>
+                        Detalle
+                      </TextLink>
+                      <TextLink href={`/dashboard/leagues/${t.leagueSlug}/teams/${t.slug}/roster`}>
+                        Plantilla
+                      </TextLink>
+                      <TextLink href={`/dashboard/leagues/${t.leagueSlug}/teams/${t.slug}/staff`}>
+                        Staff
+                      </TextLink>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </section>
   );

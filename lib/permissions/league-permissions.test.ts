@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { getLeaguePermissions } from "./league-permissions";
+import { canManageTeam, getLeaguePermissions, isTeamStaff } from "./league-permissions";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 function chainableList(data: unknown) {
@@ -176,4 +176,77 @@ describe("league-permissions", () => {
     expect(perms.canManageEvents).toBe(true);
     expect(perms.isReadOnly).toBe(false);
   });
+
+  it("grants team_admin full team management for their assigned team", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "viewer",
+      teamRows: [{ team_id: "team-admin-1", role: "team_admin" }],
+      matchRows: [],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-team-admin",
+      leagueId: "lg-1",
+    });
+
+    expect(perms.canManageLeague).toBe(false);
+    expect(perms.managedTeamIds).toEqual(["team-admin-1"]);
+    expect(perms.staffTeamIds).toEqual(["team-admin-1"]);
+    expect(canManageTeam(perms, "team-admin-1")).toBe(true);
+    expect(canManageTeam(perms, "other-team")).toBe(false);
+    expect(isTeamStaff(perms, "team-admin-1")).toBe(true);
+    expect(isTeamStaff(perms, "other-team")).toBe(false);
+    expect(perms.canManagePlayers).toBe(true);
+    expect(perms.canManageRegistrations).toBe(true);
+    expect(perms.canCreateMatchEvents).toBe(true);
+  });
+
+  it("differentiates coach from team_admin in canManageTeam", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "viewer",
+      teamRows: [{ team_id: "team-coach-1", role: "coach" }],
+      matchRows: [],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-coach-only",
+      leagueId: "lg-1",
+    });
+
+    expect(perms.managedTeamIds).toEqual([]);
+    expect(perms.staffTeamIds).toEqual(["team-coach-1"]);
+    expect(canManageTeam(perms, "team-coach-1")).toBe(false);
+    expect(isTeamStaff(perms, "team-coach-1")).toBe(true);
+  });
+
+  it("allows league_admin and super_admin to manage any team", async () => {
+    const leagueAdminSupabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "league_admin",
+    });
+    const leagueAdminPerms = await getLeaguePermissions({
+      supabase: leagueAdminSupabase,
+      userId: "usr-la",
+      leagueId: "lg-1",
+    });
+
+    expect(canManageTeam(leagueAdminPerms, "any-team-xyz")).toBe(true);
+    expect(isTeamStaff(leagueAdminPerms, "any-team-xyz")).toBe(true);
+
+    const superAdminSupabase = createMockSupabase({
+      globalRole: "super_admin",
+      leagueRole: null,
+    });
+    const superAdminPerms = await getLeaguePermissions({
+      supabase: superAdminSupabase,
+      userId: "usr-sa",
+      leagueId: "lg-1",
+    });
+
+    expect(canManageTeam(superAdminPerms, "any-team-xyz")).toBe(true);
+    expect(isTeamStaff(superAdminPerms, "any-team-xyz")).toBe(true);
+  });
 });
+

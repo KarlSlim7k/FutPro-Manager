@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { createClient } from "@/lib/supabase/server";
-import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { getLeaguePermissions, canManageTeam } from "@/lib/permissions/league-permissions";
 import { EntityImagePreview } from "@/components/media/entity-image-preview";
 import { EntityImageUploadForm } from "@/components/media/entity-image-upload-form";
 import { updateTeamLogoAction } from "@/app/dashboard/leagues/[slug]/teams/[teamSlug]/media/actions";
@@ -85,6 +85,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
   const team = teamData as TeamDetail;
   const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: league.id });
+  const canManageThisTeam = canManageTeam(permissions, team.id);
 
   return (
     <section className="space-y-6">
@@ -102,9 +103,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}>
               Ver plantilla
             </TextLink>
-            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}>
-              Editar equipo
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/staff`}>
+              Staff
             </TextLink>
+            {canManageThisTeam ? (
+              <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/edit`}>
+                Editar equipo
+              </TextLink>
+            ) : null}
           </ToolbarActions>
         }
       />
@@ -188,7 +194,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
       <Card><CardHeader><CardTitle>Logo de equipo</CardTitle></CardHeader><CardContent className="space-y-4">
         <EntityImagePreview imageUrl={team.logo_url} alt={`Logo de ${team.name}`} label="Logo" />
-        {permissions.canManageCatalog ? (
+        {canManageThisTeam ? (
           <EntityImageUploadForm
             action={updateTeamLogoAction.bind(null, league.slug, team.slug)}
             helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB."
@@ -222,10 +228,17 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Staff</CardTitle>
+            <CardTitle>Staff / Cuerpo técnico</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación.</p>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Administra los directivos, entrenadores y cuerpo técnico del equipo.
+            </p>
+            <TextLink
+              href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/staff`}
+            >
+              Ver staff del equipo
+            </TextLink>
           </CardContent>
         </Card>
 

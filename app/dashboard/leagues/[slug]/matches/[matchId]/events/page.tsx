@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { checkPlayerEligibility } from "@/lib/eligibility/player-eligibility";
 import type { League, Match, MatchEvent, Player, PlayerTeamRegistration, Season, Team, Venue } from "@/types/database";
@@ -91,6 +92,26 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
 
   const match = matchData as MatchSummary;
   const participatingTeamIds = [match.home_team_id, match.away_team_id];
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  const isAssignedReferee = permissions.assignedMatchIds.includes(match.id);
+  const isHomeStaff = permissions.staffTeamIds.includes(match.home_team_id);
+  const isAwayStaff = permissions.staffTeamIds.includes(match.away_team_id);
+  const isStaffForMatch = isHomeStaff || isAwayStaff;
+  const canManageEvents = permissions.canManageLeague || isAssignedReferee || isStaffForMatch;
+
+  let allowedTeamIds: string[] = [];
+  if (permissions.canManageLeague || isAssignedReferee) {
+    allowedTeamIds = [match.home_team_id, match.away_team_id];
+  } else {
+    if (isHomeStaff) allowedTeamIds.push(match.home_team_id);
+    if (isAwayStaff) allowedTeamIds.push(match.away_team_id);
+  }
 
   const [seasonResult, teamsResult, venueResult, registrationsResult, eventsResult] = await Promise.all([
     supabase.from("seasons").select("id, name").eq("id", match.season_id).eq("league_id", league.id).maybeSingle(),
@@ -230,21 +251,32 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Registrar evento</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreateMatchEventForm
-            leagueSlug={league.slug}
-            matchId={match.id}
-            isMatchCancelled={match.status === "cancelled"}
-            homeTeam={{ id: homeTeam.id, name: homeTeam.name }}
-            awayTeam={{ id: awayTeam.id, name: awayTeam.name }}
-            players={formPlayers}
-          />
-        </CardContent>
-      </Card>
+      {canManageEvents ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Registrar evento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreateMatchEventForm
+              leagueSlug={league.slug}
+              matchId={match.id}
+              isMatchCancelled={match.status === "cancelled"}
+              homeTeam={{ id: homeTeam.id, name: homeTeam.name }}
+              awayTeam={{ id: awayTeam.id, name: awayTeam.name }}
+              allowedTeamIds={allowedTeamIds}
+              players={formPlayers}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-gray-600">
+              Tienes acceso de consulta a los eventos de este partido. El registro está disponible para administradores de liga, árbitros asignados o cuerpo técnico de los equipos participantes.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -259,14 +291,25 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
             />
           ) : (
             <div className="space-y-3">
-              {events.map((event) => (
-                <MatchEventCard
-                  key={event.id}
-                  event={event}
-                  teamName={event.team_id ? (teamsById.get(event.team_id)?.name ?? null) : null}
-                  playerName={event.player_id ? (playerNameById.get(event.player_id) ?? null) : null}
-                />
-              ))}
+              {events.map((event) => {
+                const canDeleteEvent =
+                  permissions.canManageLeague ||
+                  isAssignedReferee ||
+                  event.created_by === user.id ||
+                  (event.team_id !== null && permissions.staffTeamIds.includes(event.team_id));
+
+                return (
+                  <MatchEventCard
+                    key={event.id}
+                    event={event}
+                    teamName={event.team_id ? (teamsById.get(event.team_id)?.name ?? null) : null}
+                    playerName={event.player_id ? (playerNameById.get(event.player_id) ?? null) : null}
+                    canDelete={canDeleteEvent}
+                    leagueSlug={league.slug}
+                    matchId={match.id}
+                  />
+                );
+              })}
             </div>
           )}
         </CardContent>

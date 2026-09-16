@@ -163,7 +163,7 @@ export default async function PlayerDetailPage({ params }: PlayerDetailPageProps
 
       <Card><CardHeader><CardTitle>Foto de jugador</CardTitle></CardHeader><CardContent className="space-y-4">
         <EntityImagePreview imageUrl={player.photo_url} alt={`Foto de ${player.full_name}`} label="Foto" />
-        {permissions.canManageCatalog ? (
+        {permissions.canManagePlayers ? (
           <EntityImageUploadForm
             action={updatePlayerPhotoAction.bind(null, league.slug, player.id)}
             helpText="Permitidos: JPG, PNG, WEBP. Máximo: 3 MB."

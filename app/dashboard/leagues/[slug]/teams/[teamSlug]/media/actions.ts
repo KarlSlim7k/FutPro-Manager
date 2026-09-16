@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { uploadEntityImage, sanitizeFileName } from "@/lib/media/upload-media";
-import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { getLeaguePermissions, canManageTeam } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 
 type UploadState = { success: boolean; message: string | null };
@@ -19,7 +19,7 @@ export async function updateTeamLogoAction(leagueSlug: string, teamSlug: string,
   const { data: team } = await supabase.from("teams").select("id,slug").eq("league_id", league.id).eq("slug", teamSlug).maybeSingle();
   if (!team) return { success: false, message: "Equipo no encontrado." };
   const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: league.id });
-  if (!permissions.canManageCatalog) return { success: false, message: "No tienes permisos para actualizar el logo del equipo." };
+  if (!canManageTeam(permissions, team.id)) return { success: false, message: "No tienes permisos para actualizar el logo del equipo." };
   const file = formData.get("image");
   if (!(file instanceof File)) return { success: false, message: "Archivo inválido." };
   const path = `leagues/${league.id}/teams/${team.id}/logo/${Date.now()}-${sanitizeFileName(file.name)}`;

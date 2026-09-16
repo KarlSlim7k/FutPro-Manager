@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { isTeamStaff, getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import {
   PLAYER_REGISTRATION_STATUS_VALUES,
@@ -236,3 +237,193 @@ export async function createPlayerRegistrationAction(
   revalidatePath(`/dashboard/leagues/${leagueSlug}/players/${values.player_id}/registrations`);
   redirect(`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}/roster`);
 }
+
+export type UpdateRosterActionState = {
+  success: boolean;
+  message: string | null;
+};
+
+export async function updatePlayerRegistrationStatusAction(
+  leagueSlug: string,
+  teamSlug: string,
+  _prevState: UpdateRosterActionState,
+  formData: FormData
+): Promise<UpdateRosterActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: league } = await supabase
+    .from("leagues")
+    .select("id")
+    .eq("slug", leagueSlug)
+    .maybeSingle();
+
+  if (!league) {
+    return { success: false, message: "Liga no encontrada." };
+  }
+
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id")
+    .eq("league_id", league.id)
+    .eq("slug", teamSlug)
+    .maybeSingle();
+
+  if (!team) {
+    return { success: false, message: "Equipo no encontrado." };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!isTeamStaff(permissions, team.id)) {
+    return { success: false, message: "No tienes permisos para modificar la plantilla de este equipo." };
+  }
+
+  const registrationId = String(formData.get("registrationId") ?? "").trim();
+  const status = String(formData.get("status") ?? "").trim() as PlayerRegistrationStatus;
+  const rawJersey = String(formData.get("jerseyNumber") ?? "").trim();
+
+  if (!registrationId) {
+    return { success: false, message: "ID de registro no proporcionado." };
+  }
+
+  if (!PLAYER_REGISTRATION_STATUS_VALUES.includes(status)) {
+    return { success: false, message: "Estado de registro no válido." };
+  }
+
+  let jerseyNumber: number | null = null;
+  if (rawJersey !== "") {
+    const parsed = Number(rawJersey);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed > 99) {
+      return { success: false, message: "El dorsal debe ser un número entero entre 0 y 99." };
+    }
+    jerseyNumber = parsed;
+  }
+
+  const { error: updateError } = await supabase
+    .from("player_team_registrations")
+    .update({
+      status,
+      ...(rawJersey !== "" ? { jersey_number: jerseyNumber } : {}),
+    })
+    .eq("id", registrationId)
+    .eq("team_id", team.id);
+
+  if (updateError) {
+    if (updateError.code === "23505") {
+      return { success: false, message: "El número de camiseta ya está en uso en este equipo para esta temporada." };
+    }
+    if (updateError.code === "42501" || updateError.message?.toLowerCase().includes("row-level security")) {
+      return { success: false, message: "RLS bloqueó la actualización de la plantilla." };
+    }
+    return { success: false, message: "No se pudo actualizar el registro del jugador." };
+  }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "player.registration_updated",
+    entityType: "player_registration",
+    entityId: registrationId,
+    metadata: {
+      league_slug: leagueSlug,
+      team_slug: teamSlug,
+      status,
+      jersey_number: jerseyNumber,
+    },
+  });
+
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}/roster`);
+  return { success: true, message: "Registro de plantilla actualizado correctamente." };
+}
+
+export async function deletePlayerRegistrationAction(
+  leagueSlug: string,
+  teamSlug: string,
+  _prevState: UpdateRosterActionState,
+  formData: FormData
+): Promise<UpdateRosterActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: league } = await supabase
+    .from("leagues")
+    .select("id")
+    .eq("slug", leagueSlug)
+    .maybeSingle();
+
+  if (!league) {
+    return { success: false, message: "Liga no encontrada." };
+  }
+
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id")
+    .eq("league_id", league.id)
+    .eq("slug", teamSlug)
+    .maybeSingle();
+
+  if (!team) {
+    return { success: false, message: "Equipo no encontrado." };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!isTeamStaff(permissions, team.id)) {
+    return { success: false, message: "No tienes permisos para remover jugadores de esta plantilla." };
+  }
+
+  const registrationId = String(formData.get("registrationId") ?? "").trim();
+
+  if (!registrationId) {
+    return { success: false, message: "ID de registro no proporcionado." };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("player_team_registrations")
+    .delete()
+    .eq("id", registrationId)
+    .eq("team_id", team.id);
+
+  if (deleteError) {
+    if (deleteError.code === "42501" || deleteError.message?.toLowerCase().includes("row-level security")) {
+      return { success: false, message: "RLS bloqueó la remoción del jugador de la plantilla." };
+    }
+    return { success: false, message: "No se pudo remover al jugador de la plantilla." };
+  }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "player.registration_deleted",
+    entityType: "player_registration",
+    entityId: registrationId,
+    metadata: { league_slug: leagueSlug, team_slug: teamSlug },
+  });
+
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}/roster`);
+  return { success: true, message: "Jugador removido de la plantilla correctamente." };
+}
+

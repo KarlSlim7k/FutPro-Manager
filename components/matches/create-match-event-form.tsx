@@ -16,6 +16,7 @@ interface CreateMatchEventFormProps {
   isMatchCancelled: boolean;
   homeTeam: { id: string; name: string };
   awayTeam: { id: string; name: string };
+  allowedTeamIds?: string[];
   players: Array<{
     id: string;
     full_name: string;
@@ -33,12 +34,18 @@ export function CreateMatchEventForm({
   isMatchCancelled,
   homeTeam,
   awayTeam,
+  allowedTeamIds,
   players,
 }: CreateMatchEventFormProps) {
   const action = createMatchEventAction.bind(null, leagueSlug, matchId);
+  const selectableTeams = [homeTeam, awayTeam].filter(
+    (t) => !allowedTeamIds || allowedTeamIds.length === 0 || allowedTeamIds.includes(t.id)
+  );
+  const defaultTeamId = selectableTeams.length === 1 ? selectableTeams[0].id : "";
+
   const initialState: CreateMatchEventActionState = {
     values: {
-      team_id: "",
+      team_id: defaultTeamId,
       player_id: "",
       event_type: "",
       minute: "",
@@ -56,7 +63,7 @@ export function CreateMatchEventForm({
   const homePlayers = players.filter((player) => player.team_id === homeTeam.id);
   const awayPlayers = players.filter((player) => player.team_id === awayTeam.id);
   const hasPlayers = players.length > 0;
-  const canSubmit = !isPending && !isMatchCancelled && hasPlayers;
+  const canSubmit = !isPending && !isMatchCancelled && hasPlayers && selectableTeams.length > 0;
 
   return (
     <form action={formAction} className="space-y-4">
@@ -86,12 +93,17 @@ export function CreateMatchEventForm({
           name="team_id"
           required
           disabled={!canSubmit}
-          defaultValue={state.values.team_id}
+          defaultValue={state.values.team_id || defaultTeamId}
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
-          <option value="">Selecciona un equipo</option>
-          <option value={homeTeam.id}>{homeTeam.name}</option>
-          <option value={awayTeam.id}>{awayTeam.name}</option>
+          {selectableTeams.length > 1 ? (
+            <option value="">Selecciona un equipo</option>
+          ) : null}
+          {selectableTeams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
         </select>
         {state.fieldErrors.team_id ? (
           <p className="text-sm text-red-600">{state.fieldErrors.team_id}</p>
@@ -111,7 +123,7 @@ export function CreateMatchEventForm({
           className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
         >
           <option value="">Selecciona un jugador</option>
-          {homePlayers.length > 0 ? (
+          {selectableTeams.some((t) => t.id === homeTeam.id) && homePlayers.length > 0 ? (
             <optgroup label={homeTeam.name}>
               {homePlayers.map((player) => (
                 <option key={player.id} value={player.id}>
@@ -123,7 +135,7 @@ export function CreateMatchEventForm({
               ))}
             </optgroup>
           ) : null}
-          {awayPlayers.length > 0 ? (
+          {selectableTeams.some((t) => t.id === awayTeam.id) && awayPlayers.length > 0 ? (
             <optgroup label={awayTeam.name}>
               {awayPlayers.map((player) => (
                 <option key={player.id} value={player.id}>

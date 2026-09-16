@@ -244,3 +244,66 @@ export async function createMatchEventAction(
 
   redirect(`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`);
 }
+
+export type DeleteMatchEventState = {
+  success: boolean;
+  message: string | null;
+};
+
+export async function deleteMatchEventAction(
+  leagueSlug: string,
+  matchId: string,
+  eventId: string
+): Promise<DeleteMatchEventState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: leagueData, error: leagueError } = await supabase
+    .from("leagues")
+    .select("id")
+    .eq("slug", leagueSlug)
+    .maybeSingle();
+
+  if (leagueError || !leagueData) {
+    return { success: false, message: "Liga no encontrada." };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("match_events")
+    .delete()
+    .eq("id", eventId)
+    .eq("match_id", matchId);
+
+  if (deleteError) {
+    if (deleteError.code === "42501" || deleteError.message?.toLowerCase().includes("row-level security")) {
+      return { success: false, message: "RLS bloqueó la eliminación: no tienes permisos para borrar este evento." };
+    }
+    return { success: false, message: "No se pudo eliminar el evento." };
+  }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: leagueData.id,
+    action: "match.event_deleted",
+    entityType: "match_event",
+    entityId: eventId,
+    metadata: {
+      league_slug: leagueSlug,
+      match_id: matchId,
+    },
+  });
+
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}/events`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);
+  revalidatePath(`/dashboard/leagues/${leagueSlug}`);
+
+  return { success: true, message: "Evento eliminado correctamente." };
+}
+

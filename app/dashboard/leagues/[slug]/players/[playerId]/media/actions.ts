@@ -19,7 +19,7 @@ export async function updatePlayerPhotoAction(leagueSlug: string, playerId: stri
   const { data: player } = await supabase.from('players').select('id').eq('id', playerId).eq('league_id', league.id).maybeSingle();
   if (!player) return { success:false, message:'Jugador no encontrado.'};
   const permissions = await getLeaguePermissions({ supabase, userId:user.id, leagueId:league.id});
-  if (!permissions.canManageCatalog) return { success:false, message:'No tienes permisos para actualizar la foto del jugador.'};
+  if (!permissions.canManagePlayers) return { success:false, message:'No tienes permisos para actualizar la foto del jugador.'};
   const file = formData.get('image');
   if (!(file instanceof File)) return { success:false, message:'Archivo inválido.'};
   const path = `leagues/${league.id}/players/${player.id}/photo/${Date.now()}-${sanitizeFileName(file.name)}`;

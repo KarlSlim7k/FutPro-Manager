@@ -47,10 +47,10 @@ Estado actual del MVP:
 - **Pendiente:** flujos avanzados de cierre/apertura automática y validaciones adicionales.
 
 ### Equipos
-- **Estado:** Implementado.
-- **Evidencia en repo:** `app/dashboard/leagues/[slug]/teams/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/edit/page.tsx`, `components/teams/*`.
-- **Funcionalidad existente:** listado, alta, edición y detalle de equipos.
-- **Pendiente:** workflows administrativos avanzados por estado/categoría.
+- **Estado:** Implementado (cobertura 100% para league_admin y team_admin).
+- **Evidencia en repo:** `app/dashboard/leagues/[slug]/teams/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/edit/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/staff/`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/roster/`, `components/teams/*`.
+- **Funcionalidad existente:** listado, alta, edición y detalle de equipos; carga y actualización de logo/escudo del equipo (habilitado para league_admin y team_admin del club); administración completa de staff de equipo (`team_members` con roles `team_admin` y `coach`, protección de último admin); gestión integral de plantilla (`/roster`) y hub "Mis equipos".
+- **Pendiente:** workflows administrativos avanzados por categoría y estadísticas históricas.
 
 ### Jugadores / plantillas
 - **Estado:** Implementado.
@@ -78,10 +78,16 @@ Estado actual del MVP:
 - **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial de standings y reglas avanzadas de desempate.
 
 ### Roles y permisos
-- **Estado:** Parcial (base tecnica + hardening UX + administracion de miembros por liga + asignacion basica de arbitros implementada).
-- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/members/actions.ts`, `components/members/role-badge.tsx`, `components/members/league-members-table.tsx`, `components/members/league-member-role-form.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/referee/actions.ts`, `components/referees/referee-assignment-form.tsx`, `components/referees/referee-assignment-card.tsx`.
-- **Funcionalidad existente:** modelo de roles y RLS definido a nivel de datos; proteccion de acceso por usuario autenticado en rutas dashboard; helper server-side `getLeaguePermissions` para calcular flags UX por liga; paginas del dashboard ocultan CTAs administrativas segun rol; UI de administracion de miembros por liga con cambio de rol y guardrails (no super_admin desde UI, proteccion de ultimo league_admin); helper extendido con `canManageMembers`/`canManageRoles`/`canAssignReferees`/`canViewRefereeAssignments`; asignacion basica de arbitros a partidos desde detalle.
-- **Pendiente:** RBAC granular por feature/equipo/partido, consola avanzada de roles, tabla de asignaciones de arbitros con historial, auditoria visible en UI.
+- **Estado:** Implementado (super_admin 100%, league_admin 100%, team_admin 100%, viewer 100%, referee ~80%, coach ~70%).
+- **Evidencia en repo:** `docs/ROLES_AND_PERMISSIONS.md`, `docs/DATABASE.md`, `types/database.ts`, migracion inicial en `supabase/migrations/0001_initial_schema.sql`, `lib/permissions/league-permissions.ts`, `lib/permissions/match-permissions.ts`, `app/dashboard/leagues/[slug]/members/page.tsx`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/staff/`, `app/dashboard/leagues/[slug]/teams/[teamSlug]/roster/`, `components/teams/*`, `components/registrations/*`, `components/members/*`, `components/referees/*`.
+- **Funcionalidad existente:**
+  - Modelo de roles y RLS estricto; protección en server actions y rutas dashboard.
+  - `super_admin`: 100% (auditoría global, exportación CSV, gestión de suscripciones).
+  - `league_admin`: 100% (gestión total de liga, temporadas, equipos, sedes, partidos, miembros, árbitros, auditoría de liga con exportación y retención).
+  - `team_admin`: 100% (edición y logo de equipo, administración de staff de equipo con guardrail de último admin, gestión de plantilla/roster con alta/dorsal/estatus/baja, carga de foto de jugadores, registro y eliminación de eventos en partidos con filtro estricto por equipo, y hub centralizado "Mis equipos").
+  - `referee`: ~80% (asignación a partidos y captura de marcador/eventos en partidos asignados).
+  - `viewer`: 100% (modo consulta informativo sin acciones de mutación).
+- **Pendiente:** optimización de flujos de captura deportiva para `coach`, multi-árbitro con ternas arbitrales completas.
 
 ### Vista pública
 - **Estado:** Implementado para MVP.
@@ -170,23 +176,23 @@ Estado actual del MVP:
 
 ## Última actualización
 
-- Fecha: 2026-05-19
+- Fecha: 2026-09-15
 - Branch: main
-- Commit/PR:
-  - Media Uploads MVP: `a4f6e86`
-  - Storage setup: `ace2702`
-  - QA real media uploads: `5f748f7`
-  - Public player reads/RLS: `1c1fb58`
-  - QA UI/UX pre-MVP + fixes accesibilidad: `dfcea05` (base)
 - Nota:
-  - Media Uploads MVP implementado y validado con usuario QA.
-  - Storage `league-media` configurado.
-  - Detalle público de jugador habilitado para ligas públicas activas.
-  - QA UI/UX Fase 4 y Fase 5 completadas para MVP: accesibilidad, semántica, formularios y consistencia visual corregidos.
-  - Resultado sigue siendo: Go with caveats → MVP controlled test.
+  - Cierre operativo del rol `team_admin` al 100%:
+    - Subida de logo de equipo habilitada para `team_admin` (`canManageTeam`).
+    - Subida de foto de jugadores habilitada para roles con `canManagePlayers`.
+    - Módulo de administración de cuerpo técnico (`/staff`) con alta, cambio de rol, remoción, guardrail de último admin y auditoría.
+    - Gestión de plantilla (`/roster`) con formulario de inscripción de jugadores, actualización de dorsal/estatus y baja con auditoría.
+    - Captura de eventos deportivos (`/events`) con filtrado estricto al equipo autorizado y eliminación con confirmación y auditoría.
+    - Hub centralizado "Mis equipos" en `/dashboard/teams` y widget en `/dashboard`.
+  - Cobertura de roles al día: `super_admin` 100%, `league_admin` 100%, `team_admin` 100%, `viewer` 100%, `referee` ~80%, `coach` ~70%.
+  - Build, tests (44/44) y lint en verde.
 
 ### Historial relevante
 
+- 2026-09-15: Cierre operativo al 100% del rol `team_admin` (staff, plantilla, logo, foto jugador, eventos filtrados, eliminación de eventos y Hub "Mis equipos").
+- 2026-09-15: Auditoría exhaustiva completada (instrumentación, vista global, exportación CSV, retención/purga) y RBAC granular v1.
 - 2026-05-19: QA UI/UX pre-MVP completado — fixes de accesibilidad, semántica y consistencia visual (`docs/QA_UI_UX_PRE_MVP.md`).
 - 2026-05-19: Media Uploads MVP implementado (`a4f6e86`).
 - 2026-05-19: Setup real de Storage completado para `league-media` (`ace2702`).
@@ -203,3 +209,4 @@ Estado actual del MVP:
 
 
 - Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.
+
