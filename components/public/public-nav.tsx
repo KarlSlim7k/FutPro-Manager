@@ -26,6 +26,7 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? "page" : undefined}
             className={cn(
               "inline-flex items-center border-b-2 px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2",
               isActive

@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { CookieSettingsButton } from "@/components/privacy/cookie-settings-button";
+import { buildWhatsAppLink } from "@/lib/site";
+
+const whatsappHref = buildWhatsAppLink(
+  "Hola, quisiera información sobre FutPro Manager"
+);
 
 export function PublicFooter() {
   return (
@@ -86,15 +92,24 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="https://wa.me/522821105432?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20FutPro%20Manager"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 transition hover:text-emerald-700 hover:underline"
-                >
-                  <span>WhatsApp soporte</span>
-                  <ArrowUpRight className="h-3.5 w-3.5 text-gray-400" aria-hidden />
-                </a>
+                {whatsappHref ? (
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 transition hover:text-emerald-700 hover:underline"
+                  >
+                    <span>WhatsApp soporte</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-400" aria-hidden />
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-gray-400">
+                    <span>WhatsApp soporte</span>
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                      Próximamente
+                    </span>
+                  </span>
+                )}
               </li>
               <li>
                 <Link
@@ -136,6 +151,9 @@ export function PublicFooter() {
                 >
                   Términos y condiciones
                 </Link>
+              </li>
+              <li>
+                <CookieSettingsButton />
               </li>
               <li>
                 <span className="text-xs text-gray-400">

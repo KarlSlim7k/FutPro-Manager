@@ -35,7 +35,8 @@ export default async function ExploreLeaguesPage({ searchParams }: SearchProps) 
     .select("id, name, slug, description, logo_url, status")
     .eq("is_public", true)
     .eq("status", "active")
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .limit(100);
 
   const leagues = (leaguesData ?? []) as LeagueExplorerItem[];
 

@@ -134,7 +134,30 @@ export default function PrivacyPage() {
 
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">
-              6. Ejercicio de Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición)
+              6. Uso de Cookies
+            </h2>
+            <p>
+              Este sitio utiliza únicamente cookies estrictamente necesarias
+              para su funcionamiento: mantener tu sesión iniciada, proteger el
+              acceso al panel de control y garantizar la seguridad de la
+              plataforma (cookies de autenticación de nuestro proveedor
+              Supabase). No utilizamos cookies de publicidad, rastreo de
+              terceros ni analítica con identificación personal.
+            </p>
+            <p>
+              Al visitar el sitio por primera vez te mostramos un aviso donde
+              puedes aceptar todas las cookies o continuar solo con las
+              necesarias; tu elección se guarda en tu propio navegador y puedes
+              cambiarla en cualquier momento desde el enlace
+              &quot;Preferencias de cookies&quot; al pie de página. También
+              puedes borrar o bloquear cookies desde la configuración de tu
+              navegador, aunque hacerlo puede impedir iniciar sesión.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold text-gray-900">
+              7. Ejercicio de Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición)
             </h2>
             <p>
               Usted tiene derecho a conocer qué datos personales tenemos de usted,
@@ -162,7 +185,7 @@ export default function PrivacyPage() {
 
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">
-              7. Modificaciones al Aviso de Privacidad
+              8. Modificaciones al Aviso de Privacidad
             </h2>
             <p>
               FutPro Manager se reserva el derecho de actualizar el presente

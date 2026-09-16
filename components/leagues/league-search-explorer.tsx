@@ -38,17 +38,24 @@ export function LeagueSearchExplorer({
 
   return (
     <div className="space-y-6">
-      <div className="relative max-w-md">
-        <Input
-          type="search"
-          placeholder="Buscar liga por nombre o palabra clave..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pr-10"
-        />
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-          <Search className="h-4 w-4" aria-hidden />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="relative w-full max-w-md">
+          <Input
+            type="search"
+            placeholder="Buscar liga por nombre o palabra clave..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-10"
+          />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+            <Search className="h-4 w-4" aria-hidden />
+          </div>
         </div>
+        <p className="text-xs text-gray-500" aria-live="polite">
+          {filtered.length === initialLeagues.length
+            ? `${initialLeagues.length} ${initialLeagues.length === 1 ? "liga activa" : "ligas activas"}`
+            : `${filtered.length} de ${initialLeagues.length} ligas`}
+        </p>
       </div>
 
       {filtered.length === 0 ? (

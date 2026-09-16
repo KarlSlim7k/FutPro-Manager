@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Check, ChevronDown, MessageCircle, Volleyball } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Volleyball } from "lucide-react";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PublicFooter } from "@/components/public/public-footer";
+import { FloatingWhatsAppButton } from "@/components/contact/floating-whatsapp-button";
 
 export const metadata: Metadata = {
   title: "FutPro Manager — Administra ligas de fútbol amateur",
@@ -630,17 +631,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Floating WhatsApp Button */}
-      <a
-        href="https://wa.me/522821105432?text=Hola%20FutPro%20Manager,%20quisiera%20informaci%C3%B3n%20sobre%20la%20plataforma"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-emerald-900/20 transition hover:bg-emerald-600 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
-        aria-label="Contactar por WhatsApp"
-      >
-        <MessageCircle className="h-5 w-5" aria-hidden />
-        <span className="hidden sm:inline text-xs font-medium">¿Dudas? Chatea con nosotros</span>
-      </a>
+      <FloatingWhatsAppButton />
 
       <PublicFooter />
     </main>
