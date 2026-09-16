@@ -23,6 +23,7 @@ function createMockSupabase({
   leagueRole = null as string | null,
   teamRows = [] as Array<{ team_id: string; role: string }>,
   assignedMatches = [] as Array<{ id: string }>,
+  officialMatches = [] as Array<{ match_id: string }>,
   matchDetail = null as { referee_id: string | null; home_team_id: string; away_team_id: string } | null,
 } = {}) {
   return {
@@ -35,6 +36,9 @@ function createMockSupabase({
       }
       if (table === "team_members") {
         return chainableList(teamRows);
+      }
+      if (table === "match_officials") {
+        return chainableList(officialMatches);
       }
       if (table === "matches") {
         // getLeaguePermissions pide lista de asignados; getMatchPermissions pide single por matchId.
@@ -186,8 +190,20 @@ describe("canOfficiateMatch", () => {
     expect(canOfficiateMatch(base, "u1", null)).toBe(true);
   });
 
-  it("denies league referee on others' matches", () => {
-    expect(canOfficiateMatch(base, "u1", "u2")).toBe(false);
+  it("allows assistant referee when matchId is in assignedMatchIds", () => {
+    const withAssignedMatch = {
+      ...base,
+      assignedMatchIds: ["m-100"],
+    } as Parameters<typeof canOfficiateMatch>[0];
+    expect(canOfficiateMatch(withAssignedMatch, "u1", "u-head", "m-100")).toBe(true);
+  });
+
+  it("denies league referee on others' matches when matchId is not assigned to them", () => {
+    const withOtherMatch = {
+      ...base,
+      assignedMatchIds: ["m-other"],
+    } as Parameters<typeof canOfficiateMatch>[0];
+    expect(canOfficiateMatch(withOtherMatch, "u1", "u-head", "m-100")).toBe(false);
   });
 
   it("denies viewers even on unassigned matches", () => {

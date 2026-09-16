@@ -71,7 +71,7 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
   >;
 
   // Consultas complementarias
-  const [seasonRes, teamsRes, venueRes, refereeRes, registrationsRes, eventsRes] = await Promise.all([
+  const [seasonRes, teamsRes, venueRes, refereeRes, registrationsRes, eventsRes, officialsRes] = await Promise.all([
     supabase.from("seasons").select("id, name").eq("id", match.season_id).maybeSingle(),
     supabase.from("teams").select("id, name, slug, logo_url").in("id", [match.home_team_id, match.away_team_id]),
     match.venue_id ? supabase.from("venues").select("id, name, address").eq("id", match.venue_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
@@ -87,6 +87,10 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
       .select("id, match_id, team_id, player_id, event_type, minute, notes")
       .eq("match_id", match.id)
       .order("minute", { ascending: true }),
+    supabase
+      .from("match_officials")
+      .select("id, role, profile_id")
+      .eq("match_id", match.id),
   ]);
 
   const season = seasonRes.data as Pick<Season, "id" | "name"> | null;
@@ -95,6 +99,43 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
   const referee = refereeRes.data as Pick<Profile, "id" | "full_name"> | null;
   const registrations = (registrationsRes.data ?? []) as Pick<PlayerTeamRegistration, "id" | "player_id" | "team_id" | "jersey_number" | "status">[];
   const events = (eventsRes.data ?? []) as Pick<MatchEvent, "id" | "match_id" | "team_id" | "player_id" | "event_type" | "minute" | "notes">[];
+  const rawOfficials = (officialsRes.data ?? []) as Array<{ id: string; role: string; profile_id: string }>;
+
+  const officialProfileIds = [
+    ...new Set([
+      ...rawOfficials.map((o) => o.profile_id),
+      ...(match.referee_id ? [match.referee_id] : []),
+    ]),
+  ];
+
+  let officialsProfileMap = new Map<string, string>();
+  if (officialProfileIds.length > 0) {
+    const { data: offProfiles } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", officialProfileIds);
+    if (offProfiles) {
+      officialsProfileMap = new Map(
+        offProfiles.map((p) => [p.id, p.full_name || `Usuario ${p.id.slice(0, 8)}...`])
+      );
+    }
+  }
+
+  const headRefId =
+    rawOfficials.find((o) => o.role === "head_referee")?.profile_id ?? match.referee_id;
+  const firstAstId =
+    rawOfficials.find((o) => o.role === "first_assistant")?.profile_id;
+  const secondAstId =
+    rawOfficials.find((o) => o.role === "second_assistant")?.profile_id;
+  const fourthOffId =
+    rawOfficials.find((o) => o.role === "fourth_official")?.profile_id;
+
+  const headRefName = headRefId
+    ? officialsProfileMap.get(headRefId) ?? referee?.full_name ?? null
+    : null;
+  const firstAstName = firstAstId ? officialsProfileMap.get(firstAstId) ?? null : null;
+  const secondAstName = secondAstId ? officialsProfileMap.get(secondAstId) ?? null : null;
+  const fourthOffName = fourthOffId ? officialsProfileMap.get(fourthOffId) ?? null : null;
 
   const homeTeam = teams.find((t) => t.id === match.home_team_id) ?? { id: match.home_team_id, name: "Equipo Local", slug: "", logo_url: null };
   const awayTeam = teams.find((t) => t.id === match.away_team_id) ?? { id: match.away_team_id, name: "Equipo Visitante", slug: "", logo_url: null };
@@ -208,9 +249,26 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
               <span className="font-semibold text-gray-500 block uppercase text-[10px]">Cancha / Sede</span>
               <span className="font-bold text-gray-800">{venue?.name ?? "Por definir"}</span>
             </div>
-            <div className="col-span-2 sm:col-span-4 border-t border-gray-200 pt-2">
-              <span className="font-semibold text-gray-500 uppercase text-[10px]">Árbitro Central: </span>
-              <span className="font-bold text-gray-900">{referee?.full_name ?? "Sin árbitro asignado"}</span>
+            <div className="col-span-2 sm:col-span-4 border-t border-gray-200 pt-2 space-y-1">
+              <span className="font-semibold text-gray-500 uppercase text-[10px]">Cuerpo Arbitral</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <span className="text-[10px] text-gray-500 block">Central:</span>
+                  <span className="font-bold text-gray-900">{headRefName ?? "Sin asignar"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 block">Primer Asistente:</span>
+                  <span className="font-bold text-gray-900">{firstAstName ?? "Sin asignar"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 block">Segundo Asistente:</span>
+                  <span className="font-bold text-gray-900">{secondAstName ?? "Sin asignar"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 block">Cuarto Oficial:</span>
+                  <span className="font-bold text-gray-900">{fourthOffName ?? "Sin asignar"}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -360,24 +418,47 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
           </div>
 
           {/* Sección de Firmas Formales */}
-          <div className="pt-8 grid grid-cols-3 gap-6 text-center text-xs">
-            <div>
-              <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
-                {referee?.full_name ?? "Árbitro Central"}
+          <div className="pt-8 space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center text-xs">
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
+                  {headRefName ?? "Árbitro Central"}
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">Árbitro Central</span>
               </div>
-              <span className="text-[10px] text-gray-500 uppercase">Cuerpo Arbitral</span>
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
+                  {firstAstName ?? "Primer Asistente"}
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">Primer Asistente</span>
+              </div>
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
+                  {secondAstName ?? "Segundo Asistente"}
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">Segundo Asistente</span>
+              </div>
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
+                  {fourthOffName ?? "Cuarto Oficial"}
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">Cuarto Oficial</span>
+              </div>
             </div>
-            <div>
-              <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
-                Capitán / Delegado
+
+            <div className="grid grid-cols-2 gap-8 text-center text-xs max-w-xl mx-auto pt-2">
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
+                  Capitán / Delegado
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">{homeTeam.name}</span>
               </div>
-              <span className="text-[10px] text-gray-500 uppercase">{homeTeam.name}</span>
-            </div>
-            <div>
-              <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
-                Capitán / Delegado
+              <div>
+                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
+                  Capitán / Delegado
+                </div>
+                <span className="text-[10px] text-gray-500 uppercase">{awayTeam.name}</span>
               </div>
-              <span className="text-[10px] text-gray-500 uppercase">{awayTeam.name}</span>
             </div>
           </div>
         </div>

@@ -17,6 +17,7 @@ function createMockSupabase({
   membershipError = null as unknown,
   teamRows = [] as Array<{ team_id: string; role: string }>,
   matchRows = [] as Array<{ id: string }>,
+  officialRows = [] as Array<{ match_id: string }>,
 } = {}) {
   return {
     from: vi.fn((table: string) => {
@@ -51,6 +52,9 @@ function createMockSupabase({
       }
       if (table === "matches") {
         return chainableList(matchRows);
+      }
+      if (table === "match_officials") {
+        return chainableList(officialRows);
       }
       return {};
     }),
@@ -175,6 +179,26 @@ describe("league-permissions", () => {
     expect(perms.canUpdateResults).toBe(true);
     expect(perms.canManageEvents).toBe(true);
     expect(perms.isReadOnly).toBe(false);
+  });
+
+  it("grants match officials assigned via match_officials table result and event access", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "referee",
+      teamRows: [],
+      matchRows: [{ id: "match-legacy" }],
+      officialRows: [{ match_id: "match-as-assistant" }],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-ref",
+      leagueId: "lg-1",
+    });
+
+    expect(perms.canManageLeague).toBe(false);
+    expect(perms.assignedMatchIds).toEqual(["match-legacy", "match-as-assistant"]);
+    expect(perms.canCreateMatchEvents).toBe(true);
+    expect(perms.canUpdateMatchResults).toBe(true);
   });
 
   it("grants team_admin full team management for their assigned team", async () => {

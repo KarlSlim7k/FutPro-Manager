@@ -5,6 +5,7 @@ export const AUDIT_ACTION_OPTIONS = [
   "team_member.removed",
   "match.referee_updated",
   "match.referee_removed",
+  "match.officials_updated",
   "match.created",
   "match.updated",
   "match.result_updated",

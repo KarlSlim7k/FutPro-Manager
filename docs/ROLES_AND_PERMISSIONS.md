@@ -24,6 +24,9 @@
 | league_members                             | No                                        | Miembros de liga                   | league_admin/super_admin                                                 |
 | seasons, teams, venues, matches, standings | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin                                                 |
 | team_members                               | No                                        | Integrantes y miembros autorizados | team_admin/league_admin/super_admin                                      |
+| match_officials                            | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin                                                 |
+| referee_availabilities                     | No                                        | Árbitro dueño + league_admin/super_admin | Árbitro miembro de la liga o admin de la liga                            |
+| user_notifications                         | No                                        | Dueño de la notificación (`user_id`)      | Dueño para update/delete; actor/admin al despachar alertas               |
 | players, player_team_registrations         | Parcial (players y registrations en ligas públicas activas) | Miembros de liga                   | league_admin, team_admin y coach según alcance                           |
 | match_events                               | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin, referee permitido, team_admin/coach del equipo (solo si su equipo participa en el partido) |
 | media_uploads                              | No                                        | Miembros de liga                   | Propietario de upload o admin de liga                                    |
@@ -39,17 +42,15 @@
 4. **Lectura pública controlada:** solo ligas `active` y `is_public = true`.
    - `players` permite `SELECT` a `anon` solo cuando el jugador pertenece a una liga pública activa, para soportar el detalle público `/liga/[slug]/players/[playerId]`.
    - Esta lectura pública no habilita escritura y no expone controles administrativos.
-5. **Referee en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`); si el partido no tiene árbitro asignado, cualquier `referee` de la liga puede oficiarlo (helper `canOfficiateMatch`).
+5. **Referee y cuerpo arbitral en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y cuando está asignado al encuentro (como central, asistente o cuarto oficial en `match_officials`, o en columna heredada `matches.referee_id`); si el partido no tiene árbitro asignado, cualquier `referee` de la liga puede oficiarlo (helper `canOfficiateMatch`).
    En `matches`, un referee no admin queda restringido a cambiar `status`, `home_score` y `away_score`.
 6. **Integridad de autoría en eventos:** `match_events.created_by` debe coincidir con el usuario autenticado en inserts y no puede cambiarse en updates (salvo `super_admin`).
 7. **Integridad deportiva en eventos:** `team_id` debe estar en el partido; si hay `player_id`, debe existir registro activo del jugador con ese equipo en la temporada del partido.
 
-## Alcance pendiente (no implementado en esta fase)
+## Alcance post-MVP
 
-- Permisos granulares por acción/módulo (RBAC detallado por feature).
-- Tabla de asignaciones de árbitro con historial.
-- Roles de staff adicionales.
-- Jerarquía avanzada de permisos por torneo/categoría.
+- Auditoría automática mediante triggers SQL / event-bus (Frente 3).
+- Media avanzada (crop, resize, avatares, múltiples uploads) y analítica deportiva (Frente 4).
 
 
 ## Hardening UX de permisos en dashboard
@@ -320,14 +321,19 @@ El rol `referee` (árbitro oficial) alcanza una cobertura operativa del 100% de 
    - Eliminación de eventos con confirmación previa y registro de auditoría (`deleteMatchEventAction`).
 4. **Cédula Oficial de Partido (`/cedula`):**
    - Ruta: `/dashboard/leagues/[slug]/matches/[matchId]/cedula`.
-   - Formato oficial físico y digital listo para impresión con alineaciones completas por equipo, números de dorsal validados, reporte cronológico de goles y desglose disciplinario de amonestaciones y expulsiones.
+   - Formato oficial físico y digital listo para impresión con alineaciones completas por equipo, números de dorsal validados, reporte cronológico de goles, desglose disciplinario de amonestaciones y expulsiones, ficha técnica con cuerpo arbitral completo (central, asistentes y cuarto oficial) y líneas formales de firmas para árbitros y capitanes/delegados.
    - Acceso directo mediante botón "Cédula" en cards de partidos, detalle de encuentro y hubs operativos.
 5. **Filtro e Identificación en el Calendario de Liga:**
    - En `/dashboard/leagues/[slug]/matches`, filtro rápido "Solo mis partidos asignados" en `MatchListFilters` para árbitros de la liga.
    - Insignia distintiva visual `Mi partido asignado` en las tarjetas `MatchCard` correspondientes al usuario.
-6. **Panel Arbitral en Detalle de Partido:**
-   - En `/dashboard/leagues/[slug]/matches/[matchId]`, bloque destacado `Panel arbitral del encuentro` para el árbitro asignado con accesos directos a resultado, eventos y cédula.
-   - En la tarjeta `RefereeAssignmentCard`, indicación explícita `(Tú / Designado)` cuando el árbitro es el usuario actual.
+6. **Panel Arbitral en Detalle de Partido y Ternas Arbitrales (`match_officials`):**
+   - En `/dashboard/leagues/[slug]/matches/[matchId]`, bloque destacado `Panel arbitral del encuentro` para cualquier árbitro asignado con accesos directos a resultado, eventos y cédula.
+   - En la tarjeta `RefereeAssignmentCard`, desglose completo del cuerpo arbitral (Árbitro central, Primer asistente, Segundo asistente, Cuarto oficial) con indicación explícita `(Tú / Designado)` en la posición asignada al usuario actual.
+   - Soporte para cuerpo arbitral completo en base de datos (`match_officials`), validación de unicidad para evitar que una misma persona ocupe dos puestos en el mismo encuentro, y sincronización transparente con `matches.referee_id`.
+7. **Disponibilidad y Notificaciones Arbitrales (`referee_availabilities` y `user_notifications`):**
+   - Gestión de calendario de disponibilidad en el hub de partidos (`/dashboard/matches`) mediante `RefereeAvailabilityManager` para registrar fechas de indisponibilidad con horarios y notas.
+   - Detección automática en `RefereeAssignmentForm` para advertir a los administradores si un árbitro seleccionado reportó no estar disponible para la fecha programada.
+   - Centro de notificaciones in-app (`NotificationBell`) en el header con avisos automáticos de nuevas designaciones arbitrales, alertas de no leídas y navegación directa al encuentro designado.
 
 ### Capacidades Administrativas Restringidas (Bloqueadas por Diseño, Trigger y RLS)
 - **Programación y Sede (`matches`):** No puede crear partidos ni eliminarlos (`matches_insert_manage_league`, `matches_delete_manage_league`); la ruta `/matches/[matchId]/edit` valida `canManageMatches` y muestra un aviso fail-closed de acceso restringido; cualquier intento en base de datos es bloqueado por el trigger `ensure_match_update_scope()`.

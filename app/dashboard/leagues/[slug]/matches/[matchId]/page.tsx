@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { FileText } from "lucide-react";
 import { UpdateMatchResultForm } from "@/components/matches/update-match-result-form";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
-import { RefereeAssignmentCard } from "@/components/referees/referee-assignment-card";
+import { RefereeAssignmentCard, type OfficialItem } from "@/components/referees/referee-assignment-card";
 import { RefereeAssignmentForm } from "@/components/referees/referee-assignment-form";
 import { RefereeHistory, type RefereeHistoryEntry } from "@/components/referees/referee-history";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { MatchShareCard } from "@/components/social/match-share-card";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
-import type { League, Match, Season, Team, Venue } from "@/types/database";
+import type { League, Match, MatchOfficialRole, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
 type MatchDetail = Pick<
@@ -109,7 +109,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const match = matchData as MatchDetail;
 
   const isAssignedReferee = match.referee_id === user.id;
-  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, match.referee_id);
+  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, match.referee_id, match.id);
   const isStaffForMatch = permissions.staffTeamIds.some(
     (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
   );
@@ -162,19 +162,72 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     ? `https://www.google.com/maps?q=${venue.latitude},${venue.longitude}`
     : null;
 
-  // Fetch referee profile if assigned
+  // Fetch officials from match_officials
+  const { data: matchOfficialsData } = await supabase
+    .from("match_officials")
+    .select("id, role, profile_id")
+    .eq("match_id", match.id);
+
+  const officialRows = matchOfficialsData ?? [];
+  const officialProfileIds = [
+    ...new Set([
+      ...officialRows.map((o) => o.profile_id),
+      ...(match.referee_id ? [match.referee_id] : []),
+    ]),
+  ];
+
   let refereeName: string | null = null;
-  if (match.referee_id) {
-    const { data: refereeProfile } = await supabase
+  let officialProfilesMap = new Map<string, string>();
+  if (officialProfileIds.length > 0) {
+    const { data: offProfiles } = await supabase
       .from("profiles")
       .select("id, full_name, display_name")
-      .eq("id", match.referee_id)
-      .maybeSingle();
+      .in("id", officialProfileIds);
 
-    if (refereeProfile) {
-      refereeName = refereeProfile.display_name || refereeProfile.full_name || null;
+    if (offProfiles) {
+      officialProfilesMap = new Map(
+        offProfiles.map((p) => [
+          p.id,
+          p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+        ])
+      );
+      if (match.referee_id) {
+        refereeName = officialProfilesMap.get(match.referee_id) ?? null;
+      }
     }
   }
+
+  const officialsList: OfficialItem[] = officialRows.map((o) => ({
+    role: o.role as MatchOfficialRole,
+    profileId: o.profile_id,
+    name: officialProfilesMap.get(o.profile_id) ?? null,
+  }));
+
+  if (officialsList.length === 0 && match.referee_id) {
+    officialsList.push({
+      role: "head_referee",
+      profileId: match.referee_id,
+      name: refereeName,
+    });
+  }
+
+  const currentAssignments = {
+    headRefereeId:
+      officialRows.find((o) => o.role === "head_referee")?.profile_id ??
+      match.referee_id ??
+      null,
+    firstAssistantId:
+      officialRows.find((o) => o.role === "first_assistant")?.profile_id ?? null,
+    secondAssistantId:
+      officialRows.find((o) => o.role === "second_assistant")?.profile_id ?? null,
+    fourthOfficialId:
+      officialRows.find((o) => o.role === "fourth_official")?.profile_id ?? null,
+  };
+
+  const isAssignedOfficial =
+    match.referee_id === user.id ||
+    officialRows.some((o) => o.profile_id === user.id) ||
+    permissions.assignedMatchIds.includes(match.id);
 
   // Fetch available referees for assignment form (only for users who can assign)
   let availableReferees: { id: string; name: string }[] = [];
@@ -190,16 +243,34 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
     if (refereeMembers.length > 0) {
       const refereeProfileIds = refereeMembers.map((m) => m.profile_id);
-      const { data: refereeProfiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, display_name")
-        .in("id", refereeProfileIds);
+      const matchDate = match.scheduled_at.slice(0, 10);
+
+      const [{ data: refereeProfiles }, { data: availabilitiesData }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, full_name, display_name")
+          .in("id", refereeProfileIds),
+        supabase
+          .from("referee_availabilities")
+          .select("profile_id, status, notes")
+          .eq("league_id", league.id)
+          .eq("date", matchDate)
+          .in("status", ["unavailable", "tentative"]),
+      ]);
+
+      const unavailMap = new Map((availabilitiesData ?? []).map((a) => [a.profile_id, a]));
 
       if (refereeProfiles) {
-        availableReferees = refereeProfiles.map((p) => ({
-          id: p.id,
-          name: p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
-        }));
+        availableReferees = refereeProfiles.map((p) => {
+          const unavail = unavailMap.get(p.id);
+          return {
+            id: p.id,
+            name: p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+            isUnavailable: Boolean(unavail),
+            availabilityNote:
+              unavail?.notes || (unavail?.status === "tentative" ? "Tentativo / Por confirmar" : null),
+          };
+        });
       }
     }
   }
@@ -214,7 +285,11 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
       .eq("league_id", league.id)
       .eq("entity_type", "match")
       .eq("entity_id", match.id)
-      .in("action", ["match.referee_updated", "match.referee_removed"])
+      .in("action", [
+        "match.referee_updated",
+        "match.referee_removed",
+        "match.officials_updated",
+      ])
       .order("created_at", { ascending: false })
       .limit(20);
 
@@ -225,6 +300,18 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         const meta = (row.metadata ?? {}) as Record<string, unknown>;
         if (typeof meta.previous_referee_id === "string") nameIds.add(meta.previous_referee_id);
         if (typeof meta.new_referee_id === "string") nameIds.add(meta.new_referee_id);
+        if (typeof meta.head_referee_id === "string") nameIds.add(meta.head_referee_id);
+        if (Array.isArray(meta.roles)) {
+          for (const r of meta.roles) {
+            if (
+              r &&
+              typeof r === "object" &&
+              typeof (r as Record<string, unknown>).profile_id === "string"
+            ) {
+              nameIds.add((r as Record<string, unknown>).profile_id as string);
+            }
+          }
+        }
         if (row.actor_id) nameIds.add(row.actor_id as string);
       }
       let namesMap = new Map<string, string>();
@@ -245,7 +332,24 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
       refereeHistory = historyRows.map((row) => {
         const meta = (row.metadata ?? {}) as Record<string, unknown>;
         const prevId = typeof meta.previous_referee_id === "string" ? meta.previous_referee_id : null;
-        const newId = typeof meta.new_referee_id === "string" ? meta.new_referee_id : null;
+        const newId =
+          typeof meta.new_referee_id === "string"
+            ? meta.new_referee_id
+            : typeof meta.head_referee_id === "string"
+              ? meta.head_referee_id
+              : null;
+        let summary: string | null = null;
+        if (row.action === "match.officials_updated") {
+          const count = typeof meta.officials_count === "number" ? meta.officials_count : 0;
+          const headName = newId ? namesMap.get(newId) : null;
+          if (count === 0) {
+            summary = "Se retiró todo el cuerpo arbitral";
+          } else if (headName) {
+            summary = `Cuerpo arbitral actualizado (${count} ${count === 1 ? "oficial" : "oficiales"}, Central: ${headName})`;
+          } else {
+            summary = `Cuerpo arbitral actualizado (${count} ${count === 1 ? "oficial" : "oficiales"})`;
+          }
+        }
         return {
           id: row.id as string,
           action: row.action as string,
@@ -253,6 +357,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           newRefereeName: newId ? (namesMap.get(newId) ?? `Usuario ${newId.slice(0, 8)}...`) : null,
           actorName: row.actor_id ? (namesMap.get(row.actor_id as string) ?? null) : null,
           createdAt: row.created_at as string,
+          summary,
         };
       });
     }
@@ -422,7 +527,9 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
       {permissions.canViewRefereeAssignments ? (
         <RefereeAssignmentCard
-          refereeName={isAssignedReferee ? `${refereeName ?? "Tú"} (Tú / Designado)` : refereeName}
+          officials={officialsList}
+          currentUserId={user.id}
+          refereeName={isAssignedOfficial ? `${refereeName ?? "Tú"} (Tú / Designado)` : refereeName}
           refereeId={match.referee_id}
           canAssign={permissions.canAssignReferees}
           assignmentForm={
@@ -430,6 +537,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
               <RefereeAssignmentForm
                 leagueSlug={league.slug}
                 matchId={match.id}
+                currentAssignments={currentAssignments}
                 currentRefereeId={match.referee_id}
                 availableReferees={availableReferees}
               />

@@ -72,6 +72,30 @@ export const MATCH_EVENT_TYPE_VALUES = [
 ] as const;
 export type MatchEventType = (typeof MATCH_EVENT_TYPE_VALUES)[number];
 
+export const MATCH_OFFICIAL_ROLE_VALUES = [
+  "head_referee",
+  "first_assistant",
+  "second_assistant",
+  "fourth_official",
+] as const;
+export type MatchOfficialRole = (typeof MATCH_OFFICIAL_ROLE_VALUES)[number];
+
+export const MATCH_OFFICIAL_ROLE_LABELS: Record<MatchOfficialRole, string> = {
+  head_referee: "Árbitro central",
+  first_assistant: "Primer asistente",
+  second_assistant: "Segundo asistente",
+  fourth_official: "Cuarto oficial",
+};
+
+export interface MatchOfficial {
+  id: string;
+  match_id: string;
+  profile_id: string;
+  role: MatchOfficialRole;
+  created_at: string;
+  updated_at: string;
+}
+
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "cancelled" | "paused";
 
 export interface Profile {
@@ -249,3 +273,38 @@ export interface MediaUpload {
   created_at: string;
   updated_at: string;
 }
+
+export type RefereeAvailabilityStatus = "available" | "unavailable" | "tentative";
+
+export const REFEREE_AVAILABILITY_STATUS_LABELS: Record<RefereeAvailabilityStatus, string> = {
+  available: "Disponible",
+  unavailable: "No disponible",
+  tentative: "Tentativo",
+};
+
+export interface RefereeAvailability {
+  id: string;
+  profile_id: string;
+  league_id: string;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  status: RefereeAvailabilityStatus;
+  notes: string | null;
+  created_at: string;
+}
+
+export type UserNotificationType = "match_assignment" | "match_update" | "system";
+
+export interface UserNotification {
+  id: string;
+  user_id: string;
+  league_id: string | null;
+  type: UserNotificationType;
+  title: string;
+  message: string;
+  link_url: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+

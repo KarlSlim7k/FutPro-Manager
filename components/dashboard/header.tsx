@@ -4,12 +4,15 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import type { UserNotification } from "@/types/database";
 
 interface DashboardHeaderProps {
   userLabel: string;
+  notifications?: UserNotification[];
 }
 
-export function DashboardHeader({ userLabel }: DashboardHeaderProps) {
+export function DashboardHeader({ userLabel, notifications = [] }: DashboardHeaderProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +43,7 @@ export function DashboardHeader({ userLabel }: DashboardHeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <NotificationBell notifications={notifications} />
           {error ? (
             <p className="text-xs text-red-600 sm:text-sm">{error}</p>
           ) : null}

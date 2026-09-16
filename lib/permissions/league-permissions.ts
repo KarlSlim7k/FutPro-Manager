@@ -78,12 +78,21 @@ export async function getLeaguePermissions({
       }
 
       try {
-        const { data: matchRows } = await supabase
-          .from("matches")
-          .select("id")
-          .eq("league_id", leagueId)
-          .eq("referee_id", userId);
-        assignedMatchIds = ((matchRows ?? []) as Array<{ id: string }>).map((m) => m.id);
+        const [{ data: matchRows }, { data: officialRows }] = await Promise.all([
+          supabase
+            .from("matches")
+            .select("id")
+            .eq("league_id", leagueId)
+            .eq("referee_id", userId),
+          supabase
+            .from("match_officials")
+            .select("match_id, matches!inner(league_id)")
+            .eq("profile_id", userId)
+            .eq("matches.league_id", leagueId),
+        ]);
+        const idsFromMatches = ((matchRows ?? []) as Array<{ id: string }>).map((m) => m.id);
+        const idsFromOfficials = ((officialRows ?? []) as Array<{ match_id: string }>).map((o) => o.match_id);
+        assignedMatchIds = [...new Set([...idsFromMatches, ...idsFromOfficials])];
       } catch {
         assignedMatchIds = [];
       }

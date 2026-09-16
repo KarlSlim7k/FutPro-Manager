@@ -17,10 +17,12 @@ export type MatchPermissions = {
 export function canOfficiateMatch(
   permissions: LeaguePermissions,
   userId: string,
-  refereeId: string | null
+  refereeId: string | null,
+  matchId?: string
 ): boolean {
   if (permissions.canManageLeague) return true;
   if (refereeId === userId) return true;
+  if (matchId && permissions.assignedMatchIds.includes(matchId)) return true;
   if (refereeId === null && permissions.leagueRole === "referee") return true;
   return false;
 }
@@ -84,7 +86,7 @@ export async function getMatchPermissions({
   const isTeamStaffForMatch = leaguePerms.staffTeamIds.some(
     (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
   );
-  const canOfficiate = canOfficiateMatch(leaguePerms, userId, match.referee_id);
+  const canOfficiate = canOfficiateMatch(leaguePerms, userId, match.referee_id, matchId);
 
   return {
     canUpdateResult: canOfficiate,

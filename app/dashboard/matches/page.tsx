@@ -8,8 +8,9 @@ import { TextLink } from "@/components/ui/text-link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import { RefereeAvailabilityManager } from "@/components/referees/referee-availability-manager";
 import { createClient } from "@/lib/supabase/server";
-import type { League, MatchStatus } from "@/types/database";
+import type { League, MatchStatus, RefereeAvailability } from "@/types/database";
 
 type LeagueItem = Pick<League, "id" | "name" | "slug" | "status">;
 
@@ -42,17 +43,41 @@ export default async function MatchesHubPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // 1. Fetch matches assigned to current user as referee
-  let assignedMatches: AssignedMatchItem[] = [];
-  const { data: rawAssignedMatches } = await supabase
-    .from("matches")
-    .select(
-      "id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name"
-    )
-    .eq("referee_id", user.id)
-    .order("scheduled_at", { ascending: true });
+  // 1. Fetch matches assigned to current user as head referee or match official
+  const [{ data: matchesAsHead }, { data: matchesAsOfficial }] = await Promise.all([
+    supabase
+      .from("matches")
+      .select(
+        "id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name"
+      )
+      .eq("referee_id", user.id),
+    supabase
+      .from("match_officials")
+      .select("match_id, role")
+      .eq("profile_id", user.id),
+  ]);
 
-  const assignedList = rawAssignedMatches ?? [];
+  const officialMatchIds = (matchesAsOfficial ?? []).map((o) => o.match_id);
+  let additionalMatches: typeof matchesAsHead = [];
+  if (officialMatchIds.length > 0) {
+    const { data: moreMatches } = await supabase
+      .from("matches")
+      .select(
+        "id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name"
+      )
+      .in("id", officialMatchIds);
+    additionalMatches = moreMatches ?? [];
+  }
+
+  // Combine and deduplicate
+  const matchMap = new Map<string, NonNullable<typeof matchesAsHead>[number]>();
+  for (const m of matchesAsHead ?? []) matchMap.set(m.id, m);
+  for (const m of additionalMatches ?? []) matchMap.set(m.id, m);
+  const assignedList = [...matchMap.values()].sort(
+    (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+  );
+
+  let assignedMatches: AssignedMatchItem[] = [];
   if (assignedList.length > 0) {
     const leagueIds = [...new Set(assignedList.map((m) => m.league_id))];
     const teamIds = [
@@ -101,7 +126,32 @@ export default async function MatchesHubPage() {
     });
   }
 
-  // 2. Fetch leagues catalog
+  // 2. Fetch referee availability and leagues where user is referee or admin
+  const { data: memberLeaguesData } = await supabase
+    .from("league_members")
+    .select("league_id, role")
+    .eq("profile_id", user.id)
+    .in("role", ["referee", "league_admin"]);
+
+  const memberLeagues = memberLeaguesData ?? [];
+  let userAvailabilities: RefereeAvailability[] = [];
+  let refereeLeagues: { id: string; name: string }[] = [];
+
+  if (memberLeagues.length > 0) {
+    const lIds = memberLeagues.map((m) => m.league_id);
+    const [{ data: refLgs }, { data: avails }] = await Promise.all([
+      supabase.from("leagues").select("id, name").in("id", lIds),
+      supabase
+        .from("referee_availabilities")
+        .select("id, profile_id, league_id, date, start_time, end_time, status, notes, created_at")
+        .eq("profile_id", user.id)
+        .order("date", { ascending: true }),
+    ]);
+    refereeLeagues = (refLgs ?? []) as { id: string; name: string }[];
+    userAvailabilities = (avails ?? []) as RefereeAvailability[];
+  }
+
+  // 3. Fetch leagues catalog
   const { data, error } = await supabase
     .from("leagues")
     .select("id, name, slug, status")
@@ -198,6 +248,14 @@ export default async function MatchesHubPage() {
             ))}
           </div>
         </div>
+      ) : null}
+
+      {/* Sección Disponibilidad arbitral (si es árbitro o admin de alguna liga) */}
+      {refereeLeagues.length > 0 ? (
+        <RefereeAvailabilityManager
+          leagues={refereeLeagues}
+          availabilities={userAvailabilities}
+        />
       ) : null}
 
       {/* Sección Explorar por liga */}

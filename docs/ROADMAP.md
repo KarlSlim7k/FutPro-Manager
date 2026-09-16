@@ -62,7 +62,22 @@
 - **Fase 6E - Cierre operativo team_admin al 100% (Implementado):** Administración completa de staff de equipo (`/staff`) con guardrail de último admin, gestión de plantilla/roster (`/roster`) con alta/dorsal/estado/baja, subida de logo de equipo y foto de jugador, captura y eliminación de eventos en partidos de sus equipos (con filtro estricto por equipo), y Hub "Mis equipos" en dashboard.
 - **Fase 6F - Cierre operativo coach al 100% (Implementado):** Operación deportiva completa para entrenadores (gestión de jugadores y fotos en liga, alta/dorsal/estado/baja en plantilla de su equipo, captura y eliminación de eventos en sus partidos con filtro por equipo, acceso en Hub "Mis equipos" y bloqueo fail-closed de controles institucionales y de marcador).
 - **Fase 6G - Cierre operativo referee al 100% (Implementado):** Operación arbitral completa para árbitros designados (hub "Mis partidos asignados" en `/dashboard/matches` y widget en `/dashboard`, captura y ajuste de resultado con enforcement estricto de trigger RLS `ensure_match_update_scope`, registro y eliminación de eventos deportivos para ambos clubes participantes, formato físico y digital de cédula oficial `/cedula`, panel arbitral en detalle de partido, filtro por partidos asignados en calendario y bloqueo fail-closed de programación, sedes, designaciones y administración institucional o deportiva).
-- Pendiente: ternas arbitrales completas con asistentes y cuarto oficial.
+- **Post-MVP Frente 1 - Multi-árbitro: ternas y cuerpo arbitral completo (Implementado):**
+  - Tabla `match_officials` con enum de roles (`head_referee`, `first_assistant`, `second_assistant`, `fourth_official`), índices y políticas RLS asociadas.
+  - Sincronización automática bidireccional mediante trigger PostgreSQL `sync_match_head_referee` con columna heredada `matches.referee_id` para garantizar 100% de retrocompatibilidad.
+  - Actualización de función RLS `can_manage_match` para habilitar a cualquiera de los oficiales del encuentro a gestionar incidencias del partido.
+  - Formulario y tarjeta de asignación en UI (`RefereeAssignmentForm` y `RefereeAssignmentCard`) para central, asistentes 1 y 2, y cuarto oficial con insignia `(Tú / Designado)`.
+  - Desglose formal del cuerpo arbitral y líneas de firma independientes en la cédula oficial de partido (`/cedula`).
+  - Auditoría ampliada con acción `match.officials_updated`.
+- **Post-MVP Frente 2 - Disponibilidad y notificaciones de árbitros (Implementado):**
+  - Tabla `referee_availabilities` para registrar fechas de indisponibilidad/disponibilidad y notas con RLS estricto (solo árbitro propietario y administradores de liga).
+  - Componente y flujo operativo `RefereeAvailabilityManager` en el hub de partidos (`/dashboard/matches`) para registro y eliminación de fechas.
+  - Alertas visuales automáticas en los selectores de designación (`RefereeAssignmentForm`) para árbitros que hayan reportado indisponibilidad en la fecha del encuentro.
+  - Tabla `user_notifications` y centro de notificaciones in-app (`NotificationBell`) en el header del dashboard con conteo de no leídas, popover interactivo y acción de marcar como leídas.
+  - Despacho automático de notificaciones a oficiales al ser asignados o actualizados en un partido vía `updateMatchRefereeAction`.
+- **Post-MVP Frentes pendientes:**
+  - Frente 3: Auditoría automática (triggers SQL / event-bus sin depender estrictamente de server actions).
+  - Frente 4: Media y métricas avanzadas (crop/resize, avatares, múltiples uploads, CDN/custom domain; gráficas y tendencias).
 
 ### Media Uploads MVP (Implementado y validado; hardening post-MVP pendiente)
 - ✅ Upload de logo de liga, logo de equipo y foto de jugador implementado en dashboard.

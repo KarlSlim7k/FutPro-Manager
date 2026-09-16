@@ -7,6 +7,7 @@ export interface RefereeHistoryEntry {
   newRefereeName: string | null;
   actorName: string | null;
   createdAt: string;
+  summary?: string | null;
 }
 
 function formatDateTime(value: string): string {
@@ -17,6 +18,15 @@ function formatDateTime(value: string): string {
 }
 
 function describeEntry(entry: RefereeHistoryEntry): string {
+  if (entry.summary) {
+    return entry.summary;
+  }
+  if (entry.action === "match.officials_updated") {
+    if (entry.newRefereeName) {
+      return `Se actualizó el cuerpo arbitral (Árbitro central: ${entry.newRefereeName})`;
+    }
+    return "Se actualizó el cuerpo arbitral";
+  }
   if (entry.action === "match.referee_removed" || !entry.newRefereeName) {
     return `Se quitó a ${entry.previousRefereeName ?? "el árbitro anterior"}`;
   }
