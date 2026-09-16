@@ -4,6 +4,7 @@ import { UpdateMatchResultForm } from "@/components/matches/update-match-result-
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { RefereeAssignmentCard } from "@/components/referees/referee-assignment-card";
 import { RefereeAssignmentForm } from "@/components/referees/referee-assignment-form";
+import { RefereeHistory, type RefereeHistoryEntry } from "@/components/referees/referee-history";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { ExternalTextLink } from "@/components/ui/external-text-link";
@@ -89,9 +90,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     supabase,
     userId: user.id,
     leagueId: league.id,
-  });
-
-  const { data: matchData, error: matchError } = await supabase
+  });  const { data: matchData, error: matchError } = await supabase
     .from("matches")
     .select("id, league_id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, created_at, referee_id")
     .eq("id", matchId)
@@ -107,6 +106,14 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   }
 
   const match = matchData as MatchDetail;
+
+  const isAssignedReferee = match.referee_id === user.id;
+  const isStaffForMatch = permissions.staffTeamIds.some(
+    (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
+  );
+  const canUpdateThisResult = permissions.canManageLeague || isAssignedReferee;
+  const canManageThisEvents =
+    permissions.canManageLeague || isAssignedReferee || isStaffForMatch;
 
   const [seasonResult, homeTeamResult, awayTeamResult, venueResult] = await Promise.all([
     supabase
@@ -195,6 +202,60 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     }
   }
 
+  // Historial de arbitraje desde auditoría (solo si puede ver asignaciones)
+  let refereeHistory: RefereeHistoryEntry[] = [];
+
+  if (permissions.canViewRefereeAssignments) {
+    const { data: historyData } = await supabase
+      .from("audit_logs")
+      .select("id, action, actor_id, metadata, created_at")
+      .eq("league_id", league.id)
+      .eq("entity_type", "match")
+      .eq("entity_id", match.id)
+      .in("action", ["match.referee_updated", "match.referee_removed"])
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    const historyRows = historyData ?? [];
+    if (historyRows.length > 0) {
+      const nameIds = new Set<string>();
+      for (const row of historyRows) {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        if (typeof meta.previous_referee_id === "string") nameIds.add(meta.previous_referee_id);
+        if (typeof meta.new_referee_id === "string") nameIds.add(meta.new_referee_id);
+        if (row.actor_id) nameIds.add(row.actor_id as string);
+      }
+      let namesMap = new Map<string, string>();
+      if (nameIds.size > 0) {
+        const { data: historyProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, display_name")
+          .in("id", [...nameIds]);
+        if (historyProfiles) {
+          namesMap = new Map(
+            historyProfiles.map((p) => [
+              p.id,
+              p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`,
+            ])
+          );
+        }
+      }
+      refereeHistory = historyRows.map((row) => {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        const prevId = typeof meta.previous_referee_id === "string" ? meta.previous_referee_id : null;
+        const newId = typeof meta.new_referee_id === "string" ? meta.new_referee_id : null;
+        return {
+          id: row.id as string,
+          action: row.action as string,
+          previousRefereeName: prevId ? (namesMap.get(prevId) ?? `Usuario ${prevId.slice(0, 8)}...`) : null,
+          newRefereeName: newId ? (namesMap.get(newId) ?? `Usuario ${newId.slice(0, 8)}...`) : null,
+          actorName: row.actor_id ? (namesMap.get(row.actor_id as string) ?? null) : null,
+          createdAt: row.created_at as string,
+        };
+      });
+    }
+  }
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -210,23 +271,23 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
               </TextLink>
             ) : null}
             {match.status === "cancelled" ? (
-              permissions.canUpdateResults ? (
+              canUpdateThisResult ? (
                 <span className="inline-flex items-center text-sm font-medium text-gray-500">
                   Resultado no disponible para partidos cancelados.
                 </span>
               ) : null
-            ) : permissions.canUpdateResults ? (
+            ) : canUpdateThisResult ? (
               <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}>
                 Capturar resultado
               </TextLink>
             ) : null}
             {match.status === "cancelled" ? (
-              permissions.canManageEvents ? (
+              canManageThisEvents ? (
                 <span className="inline-flex items-center text-sm font-medium text-gray-500">
                   Eventos no disponibles para partidos cancelados.
                 </span>
               ) : null
-            ) : permissions.canManageEvents ? (
+            ) : canManageThisEvents ? (
               <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/events`}>
                 Eventos
               </TextLink>
@@ -337,7 +398,9 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         />
       ) : null}
 
-      {match.status === "completed" && permissions.canUpdateResults ? (
+      {permissions.canViewRefereeAssignments ? <RefereeHistory entries={refereeHistory} /> : null}
+
+      {match.status === "completed" && canUpdateThisResult ? (
         <Card>
           <CardHeader>
             <CardTitle>Ajuste administrativo de resultado y estado</CardTitle>

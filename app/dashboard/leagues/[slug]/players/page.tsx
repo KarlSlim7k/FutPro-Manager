@@ -78,7 +78,7 @@ export default async function LeaguePlayersPage({ params }: LeaguePlayersPagePro
         }
       />
 
-      {permissions.canManageCatalog ? (
+      {permissions.canManagePlayers ? (
         <FormSectionCard title="Nuevo jugador">
           <CreatePlayerForm leagueSlug={league.slug} />
         </FormSectionCard>
@@ -86,7 +86,7 @@ export default async function LeaguePlayersPage({ params }: LeaguePlayersPagePro
         <Card>
           <CardContent className="py-6">
             <p className="text-sm text-gray-600">
-              Tienes acceso de consulta a los jugadores de esta liga. Las acciones administrativas están disponibles para administradores de liga.
+              Tienes acceso de consulta a los jugadores de esta liga. La creación está disponible para administradores de liga y staff de equipo (team_admin, coach).
             </p>
           </CardContent>
         </Card>

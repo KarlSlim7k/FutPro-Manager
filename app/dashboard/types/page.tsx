@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
 
 type CatalogEntry = { value: string; label: string; variant: StatusBadgeVariant };
-type Catalog = { title: string; description: string; entries: CatalogEntry[] };
+type Catalog = { title: string; description: string; usedIn?: string; entries: CatalogEntry[] };
 
 const catalogs: Catalog[] = [
   {
     title: "Estados de liga",
     description: "Ciclo de vida de una liga en el sistema.",
+    usedIn: "Ligas · Vista pública",
     entries: [
       { value: "draft", label: "Borrador", variant: "neutral" },
       { value: "active", label: "Activa", variant: "success" },
@@ -19,6 +20,7 @@ const catalogs: Catalog[] = [
   {
     title: "Estados de temporada",
     description: "Etapas del ciclo de una temporada.",
+    usedIn: "Temporadas · Tabla de posiciones",
     entries: [
       { value: "draft", label: "Borrador", variant: "neutral" },
       { value: "upcoming", label: "Próxima", variant: "info" },
@@ -30,6 +32,7 @@ const catalogs: Catalog[] = [
   {
     title: "Estados de equipo",
     description: "Disponibilidad operativa de un equipo.",
+    usedIn: "Equipos",
     entries: [
       { value: "active", label: "Activo", variant: "success" },
       { value: "inactive", label: "Inactivo", variant: "neutral" },
@@ -39,6 +42,7 @@ const catalogs: Catalog[] = [
   {
     title: "Estados de jugador",
     description: "Situación deportiva de un jugador.",
+    usedIn: "Jugadores · Plantillas",
     entries: [
       { value: "active", label: "Activo", variant: "success" },
       { value: "inactive", label: "Inactivo", variant: "neutral" },
@@ -50,6 +54,7 @@ const catalogs: Catalog[] = [
   {
     title: "Estados de registro en plantilla",
     description: "Vínculo de un jugador con un equipo en una temporada.",
+    usedIn: "Plantillas por equipo",
     entries: [
       { value: "active", label: "Activo", variant: "success" },
       { value: "inactive", label: "Inactivo", variant: "neutral" },
@@ -60,6 +65,7 @@ const catalogs: Catalog[] = [
   {
     title: "Estados de partido",
     description: "Ciclo de vida de un partido.",
+    usedIn: "Partidos · Resultados · Filtros",
     entries: [
       { value: "scheduled", label: "Programado", variant: "info" },
       { value: "in_progress", label: "En juego", variant: "warning" },
@@ -71,6 +77,7 @@ const catalogs: Catalog[] = [
   {
     title: "Tipos de evento de partido",
     description: "Acciones registrables durante un partido.",
+    usedIn: "Eventos · Goleo · Fair play",
     entries: [
       { value: "goal", label: "Gol", variant: "success" },
       { value: "own_goal", label: "Autogol", variant: "danger" },
@@ -85,6 +92,7 @@ const catalogs: Catalog[] = [
   {
     title: "Pie dominante",
     description: "Preferencia de pie de un jugador.",
+    usedIn: "Fichas de jugador",
     entries: [
       { value: "right", label: "Derecho", variant: "neutral" },
       { value: "left", label: "Izquierdo", variant: "neutral" },
@@ -94,6 +102,7 @@ const catalogs: Catalog[] = [
   {
     title: "Roles de usuario",
     description: "Niveles de acceso en el sistema.",
+    usedIn: "Miembros · Permisos · Auditoría",
     entries: [
       { value: "super_admin", label: "Super administrador", variant: "danger" },
       { value: "league_admin", label: "Admin de liga", variant: "warning" },
@@ -106,6 +115,7 @@ const catalogs: Catalog[] = [
   {
     title: "Fases de Liguilla / Torneo",
     description: "Etapas de eliminación directa en temporadas.",
+    usedIn: "Liguilla · Partidos",
     entries: [
       { value: "regular_season", label: "Fase Regular", variant: "neutral" },
       { value: "round_of_16", label: "Octavos de final", variant: "info" },
@@ -118,6 +128,7 @@ const catalogs: Catalog[] = [
   {
     title: "Formatos de Eliminatoria",
     description: "Configuración de series de liguilla.",
+    usedIn: "Liguilla · Partidos",
     entries: [
       { value: "single", label: "Partido único", variant: "neutral" },
       { value: "first_leg", label: "Partido de Ida", variant: "info" },
@@ -142,6 +153,9 @@ export default function TypesPage() {
             <CardHeader>
               <CardTitle className="text-sm">{catalog.title}</CardTitle>
               <p className="text-xs text-gray-500">{catalog.description}</p>
+              {catalog.usedIn ? (
+                <p className="text-[11px] font-medium text-emerald-700">Usado en: {catalog.usedIn}</p>
+              ) : null}
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">

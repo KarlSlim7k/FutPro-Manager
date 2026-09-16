@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filters";
+import { filterAuditLogsByQuery } from "@/lib/audit/audit-search";
 import { GlobalAuditFilters } from "@/components/audit/global-audit-filters";
 import { GlobalAuditTable, type GlobalAuditRow } from "@/components/audit/global-audit-table";
 
@@ -14,7 +15,7 @@ interface GlobalAuditPageProps {
 
 function buildExportHref(sp: Record<string, string | string[] | undefined>): string {
   const params = new URLSearchParams();
-  for (const key of ["action", "entityType", "actorId", "leagueId", "from", "to"]) {
+  for (const key of ["action", "entityType", "actorId", "leagueId", "from", "to", "q"]) {
     const v = sp[key];
     if (typeof v === "string" && v.trim() !== "") params.set(key, v.trim());
   }
@@ -69,6 +70,7 @@ export default async function GlobalAuditPage({ searchParams }: GlobalAuditPageP
 
   const filterAction = parseAuditAction(getString("action"));
   const filterEntityType = parseAuditEntityType(getString("entityType"));
+  const filterQuery = getString("q");
 
   const rawActorId = getString("actorId");
   const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -139,22 +141,25 @@ export default async function GlobalAuditPage({ searchParams }: GlobalAuditPageP
     }
   }
 
-  const rows: GlobalAuditRow[] = logs.map((log) => {
-    const profile = log.actor_id ? profilesMap.get(log.actor_id) : undefined;
-    const league = log.league_id ? leaguesMap.get(log.league_id) : undefined;
-    return {
-      id: log.id,
-      actor_id: log.actor_id,
-      action: log.action,
-      entity_type: log.entity_type,
-      entity_id: log.entity_id,
-      metadata: (log.metadata as Record<string, unknown>) ?? {},
-      created_at: log.created_at,
-      actorDisplayName: profile?.full_name ?? profile?.display_name ?? null,
-      leagueName: league?.name ?? null,
-      leagueSlug: league?.slug ?? null,
-    };
-  });
+  const rows: GlobalAuditRow[] = filterAuditLogsByQuery(
+    logs.map((log) => {
+      const profile = log.actor_id ? profilesMap.get(log.actor_id) : undefined;
+      const league = log.league_id ? leaguesMap.get(log.league_id) : undefined;
+      return {
+        id: log.id,
+        actor_id: log.actor_id,
+        action: log.action,
+        entity_type: log.entity_type,
+        entity_id: log.entity_id,
+        metadata: (log.metadata as Record<string, unknown>) ?? {},
+        created_at: log.created_at,
+        actorDisplayName: profile?.full_name ?? profile?.display_name ?? null,
+        leagueName: league?.name ?? null,
+        leagueSlug: league?.slug ?? null,
+      };
+    }),
+    filterQuery
+  );
 
   return (
     <section className="space-y-6">
@@ -171,6 +176,7 @@ export default async function GlobalAuditPage({ searchParams }: GlobalAuditPageP
         currentLeagueId={filterLeagueId}
         currentFrom={currentFrom}
         currentTo={currentTo}
+        currentQuery={filterQuery}
       />
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">

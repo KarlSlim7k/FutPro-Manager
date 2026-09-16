@@ -12,6 +12,7 @@ const menuItems = [
   { label: "Jugadores", href: "/dashboard/players" },
   { label: "Partidos", href: "/dashboard/matches" },
   { label: "Auditoría", href: "/dashboard/audit" },
+  { label: "Suscripciones", href: "/dashboard/subscriptions" },
   { label: "Tipos", href: "/dashboard/types" },
 ];
 

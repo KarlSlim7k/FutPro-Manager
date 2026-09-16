@@ -14,12 +14,14 @@ export const AUDIT_ACTION_OPTIONS = [
   "player.updated",
   "player.registration_created",
   "venue.created",
+  "audit.purged",
   "standings.recalculated_manual",
   "standings.recalculated_auto",
   "standings.recalculate_failed",
   "media.player_photo_updated",
   "media.team_logo_updated",
   "media.league_logo_updated",
+  "media.orphans_cleaned",
 ] as const;
 
 export const AUDIT_ENTITY_TYPE_OPTIONS = [

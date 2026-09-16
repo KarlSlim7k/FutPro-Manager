@@ -17,6 +17,14 @@ export type LeaguePermissions = {
   isReadOnly: boolean;
   canViewAuditLogs: boolean;
   canManageAuditLogs: boolean;
+  // RBAC granular (alineado a RLS; la autoridad final sigue siendo RLS/server actions)
+  staffTeamIds: string[];
+  managedTeamIds: string[];
+  assignedMatchIds: string[];
+  canManagePlayers: boolean;
+  canManageRegistrations: boolean;
+  canCreateMatchEvents: boolean;
+  canUpdateMatchResults: boolean;
 };
 
 export async function getLeaguePermissions({
@@ -48,22 +56,74 @@ export async function getLeaguePermissions({
 
     const canManageLeague = isSuperAdmin || isLeagueAdmin;
 
+    // RBAC granular: equipos donde el usuario es staff + partidos asignados como árbitro.
+    // Best-effort y fail-closed: si RLS bloquea la lectura, se devuelve vacío (= comportamiento anterior).
+    let staffTeamIds: string[] = [];
+    let managedTeamIds: string[] = [];
+    let assignedMatchIds: string[] = [];
+
+    if (!canManageLeague) {
+      try {
+        const { data: teamRows } = await supabase
+          .from("team_members")
+          .select("team_id, role, teams!inner(league_id)")
+          .eq("profile_id", userId)
+          .eq("teams.league_id", leagueId);
+        const rows = (teamRows ?? []) as Array<{ team_id: string; role: AppRole }>;
+        staffTeamIds = rows.filter((r) => r.role === "team_admin" || r.role === "coach").map((r) => r.team_id);
+        managedTeamIds = rows.filter((r) => r.role === "team_admin").map((r) => r.team_id);
+      } catch {
+        staffTeamIds = [];
+        managedTeamIds = [];
+      }
+
+      try {
+        const { data: matchRows } = await supabase
+          .from("matches")
+          .select("id")
+          .eq("league_id", leagueId)
+          .eq("referee_id", userId);
+        assignedMatchIds = ((matchRows ?? []) as Array<{ id: string }>).map((m) => m.id);
+      } catch {
+        assignedMatchIds = [];
+      }
+    }
+
+    const isTeamStaff = staffTeamIds.length > 0;
+    const isAssignedReferee = assignedMatchIds.length > 0;
+
+    const canManagePlayers = canManageLeague || isTeamStaff;
+    const canManageRegistrations = canManageLeague || isTeamStaff;
+    const canCreateMatchEvents = canManageLeague || isTeamStaff || isAssignedReferee;
+    const canUpdateMatchResults = canManageLeague || isAssignedReferee;
+
     return {
       globalRole,
       leagueRole,
       canManageLeague,
       canManageCatalog: canManageLeague,
       canManageMatches: canManageLeague,
-      canUpdateResults: canManageLeague,
-      canManageEvents: canManageLeague,
+      canUpdateResults: canUpdateMatchResults,
+      canManageEvents: canCreateMatchEvents,
       canRecalculateStandings: canManageLeague,
       canManageMembers: canManageLeague,
       canManageRoles: canManageLeague,
       canAssignReferees: canManageLeague,
       canViewRefereeAssignments: isSuperAdmin || leagueRole !== null,
-      isReadOnly: !canManageLeague,
+      isReadOnly: !(
+        canManageLeague ||
+        isTeamStaff ||
+        isAssignedReferee
+      ),
       canViewAuditLogs: canManageLeague,
       canManageAuditLogs: canManageLeague,
+      staffTeamIds,
+      managedTeamIds,
+      assignedMatchIds,
+      canManagePlayers,
+      canManageRegistrations,
+      canCreateMatchEvents,
+      canUpdateMatchResults,
     };
   } catch {
     return safePermissions();
@@ -87,5 +147,12 @@ function safePermissions(): LeaguePermissions {
     isReadOnly: true,
     canViewAuditLogs: false,
     canManageAuditLogs: false,
+    staffTeamIds: [],
+    managedTeamIds: [],
+    assignedMatchIds: [],
+    canManagePlayers: false,
+    canManageRegistrations: false,
+    canCreateMatchEvents: false,
+    canUpdateMatchResults: false,
   };
 }

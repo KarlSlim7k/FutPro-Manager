@@ -1,0 +1,119 @@
+import { describe, it, expect, vi } from "vitest";
+import { getMatchPermissions } from "./match-permissions";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+function chainableList(data: unknown) {
+  const chain: Record<string, unknown> = {};
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.then = (resolve: (v: unknown) => void) => resolve({ data, error: null });
+  return chain;
+}
+
+function chainableSingle(data: unknown) {
+  const chain: Record<string, unknown> = {};
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.maybeSingle = vi.fn().mockResolvedValue({ data, error: null });
+  return chain;
+}
+
+function createMockSupabase({
+  globalRole = null as string | null,
+  leagueRole = null as string | null,
+  teamRows = [] as Array<{ team_id: string; role: string }>,
+  assignedMatches = [] as Array<{ id: string }>,
+  matchDetail = null as { referee_id: string | null; home_team_id: string; away_team_id: string } | null,
+} = {}) {
+  return {
+    from: vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chainableSingle({ global_role: globalRole });
+      }
+      if (table === "league_members") {
+        return chainableSingle({ role: leagueRole });
+      }
+      if (table === "team_members") {
+        return chainableList(teamRows);
+      }
+      if (table === "matches") {
+        // getLeaguePermissions pide lista de asignados; getMatchPermissions pide single por matchId.
+        // Distinguir por número de .eq encadenados es frágil; devolvemos un chain que sirve ambos:
+        const chain: Record<string, unknown> = {};
+        chain.select = vi.fn(() => chain);
+        chain.eq = vi.fn(() => chain);
+        chain.maybeSingle = vi.fn().mockResolvedValue({ data: matchDetail, error: null });
+        chain.then = (resolve: (v: unknown) => void) => resolve({ data: assignedMatches, error: null });
+        return chain;
+      }
+      return {};
+    }),
+  } as unknown as SupabaseClient;
+}
+
+describe("match-permissions", () => {
+  it("grants full access to league_admin", async () => {
+    const supabase = createMockSupabase({ leagueRole: "league_admin" });
+    const perms = await getMatchPermissions({
+      supabase,
+      userId: "u1",
+      leagueId: "lg1",
+      matchId: "m1",
+    });
+    expect(perms.canUpdateResult).toBe(true);
+    expect(perms.canManageEvents).toBe(true);
+  });
+
+  it("grants assigned referee result+events", async () => {
+    const supabase = createMockSupabase({
+      leagueRole: "referee",
+      assignedMatches: [{ id: "m1" }],
+      matchDetail: { referee_id: "uref", home_team_id: "t1", away_team_id: "t2" },
+    });
+    const perms = await getMatchPermissions({
+      supabase,
+      userId: "uref",
+      leagueId: "lg1",
+      matchId: "m1",
+    });
+    expect(perms.isAssignedReferee).toBe(true);
+    expect(perms.canUpdateResult).toBe(true);
+    expect(perms.canManageEvents).toBe(true);
+  });
+
+  it("grants team staff events but not results on their team's match", async () => {
+    const supabase = createMockSupabase({
+      leagueRole: "viewer",
+      teamRows: [{ team_id: "t1", role: "coach" }],
+      assignedMatches: [],
+      matchDetail: { referee_id: null, home_team_id: "t1", away_team_id: "t2" },
+    });
+    const perms = await getMatchPermissions({
+      supabase,
+      userId: "ucoach",
+      leagueId: "lg1",
+      matchId: "m1",
+    });
+    expect(perms.isTeamStaffForMatch).toBe(true);
+    expect(perms.canManageEvents).toBe(true);
+    expect(perms.canUpdateResult).toBe(false);
+  });
+
+  it("denies team staff events on matches without their team", async () => {
+    const supabase = createMockSupabase({
+      leagueRole: "viewer",
+      teamRows: [{ team_id: "t9", role: "coach" }],
+      assignedMatches: [],
+      matchDetail: { referee_id: "other", home_team_id: "t1", away_team_id: "t2" },
+    });
+    const perms = await getMatchPermissions({
+      supabase,
+      userId: "ucoach",
+      leagueId: "lg1",
+      matchId: "m1",
+    });
+    expect(perms.isTeamStaffForMatch).toBe(false);
+    expect(perms.canManageEvents).toBe(false);
+    expect(perms.canUpdateResult).toBe(false);
+  });
+});

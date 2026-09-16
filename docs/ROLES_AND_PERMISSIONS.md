@@ -56,9 +56,11 @@
 
 - **Objetivo:** evitar que usuarios sin permisos vean acciones administrativas que probablemente no pueden ejecutar, manteniendo RLS/server actions como fuente real de seguridad.
 - **Implementación:** helper server-side `getLeaguePermissions` en `lib/permissions/league-permissions.ts`.
-- **Reglas UX actuales (MVP conservador):**
+- **Reglas UX actuales (RBAC granular v1):**
   - `super_admin` y `league_admin` dentro de su liga: pueden ver todas las acciones administrativas.
-  - Otros roles (`team_admin`, `coach`, `referee`, `viewer`, sin rol): solo consulta; CTAs administrativas ocultas.
+  - `team_admin`/`coach` (staff de equipo): pueden crear/editar jugadores, gestionar plantilla de sus equipos y registrar eventos en partidos donde participa su equipo. Sin acceso a gestión de liga, miembros, árbitros ni auditoría.
+  - `referee` asignado (`matches.referee_id`): puede capturar resultado y eventos en sus partidos asignados.
+  - `viewer` y resto: solo consulta; CTAs administrativas ocultas.
 - **Qué se oculta:** formularios de creación (temporadas, equipos, jugadores, sedes, partidos), links de edición de partido, captura de resultado/eventos, recálculo manual de standings, ajuste administrativo de resultado.
 - **Qué sigue visible:** listados, detalles, navegación de lectura permitida por RLS.
 - **Autoridad final:** RLS y server actions siguen siendo la autoridad de seguridad. Este cambio es puramente de UX/visibilidad.

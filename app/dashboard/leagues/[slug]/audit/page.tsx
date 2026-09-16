@@ -6,7 +6,9 @@ import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { AuditLogFilters } from "@/components/audit/audit-log-filters";
+import { AuditRetentionForm } from "@/components/audit/audit-retention-form";
 import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filters";
+import { filterAuditLogsByQuery } from "@/lib/audit/audit-search";
 import { AuditLogTable, type AuditLogRow } from "@/components/audit/audit-log-table";
 
 interface AuditPageProps {
@@ -80,6 +82,7 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
   const rawEntityType = getString("entityType");
   const filterAction = parseAuditAction(rawAction);
   const filterEntityType = parseAuditEntityType(rawEntityType);
+  const filterQuery = getString("q");
 
   const rawActorId = getString("actorId");
   const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -151,20 +154,23 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
     }
   }
 
-  const auditLogRows: AuditLogRow[] = logs.map((log) => {
-    const profile = log.actor_id ? profilesMap.get(log.actor_id) : undefined;
-    const actorDisplayName = profile?.full_name ?? profile?.display_name ?? null;
-    return {
-      id: log.id,
-      actor_id: log.actor_id,
-      action: log.action,
-      entity_type: log.entity_type,
-      entity_id: log.entity_id,
-      metadata: (log.metadata as Record<string, unknown>) ?? {},
-      created_at: log.created_at,
-      actorDisplayName,
-    };
-  });
+  const auditLogRows: AuditLogRow[] = filterAuditLogsByQuery(
+    logs.map((log) => {
+      const profile = log.actor_id ? profilesMap.get(log.actor_id) : undefined;
+      const actorDisplayName = profile?.full_name ?? profile?.display_name ?? null;
+      return {
+        id: log.id,
+        actor_id: log.actor_id,
+        action: log.action,
+        entity_type: log.entity_type,
+        entity_id: log.entity_id,
+        metadata: (log.metadata as Record<string, unknown>) ?? {},
+        created_at: log.created_at,
+        actorDisplayName,
+      };
+    }),
+    filterQuery
+  );
 
   return (
     <section className="space-y-6">
@@ -180,6 +186,7 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
         currentActorId={filterActorId}
         currentFrom={currentFrom}
         currentTo={currentTo}
+        currentQuery={filterQuery}
         slug={league.slug}
       />
       <div className="flex items-center justify-between">
@@ -197,6 +204,7 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
               if (filterActorId) params.set("actorId", filterActorId);
               if (currentFrom) params.set("from", currentFrom);
               if (currentTo) params.set("to", currentTo);
+              if (filterQuery) params.set("q", filterQuery);
               const qs = params.toString();
               return qs ? `?${qs}` : "";
             })()
@@ -213,6 +221,7 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
       ) : (
         <AuditLogTable logs={auditLogRows} />
       )}
+      {permissions.canManageAuditLogs ? <AuditRetentionForm leagueSlug={league.slug} /> : null}
     </section>
   );
 }

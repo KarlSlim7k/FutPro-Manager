@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { CreateMatchForm } from "@/components/matches/create-match-form";
 import { MatchCard } from "@/components/matches/match-card";
+import { MatchListFilters } from "@/components/matches/match-list-filters";
 import { MatchSeasonSelector } from "@/components/matches/match-season-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -10,6 +11,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -33,13 +35,24 @@ type MatchListItem = Pick<
 
 interface MatchesPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ seasonId?: string | string[] }>;
+  searchParams: Promise<{ seasonId?: string | string[]; status?: string | string[]; teamId?: string | string[]; round?: string | string[] }>;
+}
+
+function getSingleParam(value: string | string[] | undefined): string | undefined {
+  const v = Array.isArray(value) ? value[0] : value;
+  return v && v.trim() !== "" ? v.trim() : undefined;
 }
 
 export default async function MatchesPage({ params, searchParams }: MatchesPageProps) {
   const { slug } = await params;
-  const { seasonId: rawSeasonId } = await searchParams;
-  const seasonId = Array.isArray(rawSeasonId) ? rawSeasonId[0] : rawSeasonId;
+  const sp = await searchParams;
+  const seasonId = getSingleParam(sp.seasonId);
+  const rawStatus = getSingleParam(sp.status);
+  const filterStatus = rawStatus && (MATCH_STATUS_VALUES as readonly string[]).includes(rawStatus)
+    ? (rawStatus as MatchStatus)
+    : undefined;
+  const filterTeamId = getSingleParam(sp.teamId);
+  const filterRound = getSingleParam(sp.round);
 
   const supabase = await createClient();
   const {
@@ -128,12 +141,18 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
     );
   }
 
-  const { data: matchesData, error: matchesError } = await supabase
+  let matchesQuery = supabase
     .from("matches")
     .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name, referee_id")
     .eq("league_id", league.id)
     .eq("season_id", selectedSeason.id)
     .order("scheduled_at", { ascending: true });
+
+  if (filterStatus) matchesQuery = matchesQuery.eq("status", filterStatus);
+  if (filterTeamId) matchesQuery = matchesQuery.or(`home_team_id.eq.${filterTeamId},away_team_id.eq.${filterTeamId}`);
+  if (filterRound) matchesQuery = matchesQuery.ilike("round_name", `%${filterRound}%`);
+
+  const { data: matchesData, error: matchesError } = await matchesQuery;
 
   if (matchesError) {
     throw matchesError;
@@ -207,36 +226,53 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
             titleClassName="text-lg font-semibold"
           />
 
+          <MatchListFilters
+            teams={teams.map((team) => ({ id: team.id, name: team.name }))}
+            currentStatus={filterStatus}
+            currentTeamId={filterTeamId}
+            currentRound={filterRound}
+          />
           {matches.length === 0 ? (
             <EmptyState
               title="Sin partidos programados"
               description={
-                permissions.canManageMatches
-                  ? "Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
-                  : "Aún no hay partidos para la temporada seleccionada."
+                filterStatus || filterTeamId || filterRound
+                  ? "Ningún partido coincide con los filtros seleccionados."
+                  : permissions.canManageMatches
+                    ? "Aún no hay partidos para la temporada seleccionada. Programa el primer encuentro usando el formulario."
+                    : "Aún no hay partidos para la temporada seleccionada."
               }
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {matches.map((match) => (
-                <MatchCard
-                  key={match.id}
-                  matchId={match.id}
-                  leagueSlug={league.slug}
-                  homeTeamName={teamsMap.get(match.home_team_id) ?? "Equipo local"}
-                  awayTeamName={teamsMap.get(match.away_team_id) ?? "Equipo visitante"}
-                  venueName={match.venue_id ? (venuesMap.get(match.venue_id) ?? null) : null}
-                  scheduledAt={match.scheduled_at}
-                  status={match.status}
-                  homeScore={match.home_score}
-                  awayScore={match.away_score}
-                  roundName={match.round_name}
-                  refereeName={match.referee_id ? (refereesMap.get(match.referee_id) ?? null) : null}
-                  canEdit={permissions.canManageMatches}
-                  canUpdateResult={permissions.canUpdateResults}
-                  canManageEvents={permissions.canManageEvents}
-                />
-              ))}
+              {matches.map((match) => {
+                const isAssignedReferee =
+                  permissions.canManageLeague || match.referee_id === user.id;
+                const isStaffForMatch = permissions.staffTeamIds.some(
+                  (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
+                );
+                return (
+                  <MatchCard
+                    key={match.id}
+                    matchId={match.id}
+                    leagueSlug={league.slug}
+                    homeTeamName={teamsMap.get(match.home_team_id) ?? "Equipo local"}
+                    awayTeamName={teamsMap.get(match.away_team_id) ?? "Equipo visitante"}
+                    venueName={match.venue_id ? (venuesMap.get(match.venue_id) ?? null) : null}
+                    scheduledAt={match.scheduled_at}
+                    status={match.status}
+                    homeScore={match.home_score}
+                    awayScore={match.away_score}
+                    roundName={match.round_name}
+                    refereeName={match.referee_id ? (refereesMap.get(match.referee_id) ?? null) : null}
+                    canEdit={permissions.canManageMatches}
+                    canUpdateResult={permissions.canManageLeague || isAssignedReferee}
+                    canManageEvents={
+                      permissions.canManageLeague || isAssignedReferee || isStaffForMatch
+                    }
+                  />
+                );
+              })}
             </div>
           )}
         </div>

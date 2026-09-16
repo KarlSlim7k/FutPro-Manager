@@ -31,8 +31,8 @@ Estado actual del MVP:
 ### Dashboard
 - **Estado:** Implementado.
 - **Evidencia en repo:** `app/dashboard/page.tsx`, `components/dashboard/header.tsx`, `components/dashboard/sidebar.tsx`.
-- **Funcionalidad existente:** home de dashboard y navegación base a módulos de liga. Sidebar con active state via `usePathname`. Accesos globales de Equipos, Jugadores y Partidos funcionan como hubs de selección de liga; "Tipos" tiene página placeholder/roadmap honesta.
-- **Pendiente:** métricas avanzadas y widgets operativos adicionales.
+- **Funcionalidad existente:** home de dashboard y navegación base a módulos de liga. Sidebar con active state via `usePathname`. Accesos globales de Equipos, Jugadores y Partidos funcionan como hubs de selección de liga; auditoría global y suscripciones en sidebar (con guard por rol en página). Métricas base (ligas/equipos/jugadores/próximos) + widgets operativos (próximos 5 partidos, últimas 5 acciones de auditoría visibles por RLS).
+- **Pendiente:** métricas avanzadas (gráficas, tendencias).
 
 ### Ligas
 - **Estado:** Implementado.
@@ -60,9 +60,9 @@ Estado actual del MVP:
 
 ### Partidos
 - **Estado:** Implementado.
-- **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `components/matches/create-match-form.tsx`, `components/referees/referee-assignment-card.tsx`, `components/referees/referee-assignment-form.tsx`.
-- **Funcionalidad existente:** creacion, edicion y detalle de partidos por liga; asignacion basica de arbitros a partidos (asignar/quitar desde detalle de partido, visualizacion en listado).
-- **Pendiente:** calendario avanzado/filtros y tabla de asignaciones de arbitros con historial.
+- **Evidencia en repo:** `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `components/matches/create-match-form.tsx`, `components/matches/match-list-filters.tsx`, `components/referees/referee-assignment-card.tsx`, `components/referees/referee-assignment-form.tsx`, `components/referees/referee-history.tsx`.
+- **Funcionalidad existente:** creacion, edicion y detalle de partidos por liga; filtros de calendario por estado/equipo/jornada; asignacion basica de arbitros a partidos (asignar/quitar desde detalle de partido, visualizacion en listado) con historial de arbitraje desde auditoria (`match.referee_updated`/`match.referee_removed`); permisos por tarjeta (arbitro asignado y staff del encuentro ven Capturar resultado/Eventos).
+- **Pendiente:** multi-arbitro (principal/asistentes), disponibilidad y notificaciones.
 
 ### Resultados y eventos de partido
 - **Estado:** Implementado.
@@ -73,7 +73,7 @@ Estado actual del MVP:
 ### Tabla de posiciones
 - **Estado:** Implementado con hardening MVP.
 - **Evidencia en repo:** `app/dashboard/leagues/[slug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/page.tsx`, `app/dashboard/leagues/[slug]/seasons/[seasonSlug]/standings/actions.ts`, `components/standings/*`.
-- **Funcionalidad existente:** consulta por temporada desde datos reales (`leagues`, `seasons`, `standings`, `teams`), vista desktop/mobile, recálculo manual y recálculo automático al guardar resultados de partidos cuando el estado queda en `completed` o deja de estarlo.
+- **Funcionalidad existente:** consulta por temporada desde datos reales (`leagues`, `seasons`, `standings`, `teams`), vista desktop/mobile, recálculo manual y recálculo automático al guardar resultados de partidos cuando el estado queda en `completed` o deja de estarlo; historial de recálculos visible (últimos 10, desde auditoría) para admins de liga.
 - **Implementado en hardening MVP:** resultado enriquecido del recálculo (`rowsCount`, `skippedMatchesCount`, resumen de filas), auditoría manual (`standings.recalculated_manual`), auditoría automática (`standings.recalculated_auto`) y auditoría de fallo (`standings.recalculate_failed`) con best-effort sin bloquear guardado del partido.
 - **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial de standings y reglas avanzadas de desempate.
 
@@ -103,26 +103,23 @@ Estado actual del MVP:
 - **QA actualizado (2026-05-19):** `/liga/liga-qa-codex/players/0aae9fd4-111e-4c0b-bb18-d31f7ea0218e` carga sin sesion tras migracion `20260519173826_public_players_read_policy.sql`; jugador inexistente retorna 404; sin controles admin.
 
 ### Media uploads
-- **Estado:** Implementado para MVP; setup operativo de Storage verificado.
-- **Evidencia en repo:** `lib/media/upload-media.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/entity-image-preview.tsx`, server actions de media en liga/equipo/jugador, `docs/QA_MEDIA_UPLOADS.md`, `docs/STORAGE_SETUP.md`.
-- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage. Bucket `league-media` público y policies de lectura/upload verificadas en Supabase (2026-05-19).
-- **Pendiente:** hardening post-MVP (cleanup de huérfanos, borrado físico, transformaciones/crop/resize, múltiples imágenes, avatares, CDN/custom domain).
+- **Estado:** Implementado para MVP + mantenimiento.
+- **Evidencia en repo:** `lib/media/upload-media.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/entity-image-preview.tsx`, `components/media/media-cleanup-form.tsx`, server actions de media en liga/equipo/jugador, `app/dashboard/leagues/[slug]/media/actions.ts` (`cleanupOrphanMediaAction`), `docs/QA_MEDIA_UPLOADS.md`, `docs/STORAGE_SETUP.md`.
+- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage. Bucket `league-media` público y policies de lectura/upload verificadas en Supabase (2026-05-19). Limpieza de huérfanos desde detalle de liga (archivos >24h sin referencia, con borrado físico + auditoría `media.orphans_cleaned`).
+- **Pendiente:** hardening post-MVP (transformaciones/crop/resize, múltiples imágenes, avatares, CDN/custom domain).
 
 ### Auditoría
-- **Estado:** Parcial (Fase 6C implementada + hardening de filtros server-side).
-- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `lib/audit/create-audit-log.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `components/audit/*`.
-- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas; `action` y `entityType` validados server-side con allowlist (valores invalidos se ignoran sin crash); helper best-effort de insercion `createAuditLog`; instrumentacion en cambio de rol de miembro (`member.role_updated`) y asignacion/remocion de arbitro (`match.referee_updated`/`match.referee_removed`). Visible solo para `super_admin` y `league_admin`. Sin cambios a schema/RLS/migraciones.
-- **Pendiente:** Instrumentacion exhaustiva de todos los server actions; auditoria automatica via triggers SQL o event bus; auditoria global para `super_admin`; exportacion CSV/PDF; retencion avanzada; filtros full-text.
+- **Estado:** Implementado (Fase 6C + hardening + búsqueda/retención/global/export).
+- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `lib/audit/create-audit-log.ts`, `lib/audit/audit-search.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `app/dashboard/leagues/[slug]/audit/actions.ts`, `app/dashboard/leagues/[slug]/audit/export/route.ts`, `app/dashboard/audit/page.tsx`, `app/dashboard/audit/export/route.ts`, `components/audit/*`.
+- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas + búsqueda de texto (acción/entidad/metadata); export CSV por liga y global (respeta filtros); purga por retención (90/180/365 días, auditada como `audit.purged`); vista global multi-liga solo `super_admin`; instrumentación best-effort en todos los server actions de liga (creación/edición de liga, temporada, equipo, jugador, sede, partido, resultado, eventos, plantilla, roles, árbitros, media, standings).
+- **Pendiente:** auditoria automatica via triggers SQL o event bus; filtros full-text a nivel BD (pg_trgm); exportacion PDF.
 
 ### Tipos y catálogos
-- **Estado:** Pendiente / Roadmap.
+- **Estado:** Implementado como referencia administrativa.
 - **Evidencia en repo:** `app/dashboard/types/page.tsx`.
-- **Funcionalidad existente:** página placeholder honesta que documenta los catálogos actuales (tipos de evento, estados de jugador, categorías, tipos de temporada) y su estado actual (definidos en schema/código, sin UI de configuración).
-- **Pendiente:** diseño de tablas de catálogo, CRUD de valores controlados, integración con módulos consumidores.
-- **Estado:** Base técnica existente.
-- **Evidencia en repo:** `subscription_plans` y `league_subscriptions` en docs/schema.
-- **Funcionalidad existente:** modelo de datos inicial para evolución SaaS.
-- **Pendiente:** integración real de cobros/pasarela, UX de planes y gestión comercial.
+- **Funcionalidad existente:** referencia de todos los catálogos del sistema (estados de liga/temporada/equipo/jugador/registro/partido, tipos de evento, pie dominante, roles, fases y formatos de liguilla) con indicación de en qué módulo se usa cada uno.
+- **Nota:** los valores viven en enums de schema/código; su modificación requiere migración y queda fuera del MVP.
+- **Suscripciones (solo super_admin):** gestión mínima implementada en `app/dashboard/subscriptions/` (CRUD de planes, activar/desactivar, asignar plan a liga con estados trialing/active/past_due/paused). Sin pasarela de cobro (licenciamiento manual).
 
 ## Pendientes críticos antes del MVP
 

@@ -10,6 +10,7 @@ interface GlobalAuditFiltersProps {
   currentLeagueId?: string;
   currentFrom?: string;
   currentTo?: string;
+  currentQuery?: string;
 }
 
 export function GlobalAuditFilters({
@@ -19,6 +20,7 @@ export function GlobalAuditFilters({
   currentLeagueId,
   currentFrom,
   currentTo,
+  currentQuery,
 }: GlobalAuditFiltersProps) {
   return (
     <form
@@ -114,6 +116,20 @@ export function GlobalAuditFilters({
           name="to"
           type="date"
           defaultValue={currentTo ?? ""}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="global-audit-query" className="text-xs font-medium text-gray-500">
+          Buscar
+        </label>
+        <input
+          id="global-audit-query"
+          name="q"
+          type="search"
+          defaultValue={currentQuery ?? ""}
+          placeholder="Acción, entidad o detalle"
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
         />
       </div>

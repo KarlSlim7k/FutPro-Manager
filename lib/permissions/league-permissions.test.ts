@@ -2,11 +2,21 @@ import { describe, it, expect, vi } from "vitest";
 import { getLeaguePermissions } from "./league-permissions";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+function chainableList(data: unknown) {
+  const chain: Record<string, unknown> = {};
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.then = (resolve: (v: unknown) => void) => resolve({ data, error: null });
+  return chain;
+}
+
 function createMockSupabase({
   globalRole = null as string | null,
   leagueRole = null as string | null,
   profileError = null as unknown,
   membershipError = null as unknown,
+  teamRows = [] as Array<{ team_id: string; role: string }>,
+  matchRows = [] as Array<{ id: string }>,
 } = {}) {
   return {
     from: vi.fn((table: string) => {
@@ -35,6 +45,12 @@ function createMockSupabase({
             }),
           }),
         };
+      }
+      if (table === "team_members") {
+        return chainableList(teamRows);
+      }
+      if (table === "matches") {
+        return chainableList(matchRows);
       }
       return {};
     }),
@@ -110,5 +126,54 @@ describe("league-permissions", () => {
     expect(perms.leagueRole).toBeNull();
     expect(perms.canManageLeague).toBe(false);
     expect(perms.isReadOnly).toBe(true);
+  });
+
+  it("grants team staff (team_admin/coach) player and event access without league management", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "viewer",
+      teamRows: [{ team_id: "team-1", role: "coach" }],
+      matchRows: [],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-coach",
+      leagueId: "lg-1",
+    });
+
+    expect(perms.canManageLeague).toBe(false);
+    expect(perms.canManageMatches).toBe(false);
+    expect(perms.canManageMembers).toBe(false);
+    expect(perms.canAssignReferees).toBe(false);
+    expect(perms.canViewAuditLogs).toBe(false);
+    expect(perms.staffTeamIds).toEqual(["team-1"]);
+    expect(perms.canManagePlayers).toBe(true);
+    expect(perms.canManageRegistrations).toBe(true);
+    expect(perms.canCreateMatchEvents).toBe(true);
+    expect(perms.canUpdateMatchResults).toBe(false);
+    expect(perms.isReadOnly).toBe(false);
+  });
+
+  it("grants assigned referees result and event access without league management", async () => {
+    const supabase = createMockSupabase({
+      globalRole: null,
+      leagueRole: "referee",
+      teamRows: [],
+      matchRows: [{ id: "match-1" }],
+    });
+    const perms = await getLeaguePermissions({
+      supabase,
+      userId: "usr-ref",
+      leagueId: "lg-1",
+    });
+
+    expect(perms.canManageLeague).toBe(false);
+    expect(perms.assignedMatchIds).toEqual(["match-1"]);
+    expect(perms.canManagePlayers).toBe(false);
+    expect(perms.canCreateMatchEvents).toBe(true);
+    expect(perms.canUpdateMatchResults).toBe(true);
+    expect(perms.canUpdateResults).toBe(true);
+    expect(perms.canManageEvents).toBe(true);
+    expect(perms.isReadOnly).toBe(false);
   });
 });

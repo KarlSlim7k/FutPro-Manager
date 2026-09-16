@@ -9,6 +9,7 @@ interface AuditLogFiltersProps {
   currentActorId?: string;
   currentFrom?: string;
   currentTo?: string;
+  currentQuery?: string;
   slug: string;
 }
 
@@ -18,6 +19,7 @@ export function AuditLogFilters({
   currentActorId,
   currentFrom,
   currentTo,
+  currentQuery,
   slug,
 }: AuditLogFiltersProps) {
   return (
@@ -100,6 +102,20 @@ export function AuditLogFilters({
           name="to"
           type="date"
           defaultValue={currentTo ?? ""}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="audit-query" className="text-xs font-medium text-gray-500">
+          Buscar
+        </label>
+        <input
+          id="audit-query"
+          name="q"
+          type="search"
+          defaultValue={currentQuery ?? ""}
+          placeholder="Acción, entidad o detalle"
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
         />
       </div>

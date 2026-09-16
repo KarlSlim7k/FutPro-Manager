@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { StandingMobileCard } from "@/components/standings/standing-mobile-card";
+import { StandingsRecalcHistory, type StandingsRecalcEntry } from "@/components/standings/standings-recalc-history";
 import { StandingsSeasonSelector } from "@/components/standings/standings-season-selector";
 import { StandingsTableView } from "@/components/standings/standings-table-view";
 import type { StandingRowViewModel, StandingTeamSummary } from "@/components/standings/types";
@@ -219,6 +220,55 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
     }),
   ]);
 
+  // Historial de recálculos desde auditoría (visible para admins de liga)
+  let recalcHistory: StandingsRecalcEntry[] = [];
+  if (permissions.canViewAuditLogs) {
+    const { data: recalcData } = await supabase
+      .from("audit_logs")
+      .select("id, action, actor_id, metadata, created_at")
+      .eq("league_id", league.id)
+      .eq("entity_type", "season")
+      .eq("entity_id", selectedSeason.id)
+      .in("action", ["standings.recalculated_manual", "standings.recalculated_auto", "standings.recalculate_failed"])
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    const recalcRows = recalcData ?? [];
+    if (recalcRows.length > 0) {
+      const actorIds = [...new Set(recalcRows.map((r) => r.actor_id).filter((id): id is string => id !== null))];
+      let namesMap = new Map<string, string>();
+      if (actorIds.length > 0) {
+        const { data: recalcProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, display_name")
+          .in("id", actorIds);
+        if (recalcProfiles) {
+          namesMap = new Map(
+            recalcProfiles.map((p) => [p.id, p.display_name || p.full_name || `Usuario ${p.id.slice(0, 8)}...`])
+          );
+        }
+      }
+      recalcHistory = recalcRows.map((row) => {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        const rowsCount = typeof meta.rows_count === "number" ? meta.rows_count : null;
+        const trigger = typeof meta.trigger === "string" ? meta.trigger : null;
+        const summary =
+          rowsCount !== null
+            ? `${rowsCount} fila(s)${trigger ? ` · origen: ${trigger}` : ""}`
+            : trigger
+              ? `Origen: ${trigger}`
+              : null;
+        return {
+          id: row.id as string,
+          action: row.action as string,
+          createdAt: row.created_at as string,
+          actorName: row.actor_id ? (namesMap.get(row.actor_id as string) ?? null) : null,
+          summary,
+        };
+      });
+    }
+  }
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -392,6 +442,8 @@ export default async function LeagueStandingsPage({ params, searchParams }: Leag
           </CardContent>
         </Card>
       )}
+
+      {permissions.canViewAuditLogs ? <StandingsRecalcHistory entries={recalcHistory} /> : null}
     </section>
   );
 }

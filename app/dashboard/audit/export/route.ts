@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filters";
+import { filterAuditLogsByQuery } from "@/lib/audit/audit-search";
 
 function csvEscape(value: unknown): string {
   const s = value === null || value === undefined ? "" : String(value);
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
   const leagueId = get("leagueId");
   const from = get("from");
   const to = get("to");
+  const searchQuery = get("q");
   const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
   let query = supabase
@@ -62,7 +64,14 @@ export async function GET(request: Request) {
 
   const header = ["id", "created_at", "league_id", "actor_id", "action", "entity_type", "entity_id", "metadata"];
   const lines = [header.join(",")];
-  for (const row of data ?? []) {
+  const filtered = filterAuditLogsByQuery(
+    (data ?? []).map((row) => ({
+      ...row,
+      metadata: (row.metadata ?? {}) as Record<string, unknown>,
+    })),
+    searchQuery
+  );
+  for (const row of filtered) {
     lines.push(
       [
         csvEscape(row.id),

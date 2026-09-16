@@ -2,6 +2,8 @@ import {
   type MetricCardProps,
   MetricCard,
 } from "@/components/ui/metric-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TextLink } from "@/components/ui/text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,6 +39,9 @@ function buildCards(
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const now = new Date().toISOString();
   const [
     { count: leaguesCount, error: leaguesError },
@@ -71,6 +76,56 @@ export default async function DashboardPage() {
 
   const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0, playersCount ?? 0, safeUpcomingMatchesCount);
 
+  // Widgets operativos: próximos partidos y actividad reciente (best-effort, RLS mediante)
+  const { data: upcomingMatches } = await supabase
+    .from("matches")
+    .select("id, league_id, scheduled_at, status, home_team_id, away_team_id")
+    .eq("status", "scheduled")
+    .gte("scheduled_at", now)
+    .order("scheduled_at", { ascending: true })
+    .limit(5);
+
+  const upcoming = upcomingMatches ?? [];
+  const upcomingLeagueIds = [...new Set(upcoming.map((m) => m.league_id))];
+  const upcomingTeamIds = [...new Set(upcoming.flatMap((m) => [m.home_team_id, m.away_team_id]))];
+
+  let leagueNames = new Map<string, string>();
+  let teamNames = new Map<string, string>();
+  if (upcomingLeagueIds.length > 0) {
+    const { data: leagueRows } = await supabase.from("leagues").select("id, name").in("id", upcomingLeagueIds);
+    if (leagueRows) leagueNames = new Map(leagueRows.map((l) => [l.id, l.name]));
+  }
+  if (upcomingTeamIds.length > 0) {
+    const { data: teamRows } = await supabase.from("teams").select("id, name").in("id", upcomingTeamIds);
+    if (teamRows) teamNames = new Map(teamRows.map((t) => [t.id, t.name]));
+  }
+
+  let recentActivity: Array<{ id: string; action: string; created_at: string; leagueName: string | null }> = [];
+  if (user) {
+    const { data: auditRows } = await supabase
+      .from("audit_logs")
+      .select("id, action, created_at, league_id")
+      .order("created_at", { ascending: false })
+      .limit(5);
+    const audits = auditRows ?? [];
+    const auditLeagueIds = [...new Set(audits.map((a) => a.league_id).filter((id): id is string => id !== null))];
+    let auditLeagueNames = new Map<string, string>();
+    if (auditLeagueIds.length > 0) {
+      const { data: auditLeagues } = await supabase.from("leagues").select("id, name").in("id", auditLeagueIds);
+      if (auditLeagues) auditLeagueNames = new Map(auditLeagues.map((l) => [l.id, l.name]));
+    }
+    recentActivity = audits.map((a) => ({
+      id: a.id as string,
+      action: a.action as string,
+      created_at: a.created_at as string,
+      leagueName: a.league_id ? (auditLeagueNames.get(a.league_id as string) ?? null) : null,
+    }));
+  }
+
+  function formatDateTime(value: string) {
+    return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  }
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -82,6 +137,56 @@ export default async function DashboardPage() {
         {cards.map((card) => (
           <MetricCard key={card.label} {...card} />
         ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Próximos partidos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {upcoming.length === 0 ? (
+              <p className="text-sm text-gray-500">No hay partidos programados próximamente.</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {upcoming.map((m) => (
+                  <li key={m.id} className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <span className="text-gray-900">
+                      {teamNames.get(m.home_team_id) ?? "Local"} vs {teamNames.get(m.away_team_id) ?? "Visitante"}
+                      <span className="block text-xs text-gray-500">{leagueNames.get(m.league_id) ?? ""}</span>
+                    </span>
+                    <span className="text-xs text-gray-500">{formatDateTime(m.scheduled_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Actividad reciente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recentActivity.length === 0 ? (
+              <p className="text-sm text-gray-500">Sin actividad registrada visible para tu usuario.</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {recentActivity.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <span className="font-mono text-xs text-gray-900">{a.action}</span>
+                    <span className="text-xs text-gray-500">
+                      {a.leagueName ?? ""} {formatDateTime(a.created_at)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-3">
+              <TextLink href="/dashboard/audit">Ver auditoría global</TextLink>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

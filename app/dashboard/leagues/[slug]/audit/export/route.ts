@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { parseAuditAction, parseAuditEntityType } from "@/lib/audit/audit-filters";
+import { filterAuditLogsByQuery } from "@/lib/audit/audit-search";
 
 function csvEscape(value: unknown): string {
   const s = value === null || value === undefined ? "" : String(value);
@@ -40,6 +41,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const actorId = get("actorId");
   const from = get("from");
   const to = get("to");
+  const searchQuery = get("q");
   const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -63,7 +65,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const header = ["id", "created_at", "actor_id", "action", "entity_type", "entity_id", "metadata"];
   const lines = [header.join(",")];
-  for (const row of data ?? []) {
+  const filtered = filterAuditLogsByQuery(
+    (data ?? []).map((row) => ({
+      ...row,
+      metadata: (row.metadata ?? {}) as Record<string, unknown>,
+    })),
+    searchQuery
+  );
+  for (const row of filtered) {
     lines.push(
       [
         csvEscape(row.id),
