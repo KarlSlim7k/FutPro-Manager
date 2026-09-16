@@ -11,6 +11,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
@@ -261,8 +262,9 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
             <div className="grid gap-4 md:grid-cols-2">
               {matches.map((match) => {
                 const isRefereeOfThisMatch = match.referee_id === user.id;
+                const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, match.referee_id);
                 const canUpdateThisResult =
-                  permissions.canManageLeague || isRefereeOfThisMatch;
+                  permissions.canManageLeague || canOfficiateThisMatch;
                 const isStaffForMatch = permissions.staffTeamIds.some(
                   (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
                 );
@@ -284,7 +286,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
                     canEdit={permissions.canManageMatches}
                     canUpdateResult={canUpdateThisResult}
                     canManageEvents={
-                      permissions.canManageLeague || isRefereeOfThisMatch || isStaffForMatch
+                      permissions.canManageLeague || canOfficiateThisMatch || isStaffForMatch
                     }
                   />
                 );

@@ -6,6 +6,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -130,8 +131,8 @@ export default async function MatchResultPage({ params }: MatchResultPageProps) 
     leagueId: league.id,
   });
 
-  const isAssignedReferee = match.referee_id === user.id;
-  const canUpdateResult = permissions.canManageLeague || isAssignedReferee;
+  const canUpdateResult =
+    permissions.canManageLeague || canOfficiateMatch(permissions, user.id, match.referee_id);
 
   if (!canUpdateResult) {
     return (
@@ -145,7 +146,7 @@ export default async function MatchResultPage({ params }: MatchResultPageProps) 
         <Card>
           <CardContent className="py-6">
             <p className="text-sm text-gray-600">
-              Acceso restringido: Solo los administradores de liga y el árbitro asignado pueden capturar o modificar el resultado de este partido.
+              Acceso restringido: Solo los administradores de liga y los árbitros (asignado al partido o de la liga si no hay árbitro asignado) pueden capturar o modificar el resultado de este partido.
             </p>
           </CardContent>
         </Card>

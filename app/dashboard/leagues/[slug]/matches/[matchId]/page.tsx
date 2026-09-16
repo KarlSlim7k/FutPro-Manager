@@ -14,6 +14,7 @@ import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { MatchShareCard } from "@/components/social/match-share-card";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import type { League, Match, Season, Team, Venue } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -108,12 +109,13 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const match = matchData as MatchDetail;
 
   const isAssignedReferee = match.referee_id === user.id;
+  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, match.referee_id);
   const isStaffForMatch = permissions.staffTeamIds.some(
     (teamId) => teamId === match.home_team_id || teamId === match.away_team_id
   );
-  const canUpdateThisResult = permissions.canManageLeague || isAssignedReferee;
+  const canUpdateThisResult = permissions.canManageLeague || canOfficiateThisMatch;
   const canManageThisEvents =
-    permissions.canManageLeague || isAssignedReferee || isStaffForMatch;
+    permissions.canManageLeague || canOfficiateThisMatch || isStaffForMatch;
 
   const [seasonResult, homeTeamResult, awayTeamResult, venueResult] = await Promise.all([
     supabase

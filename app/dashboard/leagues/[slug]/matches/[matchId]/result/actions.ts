@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -147,8 +148,7 @@ export async function updateMatchResultAction(
     leagueId: leagueData.id,
   });
 
-  const isAssignedReferee = matchData.referee_id === user.id;
-  if (!permissions.canManageLeague && !isAssignedReferee) {
+  if (!canOfficiateMatch(permissions, user.id, matchData.referee_id)) {
     return {
       values,
       fieldErrors: {},

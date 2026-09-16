@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_EVENT_TYPE_VALUES, type MatchEventType } from "@/types/database";
 
@@ -165,11 +166,10 @@ export async function createMatchEventAction(
     leagueId: leagueData.id,
   });
 
-  const isAssignedReferee =
-    permissions.assignedMatchIds.includes(matchData.id) || matchData.referee_id === user.id;
+  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, matchData.referee_id);
   const canManageThisTeam =
     permissions.canManageLeague ||
-    isAssignedReferee ||
+    canOfficiateThisMatch ||
     permissions.staffTeamIds.includes(values.team_id);
 
   if (!canManageThisTeam) {

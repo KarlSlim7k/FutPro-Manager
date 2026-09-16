@@ -39,7 +39,7 @@
 4. **Lectura pública controlada:** solo ligas `active` y `is_public = true`.
    - `players` permite `SELECT` a `anon` solo cuando el jugador pertenece a una liga pública activa, para soportar el detalle público `/liga/[slug]/players/[playerId]`.
    - Esta lectura pública no habilita escritura y no expone controles administrativos.
-5. **Referee en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`).
+5. **Referee en partidos:** puede actualizar/capturar resultados y eventos si está permitido por liga y, si existe asignación, cuando es el árbitro asignado (`matches.referee_id`); si el partido no tiene árbitro asignado, cualquier `referee` de la liga puede oficiarlo (helper `canOfficiateMatch`).
    En `matches`, un referee no admin queda restringido a cambiar `status`, `home_score` y `away_score`.
 6. **Integridad de autoría en eventos:** `match_events.created_by` debe coincidir con el usuario autenticado en inserts y no puede cambiarse en updates (salvo `super_admin`).
 7. **Integridad deportiva en eventos:** `team_id` debe estar en el partido; si hay `player_id`, debe existir registro activo del jugador con ese equipo en la temporada del partido.

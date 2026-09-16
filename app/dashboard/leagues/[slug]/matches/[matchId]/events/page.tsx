@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { checkPlayerEligibility } from "@/lib/eligibility/player-eligibility";
 import type { League, Match, MatchEvent, Player, PlayerTeamRegistration, Season, Team, Venue } from "@/types/database";
@@ -100,15 +101,14 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
     leagueId: league.id,
   });
 
-  const isAssignedReferee =
-    permissions.assignedMatchIds.includes(match.id) || match.referee_id === user.id;
+  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, match.referee_id);
   const isHomeStaff = permissions.staffTeamIds.includes(match.home_team_id);
   const isAwayStaff = permissions.staffTeamIds.includes(match.away_team_id);
   const isStaffForMatch = isHomeStaff || isAwayStaff;
-  const canManageEvents = permissions.canManageLeague || isAssignedReferee || isStaffForMatch;
+  const canManageEvents = permissions.canManageLeague || canOfficiateThisMatch || isStaffForMatch;
 
   let allowedTeamIds: string[] = [];
-  if (permissions.canManageLeague || isAssignedReferee) {
+  if (permissions.canManageLeague || canOfficiateThisMatch) {
     allowedTeamIds = [match.home_team_id, match.away_team_id];
   } else {
     if (isHomeStaff) allowedTeamIds.push(match.home_team_id);
@@ -296,7 +296,7 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
               {events.map((event) => {
                 const canDeleteEvent =
                   permissions.canManageLeague ||
-                  isAssignedReferee ||
+                  canOfficiateThisMatch ||
                   event.created_by === user.id ||
                   (event.team_id !== null && permissions.staffTeamIds.includes(event.team_id));
 
