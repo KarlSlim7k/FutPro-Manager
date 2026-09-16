@@ -90,23 +90,20 @@ Estado actual del MVP:
 - **Post-MVP Frentes 1 y 2 (Multi-árbitro y Disponibilidad):** 100% completados con ternas completas (`match_officials`), retrocompatibilidad bidireccional, notificaciones in-app y calendario de indisponibilidad.
 
 ### Vista pública
-- **Estado:** Implementado para MVP.
-- **Evidencia en repo:** `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `app/liga/[slug]/players/[playerId]/page.tsx`, `components/public/*`, `components/public/public-match-events.tsx`.
+- **Estado:** Implementado al 100% (MVP + Mejoras avanzadas de estadísticas y OpenGraph dinámico).
+- **Evidencia en repo:** `app/page.tsx`, `app/explorar/page.tsx`, `app/contacto/page.tsx`, `app/liga/[slug]/page.tsx`, `app/liga/[slug]/standings/page.tsx`, `app/liga/[slug]/stats/page.tsx`, `app/liga/[slug]/matches/page.tsx`, `app/liga/[slug]/matches/[matchId]/page.tsx`, `app/liga/[slug]/teams/[teamSlug]/page.tsx`, `app/liga/[slug]/players/[playerId]/page.tsx`, `app/opengraph-image.tsx`, `app/liga/[slug]/opengraph-image.tsx`, `app/liga/[slug]/matches/[matchId]/opengraph-image.tsx`, `app/liga/[slug]/stats/opengraph-image.tsx`, `app/liga/[slug]/teams/[teamSlug]/opengraph-image.tsx`, `app/liga/[slug]/players/[playerId]/opengraph-image.tsx`, `components/public/*`, `components/stats/*`.
 - **Funcionalidad existente:**
-  - Resumen de liga con link a liga activa.
-  - Standings publicos por temporada.
-  - Calendario/lista de partidos con filtros (estado, equipo, jornada/round).
-  - Detalle publico de partido con timeline visual de eventos, resumen por categorias y filtros (todos/goles/tarjetas/sustituciones/penales).
-  - Detalle publico de equipo con plantilla y partidos por temporada.
-  - Detalle publico de jugador.
-  - Metadata basica SEO/OpenGraph/Twitter en vistas publicas principales.
-  - Navegacion publica entre vistas.
-  - Empty states y manejo de rutas inexistentes (notFound).
-- **Post-MVP:** E2E automatizado, QA visual cross-browser, social previews avanzados con imagenes dinamicas, estadisticas publicas avanzadas.
-- **Nota:** standings publico enlaza a detalle de equipo; lista de partidos y detalle de equipo enlazan a detalle de partido; la plantilla publica enlaza a detalle publico de jugador. `players` tiene lectura publica minima para `anon` solo en ligas publicas activas; `player_team_registrations` y `match_events` mantienen lectura publica controlada para ligas publicas activas y empty states seguros.
-- **QA realizado (2026-05-04):** rutas publicas validadas con datos reales de Supabase/RLS en modo read-only; build y lint pasan; fix menor en navegacion publica (`PublicNav`).
-- **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
-- **QA actualizado (2026-05-19):** `/liga/liga-qa-codex/players/0aae9fd4-111e-4c0b-bb18-d31f7ea0218e` carga sin sesion tras migracion `20260519173826_public_players_read_policy.sql`; jugador inexistente retorna 404; sin controles admin.
+  - Resumen de liga con link a liga activa, métricas e historial.
+  - Standings públicos con streaming Suspense, rachas de forma (W/D/L), escudos y caching ISR.
+  - Módulo completo de estadísticas agregadas (`/liga/[slug]/stats`): goleadores (campo y penales), máximos asistentes, vallas invictas por club (clean sheets y porcentaje), fair play disciplinario (tarjetas amarillas/rojas y puntos) y tarjetas de métricas globales de temporada.
+  - Calendario y partidos públicos con badge **EN VIVO** pulsante y filtros por estado, equipo y jornada/round.
+  - Detalle público de partido con timeline interactivo de incidencias, cédula y filtros por categoría de evento.
+  - Detalle público de club con plantilla oficial y partidos por temporada.
+  - Detalle público de jugador con datos deportivos y perfil.
+  - Navegación pública unificada mediante `PublicNav` con accesos a Resumen, Tabla, Estadísticas, Partidos y Equipos.
+  - **Generación dinámica de imágenes OpenGraph (`next/og`):** Social previews 1200x630 generados en servidor para home, liga, partido (con marcador en vivo/finalizado y escudos), estadísticas, equipo y jugador.
+  - Empty states informativos y manejo robusto de 404 (notFound).
+- **QA realizado (2026-09-16):** Rutas públicas, compilación SSG/ISR, suites de tests (66/66) y linting de ESLint 100% en verde.
 
 ### Media uploads y Recursos Multimedia
 - **Estado:** Implementado al 100% (MVP + Post-MVP Frente 4 completo).

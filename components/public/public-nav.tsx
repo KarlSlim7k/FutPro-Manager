@@ -14,6 +14,7 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
   const tabs = [
     { label: "Resumen", href: `/liga/${leagueSlug}` },
     { label: "Tabla de posiciones", href: `/liga/${leagueSlug}/standings` },
+    { label: "Estadísticas", href: `/liga/${leagueSlug}/stats` },
     { label: "Partidos", href: `/liga/${leagueSlug}/matches` },
     { label: "Equipos", href: `/liga/${leagueSlug}/teams` },
   ];

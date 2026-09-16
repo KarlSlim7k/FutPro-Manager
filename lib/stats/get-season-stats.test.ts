@@ -144,4 +144,61 @@ describe("getSeasonStats", () => {
     expect(stats.fairPlayPlayers[0].playerName).toBe("Jugador Expulsado");
     expect(stats.fairPlayPlayers[0].points).toBe(3);
   });
+
+  it("calculates top assists, clean sheets, and overview metrics correctly", async () => {
+    const matches = [
+      { id: "m1", status: "completed", home_team_id: "t1", away_team_id: "t2", home_score: 2, away_score: 0 },
+      { id: "m2", status: "completed", home_team_id: "t2", away_team_id: "t1", home_score: 1, away_score: 1 },
+      { id: "m3", status: "scheduled", home_team_id: "t1", away_team_id: "t2", home_score: null, away_score: null },
+    ];
+    const teams = [
+      { id: "t1", name: "Muralla FC", slug: "muralla-fc", logo_url: null },
+      { id: "t2", name: "Ataque Total", slug: "ataque-total", logo_url: null },
+    ];
+    const players = [
+      { id: "p1", full_name: "Andrés Asistencias", photo_url: null },
+      { id: "p2", full_name: "Bruno Pase", photo_url: null },
+    ];
+    const events = [
+      { id: "e1", match_id: "m1", team_id: "t1", player_id: "p1", event_type: "assist" },
+      { id: "e2", match_id: "m1", team_id: "t1", player_id: "p1", event_type: "assist" },
+      { id: "e3", match_id: "m2", team_id: "t2", player_id: "p2", event_type: "assist" },
+      { id: "e4", match_id: "m1", team_id: "t1", player_id: "p1", event_type: "yellow_card" },
+    ];
+
+    const supabase = createMockSupabaseStats({
+      matches: matches as unknown as { id: string }[],
+      teams,
+      players,
+      events,
+    });
+    const stats = await getSeasonStats({ supabase, leagueId: "l1", seasonId: "s1" });
+
+    // Assists
+    expect(stats.topAssists.length).toBe(2);
+    expect(stats.topAssists[0].playerName).toBe("Andrés Asistencias");
+    expect(stats.topAssists[0].assists).toBe(2);
+    expect(stats.topAssists[1].playerName).toBe("Bruno Pase");
+    expect(stats.topAssists[1].assists).toBe(1);
+
+    // Clean sheets:
+    // in m1: t1 won 2-0 against t2 -> t1 clean sheet (away_score 0)
+    // in m2: 1-1 -> neither has clean sheet
+    // t1 has 1 clean sheet in 2 matches (50%)
+    // t2 has 0 clean sheets in 2 matches (0%)
+    expect(stats.cleanSheets[0].teamName).toBe("Muralla FC");
+    expect(stats.cleanSheets[0].cleanSheets).toBe(1);
+    expect(stats.cleanSheets[0].matchesPlayed).toBe(2);
+    expect(stats.cleanSheets[0].cleanSheetPercentage).toBe(50);
+
+    // Overview
+    expect(stats.overview.totalMatches).toBe(3);
+    expect(stats.overview.completedMatches).toBe(2);
+    expect(stats.overview.totalGoals).toBe(4); // 2 + 0 + 1 + 1
+    expect(stats.overview.goalsPerMatch).toBe(2);
+    expect(stats.overview.totalYellowCards).toBe(1);
+    expect(stats.overview.totalRedCards).toBe(0);
+    expect(stats.overview.cardsPerMatch).toBe(0.5);
+  });
 });
+

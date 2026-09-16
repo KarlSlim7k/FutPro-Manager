@@ -2,24 +2,65 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Trophy, Target, ShieldAlert, Swords } from "lucide-react";
+import { Trophy, Target, ShieldAlert, Swords, Zap, ShieldCheck } from "lucide-react";
 
-export type StatsTabType = "standings" | "scorers" | "fair-play" | "playoffs";
+export type StatsTabType = "standings" | "scorers" | "assists" | "clean-sheets" | "fair-play" | "playoffs";
 
 interface SeasonStatsTabsProps {
   currentTab: StatsTabType;
   basePath: string;
+  allowedTabs?: StatsTabType[];
+  defaultTab?: StatsTabType;
 }
+
+const ALL_TABS: { id: StatsTabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  {
+    id: "standings",
+    label: "Clasificación General",
+    icon: Trophy,
+  },
+  {
+    id: "playoffs",
+    label: "Liguilla / Eliminatorias",
+    icon: Swords,
+  },
+  {
+    id: "scorers",
+    label: "Goleo Individual",
+    icon: Target,
+  },
+  {
+    id: "assists",
+    label: "Máximos Asistentes",
+    icon: Zap,
+  },
+  {
+    id: "clean-sheets",
+    label: "Vallas Invictas",
+    icon: ShieldCheck,
+  },
+  {
+    id: "fair-play",
+    label: "Juego Limpio / Tarjetas",
+    icon: ShieldAlert,
+  },
+];
 
 export function SeasonStatsTabs({
   currentTab,
   basePath,
+  allowedTabs,
+  defaultTab = "standings",
 }: SeasonStatsTabsProps) {
   const searchParams = useSearchParams();
 
+  const tabs = allowedTabs
+    ? ALL_TABS.filter((t) => allowedTabs.includes(t.id))
+    : ALL_TABS;
+
   const createTabHref = (tab: StatsTabType) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (tab === "standings") {
+    if (tab === defaultTab) {
       params.delete("tab");
     } else {
       params.set("tab", tab);
@@ -27,29 +68,6 @@ export function SeasonStatsTabs({
     const query = params.toString();
     return `${basePath}${query ? `?${query}` : ""}`;
   };
-
-  const tabs = [
-    {
-      id: "standings" as const,
-      label: "Clasificación General",
-      icon: Trophy,
-    },
-    {
-      id: "playoffs" as const,
-      label: "Liguilla / Eliminatorias",
-      icon: Swords,
-    },
-    {
-      id: "scorers" as const,
-      label: "Goleo Individual",
-      icon: Target,
-    },
-    {
-      id: "fair-play" as const,
-      label: "Juego Limpio / Tarjetas",
-      icon: ShieldAlert,
-    },
-  ];
 
   return (
     <div className="border-b border-gray-200">

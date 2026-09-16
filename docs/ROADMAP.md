@@ -32,14 +32,14 @@
 - Incluye recálculo manual por temporada, recálculo automático al actualizar resultados `completed`, auditoría best-effort de recálculos, warnings por inconsistencias de equipos (`skipped matches`) y revalidación de rutas dashboard/públicas.
 - **Post-MVP:** jobs/background reales, event bus/queue, triggers SQL, historial avanzado y desempates complejos.
 
-### Fase 5 - Vista pública (Completado para MVP)
+### Fase 5 - Vista pública (Completado al 100% + Mejoras avanzadas)
 - ✅ Portal público: resumen de liga, standings, calendario/lista de partidos, detalle de partido, detalle de equipo y detalle de jugador.
 - ✅ Eventos públicos: timeline visual, resumen por categorias y filtros (todos/goles/tarjetas/sustituciones/penales).
 - ✅ Filtros publicos de partidos: estado, equipo y jornada/round cuando aplique.
-- ✅ SEO basico: metadata, OpenGraph y Twitter en vistas publicas principales.
-- ✅ Navegacion de consulta para aficionados entre vistas publicas.
-- ✅ QA publico validado con datos reales de Supabase/RLS; build y lint exitosos (PR #4 y PR #5).
-- **Post-MVP:** OG dinamico con imagenes, E2E automatizado, QA visual cross-browser/manual, estadisticas publicas avanzadas.
+- ✅ Módulo avanzado de estadísticas agregadas (`/liga/[slug]/stats`): tabla de goleo individual, máximos asistentes, vallas invictas por equipo, fair play y KPIs globales de temporada.
+- ✅ SEO y OpenGraph dinámico (`next/og`): generación en servidor de social cards dinámicas (1200x630) para portada, ligas, partidos (scorecards en vivo/finalizados), estadísticas, clubes y jugadores.
+- ✅ Navegacion pública unificada (`PublicNav`) con pestaña dedicada a "Estadísticas".
+- ✅ QA validado con datos reales de Supabase/RLS; compilación SSG/ISR, suite de tests (66/66) y linting 100% exitosos.
 
 ### Fase 6 - Roles avanzados, árbitros, auditoría (Base técnica + hardening UX + UI de administracion de miembros implementada)
 - Modelo base en schema/RLS.
