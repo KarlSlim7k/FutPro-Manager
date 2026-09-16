@@ -8,7 +8,7 @@ import { getLeaguePermissions, canManageTeam } from "@/lib/permissions/league-pe
 import { createClient } from "@/lib/supabase/server";
 
 type UploadState = { success: boolean; message: string | null };
-const LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+const LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function updateTeamLogoAction(leagueSlug: string, teamSlug: string, _state: UploadState, formData: FormData): Promise<UploadState> {
   const supabase = await createClient();

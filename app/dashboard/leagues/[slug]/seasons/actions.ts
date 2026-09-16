@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { SEASON_STATUS_VALUES, type SeasonStatus } from "@/types/database";
 
@@ -115,6 +116,20 @@ export async function createSeasonAction(
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso para crear temporadas.",
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!permissions.canManageLeague) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para crear temporadas en esta liga.",
     };
   }
 

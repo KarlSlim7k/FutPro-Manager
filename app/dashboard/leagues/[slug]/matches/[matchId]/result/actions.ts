@@ -148,7 +148,7 @@ export async function updateMatchResultAction(
     leagueId: leagueData.id,
   });
 
-  if (!canOfficiateMatch(permissions, user.id, matchData.referee_id)) {
+  if (!canOfficiateMatch(permissions, user.id, (matchData.referee_id as string | null) ?? null, matchId)) {
     return {
       values,
       fieldErrors: {},
@@ -158,11 +158,21 @@ export async function updateMatchResultAction(
     };
   }
 
-  if (matchData.status === "cancelled") {
+  if (matchData.status === "completed" && !permissions.canManageLeague) {
     return {
       values,
       fieldErrors: {},
-      formError: "No se puede capturar resultado de un partido cancelado.",
+      formError: "El partido ya está completado. Solo un administrador de liga puede modificar el resultado.",
+      success: false,
+      standingsWarning: null,
+    };
+  }
+
+  if (matchData.status === "cancelled" && !permissions.canManageLeague) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "Solo un administrador puede editar un partido cancelado.",
       success: false,
       standingsWarning: null,
     };

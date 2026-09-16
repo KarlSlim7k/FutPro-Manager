@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type UploadState = { success: boolean; message: string | null };
 
-const LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+const LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function updateLeagueLogoAction(
   leagueSlug: string,
@@ -171,6 +171,11 @@ export async function uploadBatchLeagueMediaAction(
     return { success: false, message: "Selecciona al menos un archivo de imagen válido." };
   }
 
+  // Cota anti-abuso: máximo 10 archivos por request (además del bodySizeLimit 4mb).
+  if (files.length > 10) {
+    return { success: false, message: "Máximo 10 archivos por subida." };
+  }
+
   const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
   const maxSizeBytes = 4 * 1024 * 1024; // 4 MB por imagen
   let uploadedCount = 0;
@@ -271,8 +276,11 @@ export async function deleteMediaUploadAction(
     return { success: false, message: "Archivo multimedia no encontrado." };
   }
 
-  // Borrado de storage
-  await supabase.storage.from(mediaRow.bucket).remove([mediaRow.path]);
+  // Borrado de storage: si falla, no borrar la fila (evita borrado fantasma).
+  const { error: storageError } = await supabase.storage.from(mediaRow.bucket).remove([mediaRow.path]);
+  if (storageError && !storageError.message?.toLowerCase().includes("not found")) {
+    return { success: false, message: "No se pudo eliminar el archivo del almacenamiento." };
+  }
 
   // Borrado de base de datos
   const { error } = await supabase.from("media_uploads").delete().eq("id", mediaId);

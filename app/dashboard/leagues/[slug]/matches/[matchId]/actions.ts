@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_STATUS_VALUES, type MatchStatus } from "@/types/database";
@@ -126,7 +128,7 @@ export async function updateMatchResultAction(
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
-    .select("id, season_id, status")
+    .select("id, season_id, status, home_score, away_score, referee_id")
     .eq("id", matchId)
     .eq("league_id", league.id)
     .maybeSingle();
@@ -143,6 +145,21 @@ export async function updateMatchResultAction(
       success: false,
       standingsWarning: null,
     };
+  }
+
+  // Auth app-layer (además de RLS/trigger): solo oficiante o admin.
+  const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: league.id });
+  if (!canOfficiateMatch(permissions, user.id, (matchData.referee_id as string | null) ?? null, matchId)) {
+    return { values, fieldErrors: {}, formError: "No tienes permisos para actualizar este partido.", success: false, standingsWarning: null };
+  }
+
+  // Máquina de estados mínima: si el partido ya está completado o cancelado,
+  // solo league_admin puede modificar el resultado o cambiar el estado (evita amaños/reescrituras).
+  if (matchData.status === "completed" && !permissions.canManageLeague) {
+    return { values, fieldErrors: {}, formError: "El partido ya está completado. Solo un administrador de liga puede modificar el resultado.", success: false, standingsWarning: null };
+  }
+  if (matchData.status === "cancelled" && !permissions.canManageLeague) {
+    return { values, fieldErrors: {}, formError: "Solo un administrador puede editar un partido cancelado.", success: false, standingsWarning: null };
   }
 
   const { data: seasonData, error: seasonError } = await supabase
@@ -206,6 +223,8 @@ export async function updateMatchResultAction(
       league_slug: leagueSlug,
       previous_match_status: matchData.status,
       new_match_status: values.status,
+      previous_home_score: (matchData.home_score as number | null) ?? null,
+      previous_away_score: (matchData.away_score as number | null) ?? null,
       home_score: Number(values.home_score),
       away_score: Number(values.away_score),
     },

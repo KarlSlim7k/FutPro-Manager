@@ -166,7 +166,7 @@ export async function createMatchEventAction(
     leagueId: leagueData.id,
   });
 
-  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, matchData.referee_id);
+  const canOfficiateThisMatch = canOfficiateMatch(permissions, user.id, matchData.referee_id, matchId);
   const canManageThisTeam =
     permissions.canManageLeague ||
     canOfficiateThisMatch ||
@@ -177,6 +177,14 @@ export async function createMatchEventAction(
       values,
       fieldErrors: { team_id: "No tienes permisos para registrar eventos para este equipo." },
       formError: null,
+    };
+  }
+
+  if (matchData.status === "completed" && !permissions.canManageLeague) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "El partido ya está completado. Solo un administrador de liga puede registrar eventos.",
     };
   }
 
@@ -202,6 +210,51 @@ export async function createMatchEventAction(
       },
       formError: null,
     };
+  }
+
+  // Enforcement server-side de elegibilidad (no solo UI): suspendidos,
+  // lesionados, retirados/inactivos, roja previa o acumulación 3+ amarillas.
+  const { data: playerRow } = await supabase
+    .from("players")
+    .select("id, full_name, status")
+    .eq("id", values.player_id)
+    .eq("league_id", leagueData.id)
+    .maybeSingle();
+  if (!playerRow) {
+    return { values, fieldErrors: { player_id: "Jugador no encontrado en esta liga." }, formError: null };
+  }
+  let seasonDisciplinaryEvents: Array<{ id: string; match_id: string; player_id: string; event_type: "yellow_card" | "red_card"; created_at: string }> = [];
+  try {
+    const { data: seasonMatches } = await supabase
+      .from("matches")
+      .select("id")
+      .eq("league_id", leagueData.id)
+      .eq("season_id", matchData.season_id);
+    const seasonMatchIds = (seasonMatches ?? []).map((m) => (m as { id: string }).id).filter(Boolean);
+    if (seasonMatchIds.length > 0) {
+      const { data: discEvents } = await supabase
+        .from("match_events")
+        .select("id, match_id, player_id, event_type, created_at")
+        .in("match_id", seasonMatchIds)
+        .eq("player_id", values.player_id)
+        .in("event_type", ["yellow_card", "red_card"]);
+      seasonDisciplinaryEvents = (discEvents ?? []) as typeof seasonDisciplinaryEvents;
+    }
+  } catch {
+    seasonDisciplinaryEvents = [];
+  }
+  const { checkPlayerEligibility } = await import("@/lib/eligibility/player-eligibility");
+  const eligibility = checkPlayerEligibility({
+    player: {
+      playerId: playerRow.id as string,
+      fullName: (playerRow.full_name as string) ?? "",
+      status: playerRow.status as "active" | "suspended" | "injured" | "retired" | "inactive",
+    },
+    seasonEvents: seasonDisciplinaryEvents,
+    currentMatchId: matchData.id,
+  });
+  if (!eligibility.isEligible) {
+    return { values, fieldErrors: { player_id: eligibility.reason ?? "Jugador no elegible para este partido." }, formError: null };
   }
 
   const insertPayload: {
@@ -296,6 +349,45 @@ export async function deleteMatchEventAction(
     return { success: false, message: "Liga no encontrada." };
   }
 
+  // Verificar que el partido pertenece a la liga y obtener contexto para auth.
+  const { data: matchRow } = await supabase
+    .from("matches")
+    .select("id, league_id, status, home_team_id, away_team_id, referee_id")
+    .eq("id", matchId)
+    .eq("league_id", leagueData.id)
+    .maybeSingle();
+  if (!matchRow) {
+    return { success: false, message: "Partido no encontrado en esta liga." };
+  }
+  // Auth app-layer (además de RLS): oficiante del partido o staff del equipo del evento.
+  const permissions = await getLeaguePermissions({ supabase, userId: user.id, leagueId: leagueData.id });
+
+  if (matchRow.status === "cancelled") {
+    return { success: false, message: "No se pueden eliminar eventos de un partido cancelado." };
+  }
+  if (matchRow.status === "completed" && !permissions.canManageLeague) {
+    return { success: false, message: "El partido ya está completado. Solo un administrador de liga puede eliminar eventos." };
+  }
+
+  // Verificar que el evento pertenece al partido (evita auditoría cross-liga).
+  const { data: eventRow } = await supabase
+    .from("match_events")
+    .select("id, match_id, team_id")
+    .eq("id", eventId)
+    .eq("match_id", matchId)
+    .maybeSingle();
+  if (!eventRow) {
+    return { success: false, message: "Evento no encontrado en este partido." };
+  }
+
+  const canOfficiate = canOfficiateMatch(permissions, user.id, matchRow.referee_id as string | null, matchId);
+  const isEventTeamStaff =
+    permissions.canManageLeague ||
+    permissions.staffTeamIds.includes((eventRow as { team_id: string }).team_id);
+  if (!canOfficiate && !isEventTeamStaff) {
+    return { success: false, message: "No tienes permisos para borrar este evento." };
+  }
+
   const { error: deleteError } = await supabase
     .from("match_events")
     .delete()
@@ -303,10 +395,7 @@ export async function deleteMatchEventAction(
     .eq("match_id", matchId);
 
   if (deleteError) {
-    if (deleteError.code === "42501" || deleteError.message?.toLowerCase().includes("row-level security")) {
-      return { success: false, message: "RLS bloqueó la eliminación: no tienes permisos para borrar este evento." };
-    }
-    return { success: false, message: "No se pudo eliminar el evento." };
+    return { success: false, message: "No tienes permisos para borrar este evento." };
   }
 
   await createAuditLog({

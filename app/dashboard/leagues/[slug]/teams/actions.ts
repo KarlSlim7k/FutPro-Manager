@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { TEAM_STATUS_VALUES, type TeamStatus } from "@/types/database";
 
@@ -88,6 +89,17 @@ export async function createTeamAction(
     fieldErrors.slug = "Usa formato lowercase-kebab-case (ejemplo: club-perote-fc).";
   }
 
+  if (values.logo_url) {
+    try {
+      const parsedUrl = new URL(values.logo_url);
+      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        fieldErrors.logo_url = "La URL del logo debe iniciar con http o https.";
+      }
+    } catch {
+      fieldErrors.logo_url = "Ingresa una URL válida para el logo.";
+    }
+  }
+
   if (values.primary_color && !HEX_COLOR_PATTERN.test(values.primary_color)) {
     fieldErrors.primary_color = "Usa un color hex válido (#fff o #ffffff).";
   }
@@ -138,6 +150,20 @@ export async function createTeamAction(
       values,
       fieldErrors: {},
       formError: "Liga no encontrada o sin acceso para crear equipos.",
+    };
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!permissions.canManageLeague) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para crear equipos en esta liga.",
     };
   }
 

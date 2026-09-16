@@ -169,6 +169,31 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
   }
 
   const playersById = new Map(players.map((player) => [player.id, player]));
+
+  // Eventos disciplinarios de la temporada (para elegibilidad real, no solo status).
+  let seasonDisciplinaryEvents: Array<{
+    id: string; match_id: string; player_id: string; event_type: "yellow_card" | "red_card"; created_at: string;
+  }> = [];
+  try {
+    const { data: seasonMatches } = await supabase
+      .from("matches")
+      .select("id")
+      .eq("league_id", league.id)
+      .eq("season_id", match.season_id);
+    const seasonMatchIds = (seasonMatches ?? []).map((m) => m.id as string).filter(Boolean);
+    if (seasonMatchIds.length > 0 && playerIds.length > 0) {
+      const { data: discEvents } = await supabase
+        .from("match_events")
+        .select("id, match_id, player_id, event_type, created_at")
+        .in("match_id", seasonMatchIds)
+        .in("player_id", playerIds)
+        .in("event_type", ["yellow_card", "red_card"]);
+      seasonDisciplinaryEvents = (discEvents ?? []) as typeof seasonDisciplinaryEvents;
+    }
+  } catch {
+    seasonDisciplinaryEvents = [];
+  }
+
   const formPlayers = registrations
     .map((registration): FormPlayerOption | null => {
       const player = playersById.get(registration.player_id);
@@ -180,6 +205,8 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
           fullName: player.full_name,
           status: player.status,
         },
+        seasonEvents: seasonDisciplinaryEvents,
+        currentMatchId: match.id,
       });
 
       return {

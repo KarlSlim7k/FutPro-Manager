@@ -89,7 +89,6 @@ const MIME_LABELS: Record<string, string> = {
   "image/jpeg": "JPG",
   "image/png": "PNG",
   "image/webp": "WEBP",
-  "image/svg+xml": "SVG",
 };
 
 function getInvalidMimeMessage(allowedMimeTypes: string[]) {
@@ -123,6 +122,43 @@ function getStorageUploadErrorMessage(uploadError: { message?: string } | null) 
   return STORAGE_UPLOAD_BASE_ERROR;
 }
 
+/**
+ * Verifica magic bytes del contenido real (no solo `file.type`).
+ * Rechaza SVG/HTML polyglots aunque lleguen con MIME spoofeado.
+ */
+function hasAllowedImageSignature(bytes: Uint8Array, declaredMime: string): boolean {
+  if (bytes.length < 12) return false;
+
+  // Rechazo rápido de texto/markup (SVG, HTML, XML, scripts).
+  const head = new TextDecoder().decode(bytes.slice(0, Math.min(bytes.length, 512))).trimStart().toLowerCase();
+  if (
+    head.startsWith("<svg") ||
+    head.startsWith("<?xml") ||
+    head.startsWith("<html") ||
+    head.startsWith("<!doctype html") ||
+    head.startsWith("<script")
+  ) {
+    return false;
+  }
+
+  if (declaredMime === "image/jpeg") {
+    return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+  if (declaredMime === "image/png") {
+    return (
+      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+      bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a
+    );
+  }
+  if (declaredMime === "image/webp") {
+    return (
+      bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
+    );
+  }
+  return false;
+}
+
 export async function uploadEntityImage(params: UploadEntityImageParams): Promise<UploadEntityImageResult> {
   const {
     supabase,
@@ -143,6 +179,18 @@ export async function uploadEntityImage(params: UploadEntityImageParams): Promis
 
   if (!allowedMimeTypes.includes(file.type)) {
     return { success: false, message: getInvalidMimeMessage(allowedMimeTypes) };
+  }
+
+  // Defensa en profundidad: no confiar solo en `file.type` (controlable por el
+  // cliente). Verifica magic bytes y rechaza SVG/HTML polyglots aunque vengan
+  // con MIME spoofeado. Solo se permiten rasterizados: JPEG, PNG, WebP.
+  try {
+    const buffer = new Uint8Array(await file.arrayBuffer());
+    if (!hasAllowedImageSignature(buffer, file.type)) {
+      return { success: false, message: getInvalidMimeMessage(allowedMimeTypes) };
+    }
+  } catch {
+    return { success: false, message: "No se pudo validar el archivo." };
   }
 
   if (file.size > maxSizeBytes) {

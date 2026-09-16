@@ -136,13 +136,17 @@ export function LoginForm({ initialMode = "login", onModeChange }: LoginFormProp
       });
 
       if (resetError) {
-        setError(mapAuthError(resetError.message));
-        setIsLoading(false);
-        return;
+        const msg = resetError.message?.toLowerCase() || "";
+        if (msg.includes("rate limit") || msg.includes("too many requests")) {
+          setError("Demasiados intentos. Por favor espera unos minutos antes de volver a intentar.");
+          setIsLoading(false);
+          return;
+        }
+        // Defensa contra enumeración: no revelar si el email no existe
       }
 
       setSuccess(
-        "Te hemos enviado un correo seguro con el enlace para restablecer tu contraseña. Revisa tu bandeja de entrada o spam."
+        "Si la dirección de correo está registrada, te hemos enviado un enlace seguro para restablecer tu contraseña. Revisa tu bandeja de entrada o spam."
       );
       setIsLoading(false);
       return;
@@ -201,6 +205,17 @@ export function LoginForm({ initialMode = "login", onModeChange }: LoginFormProp
       });
 
       if (signUpError) {
+        const msg = signUpError.message?.toLowerCase() || "";
+        if (msg.includes("user already registered") || msg.includes("already registered")) {
+          setSuccess(
+            "Si la dirección de correo es nueva, te enviamos un enlace de activación (revisa también tu carpeta de spam). Si ya tenías una cuenta, puedes iniciar sesión o recuperar tu contraseña."
+          );
+          switchMode("login");
+          setPassword("");
+          setConfirmPassword("");
+          setIsLoading(false);
+          return;
+        }
         setError(mapAuthError(signUpError.message));
         setIsLoading(false);
         return;

@@ -1,6 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type ContactFormState = {
   values: { name: string; league: string; email: string; phone: string; message: string };
@@ -29,6 +31,28 @@ export async function submitContactAction(
   // Honeypot: bots fill hidden fields, humans don't.
   if (String(formData.get("company") ?? "").trim() !== "") {
     return { ...EMPTY_CONTACT_STATE, success: true };
+  }
+
+  const headerList = await headers();
+  const ip =
+    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerList.get("x-real-ip") ||
+    "unknown";
+
+  const rateLimit = checkRateLimit(`contact:${ip}`, 5, 10 * 60 * 1000);
+  if (!rateLimit.allowed) {
+    return {
+      values: {
+        name: String(formData.get("name") ?? "").trim(),
+        league: String(formData.get("league") ?? "").trim(),
+        email: String(formData.get("email") ?? "").trim(),
+        phone: String(formData.get("phone") ?? "").trim(),
+        message: String(formData.get("message") ?? "").trim(),
+      },
+      fieldErrors: {},
+      formError: `Has enviado demasiados mensajes. Por favor espera ${Math.max(1, Math.ceil(rateLimit.retryAfterSeconds / 60))} minutos antes de intentar de nuevo.`,
+      success: false,
+    };
   }
 
   const values = {

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { createClient } from "@/lib/supabase/server";
 
 export type CreateMatchField =
@@ -187,6 +188,20 @@ export async function createMatchAction(
         formError: null,
       };
     }
+  }
+
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
+  if (!permissions.canManageLeague) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: "No tienes permisos para programar partidos en esta liga.",
+    };
   }
 
   const matchId = randomUUID();

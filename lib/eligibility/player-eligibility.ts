@@ -76,9 +76,10 @@ export function checkPlayerEligibility({
     };
   }
 
-  // Si acumula 3 o 5 amarillas sin cumplir sanción
+  // Si acumula 3+ amarillas sin sanción cumplida registrada, bloqueo fail-closed.
+  // (Sin estado `suspension_served`, permitir 4-5 reabriría la puerta tras la sanción.)
   const yellowCardCount = yellowCards.length;
-  if (yellowCardCount > 0 && yellowCardCount % 3 === 0) {
+  if (yellowCardCount >= 3) {
     return {
       isEligible: false,
       status: "suspended",

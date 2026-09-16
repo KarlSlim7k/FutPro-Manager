@@ -71,6 +71,21 @@ export async function addTeamMemberAction(
     return { success: false, message: "Rol no válido para staff de equipo." };
   }
 
+  // Prevenir que un team_admin agregue a usuarios que no son miembros de la liga
+  const { data: leagueMember } = await supabase
+    .from("league_members")
+    .select("id")
+    .eq("league_id", league.id)
+    .eq("profile_id", profileId)
+    .maybeSingle();
+
+  if (!leagueMember) {
+    return {
+      success: false,
+      message: "El usuario debe ser miembro de la liga para poder formar parte del staff del equipo.",
+    };
+  }
+
   const { data: inserted, error: insertError } = await supabase
     .from("team_members")
     .insert({

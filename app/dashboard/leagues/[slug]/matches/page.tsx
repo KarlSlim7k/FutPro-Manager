@@ -156,8 +156,14 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
     .eq("season_id", selectedSeason.id)
     .order("scheduled_at", { ascending: true });
 
+  const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const validFilterTeamId =
+    filterTeamId && UUID_PATTERN.test(filterTeamId) && teams.some((team) => team.id === filterTeamId)
+      ? filterTeamId
+      : undefined;
+
   if (filterStatus) matchesQuery = matchesQuery.eq("status", filterStatus);
-  if (filterTeamId) matchesQuery = matchesQuery.or(`home_team_id.eq.${filterTeamId},away_team_id.eq.${filterTeamId}`);
+  if (validFilterTeamId) matchesQuery = matchesQuery.or(`home_team_id.eq.${validFilterTeamId},away_team_id.eq.${validFilterTeamId}`);
   if (filterRound) matchesQuery = matchesQuery.ilike("round_name", `%${filterRound}%`);
   if (filterMyMatches) matchesQuery = matchesQuery.eq("referee_id", user.id);
 
@@ -238,7 +244,7 @@ export default async function MatchesPage({ params, searchParams }: MatchesPageP
           <MatchListFilters
             teams={teams.map((team) => ({ id: team.id, name: team.name }))}
             currentStatus={filterStatus}
-            currentTeamId={filterTeamId}
+            currentTeamId={validFilterTeamId}
             currentRound={filterRound}
             showMyMatchesFilter={
               permissions.assignedMatchIds.length > 0 ||

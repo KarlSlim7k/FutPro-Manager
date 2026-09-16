@@ -197,9 +197,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         {canManageThisTeam ? (
           <EntityImageUploadForm
             action={updateTeamLogoAction.bind(null, league.slug, team.slug)}
-            helpText="Permitidos: JPG, PNG, WEBP, SVG. Máximo: 2 MB."
+            helpText="Permitidos: JPG, PNG, WEBP. Máximo: 2 MB."
             buttonText="Actualizar logo"
-            accept="image/jpeg,image/png,image/webp,image/svg+xml"
+            accept="image/jpeg,image/png,image/webp"
           />
         ) : null}
       </CardContent></Card>
