@@ -72,3 +72,147 @@ textarea {
   scrollbar-width: none;
 }
 
+/* Animaciones fluidas de entrada y micro-interacciones */
+@keyframes enterFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enterFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enterFadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes floatAmbient {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.04);
+  }
+}
+
+@keyframes pulseGlowRing {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes liveDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.4);
+  }
+}
+
+.animate-enter-fade-up {
+  animation: enterFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-enter-fade-down {
+  animation: enterFadeDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-enter-fade-scale {
+  animation: enterFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float-ambient {
+  animation: floatAmbient 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow-ring {
+  animation: pulseGlowRing 5s ease-in-out infinite;
+}
+
+.animate-live-dot {
+  animation: liveDot 2s ease-in-out infinite;
+}
+
+.anim-delay-75 {
+  animation-delay: 75ms;
+}
+
+.anim-delay-150 {
+  animation-delay: 150ms;
+}
+
+.anim-delay-200 {
+  animation-delay: 200ms;
+}
+
+.anim-delay-300 {
+  animation-delay: 300ms;
+}
+
+.anim-delay-400 {
+  animation-delay: 400ms;
+}
+
+.anim-delay-500 {
+  animation-delay: 500ms;
+}
+
+/* Home: marquee + hero glow */
+@keyframes home-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-home-marquee {
+  animation: home-marquee 28s linear infinite;
+}
+
+.home-marquee-mask {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.hero-grid-texture {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-home-marquee {
+    animation: none;
+  }
+}
+
