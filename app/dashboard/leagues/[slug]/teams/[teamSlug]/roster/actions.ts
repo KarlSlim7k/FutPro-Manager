@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import {
   PLAYER_REGISTRATION_STATUS_VALUES,
@@ -196,13 +197,17 @@ export async function createPlayerRegistrationAction(
     };
   }
 
-  const { error: insertError } = await supabase.from("player_team_registrations").insert({
-    player_id: player.id,
-    team_id: team.id,
-    season_id: season.id,
-    jersey_number: jerseyNumber,
-    status: values.status as PlayerRegistrationStatus,
-  });
+  const { data: insertedRegistration, error: insertError } = await supabase
+    .from("player_team_registrations")
+    .insert({
+      player_id: player.id,
+      team_id: team.id,
+      season_id: season.id,
+      jersey_number: jerseyNumber,
+      status: values.status as PlayerRegistrationStatus,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return {
@@ -211,6 +216,21 @@ export async function createPlayerRegistrationAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message, insertError.details),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "player.registration_created",
+    entityType: "player_registration",
+    entityId: insertedRegistration?.id ?? null,
+    metadata: {
+      league_slug: leagueSlug,
+      team_slug: teamSlug,
+      player_id: player.id,
+      season_id: season.id,
+    },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/teams/${teamSlug}/roster`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/players/${values.player_id}/registrations`);

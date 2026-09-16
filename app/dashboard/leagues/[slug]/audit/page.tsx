@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { AuditLogFilters } from "@/components/audit/audit-log-filters";
@@ -181,11 +182,29 @@ export default async function AuditPage({ params, searchParams }: AuditPageProps
         currentTo={currentTo}
         slug={league.slug}
       />
-      {logs.length === 100 && (
-        <p className="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-700">
-          Mostrando los primeros 100 registros. Aplica filtros para acotar los resultados.
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500">
+          {logs.length === 100
+            ? "Mostrando los primeros 100 registros. Aplica filtros para acotar los resultados."
+            : `${logs.length} registro(s).`}
         </p>
-      )}
+        <TextLink
+          href={`/dashboard/leagues/${league.slug}/audit/export${
+            (() => {
+              const params = new URLSearchParams();
+              if (filterAction) params.set("action", filterAction);
+              if (filterEntityType) params.set("entityType", filterEntityType);
+              if (filterActorId) params.set("actorId", filterActorId);
+              if (currentFrom) params.set("from", currentFrom);
+              if (currentTo) params.set("to", currentTo);
+              const qs = params.toString();
+              return qs ? `?${qs}` : "";
+            })()
+          }`}
+        >
+          Exportar CSV
+        </TextLink>
+      </div>
       {auditLogRows.length === 0 ? (
         <EmptyState
           title="Sin registros"

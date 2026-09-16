@@ -2,6 +2,18 @@ export const AUDIT_ACTION_OPTIONS = [
   "member.role_updated",
   "match.referee_updated",
   "match.referee_removed",
+  "match.created",
+  "match.updated",
+  "match.result_updated",
+  "match.event_created",
+  "league.created",
+  "season.created",
+  "team.created",
+  "team.updated",
+  "player.created",
+  "player.updated",
+  "player.registration_created",
+  "venue.created",
   "standings.recalculated_manual",
   "standings.recalculated_auto",
   "standings.recalculate_failed",
@@ -10,7 +22,17 @@ export const AUDIT_ACTION_OPTIONS = [
   "media.league_logo_updated",
 ] as const;
 
-export const AUDIT_ENTITY_TYPE_OPTIONS = ["league_member", "match", "season", "league", "team", "player"] as const;
+export const AUDIT_ENTITY_TYPE_OPTIONS = [
+  "league_member",
+  "match",
+  "match_event",
+  "season",
+  "league",
+  "team",
+  "player",
+  "player_registration",
+  "venue",
+] as const;
 
 export type AuditActionOption = (typeof AUDIT_ACTION_OPTIONS)[number];
 export type AuditEntityTypeOption = (typeof AUDIT_ENTITY_TYPE_OPTIONS)[number];

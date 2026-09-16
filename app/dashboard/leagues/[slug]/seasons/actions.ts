@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import { SEASON_STATUS_VALUES, type SeasonStatus } from "@/types/database";
 
@@ -117,14 +118,18 @@ export async function createSeasonAction(
     };
   }
 
-  const { error: insertError } = await supabase.from("seasons").insert({
-    league_id: league.id,
-    name: values.name,
-    slug: values.slug,
-    start_date: values.start_date,
-    end_date: values.end_date,
-    status: values.status as SeasonStatus,
-  });
+  const { data: insertedSeason, error: insertError } = await supabase
+    .from("seasons")
+    .insert({
+      league_id: league.id,
+      name: values.name,
+      slug: values.slug,
+      start_date: values.start_date,
+      end_date: values.end_date,
+      status: values.status as SeasonStatus,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return {
@@ -133,6 +138,16 @@ export async function createSeasonAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "season.created",
+    entityType: "season",
+    entityId: insertedSeason?.id ?? null,
+    metadata: { slug: values.slug, name: values.name, league_slug: leagueSlug },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/seasons`);
   redirect(`/dashboard/leagues/${leagueSlug}/seasons`);

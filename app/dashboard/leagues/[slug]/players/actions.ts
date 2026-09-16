@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import {
   DOMINANT_FOOT_VALUES,
@@ -167,15 +168,19 @@ export async function createPlayerAction(
     };
   }
 
-  const { error: insertError } = await supabase.from("players").insert({
-    league_id: league.id,
-    full_name: values.full_name,
-    birth_date: birthDate,
-    photo_url: values.photo_url || null,
-    preferred_position: values.preferred_position || null,
-    dominant_foot: dominantFoot as DominantFoot | null,
-    status: values.status as PlayerStatus,
-  });
+  const { data: insertedPlayer, error: insertError } = await supabase
+    .from("players")
+    .insert({
+      league_id: league.id,
+      full_name: values.full_name,
+      birth_date: birthDate,
+      photo_url: values.photo_url || null,
+      preferred_position: values.preferred_position || null,
+      dominant_foot: dominantFoot as DominantFoot | null,
+      status: values.status as PlayerStatus,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return {
@@ -184,6 +189,16 @@ export async function createPlayerAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "player.created",
+    entityType: "player",
+    entityId: insertedPlayer?.id ?? null,
+    metadata: { full_name: values.full_name, league_slug: leagueSlug },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/players`);
   redirect(`/dashboard/leagues/${leagueSlug}/players`);

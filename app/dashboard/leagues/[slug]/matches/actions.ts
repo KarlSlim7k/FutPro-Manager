@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 
 export type CreateMatchField =
@@ -210,6 +211,21 @@ export async function createMatchAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message, insertError.details),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "match.created",
+    entityType: "match",
+    entityId: matchId,
+    metadata: {
+      league_slug: leagueSlug,
+      season_id: values.season_id,
+      home_team_id: values.home_team_id,
+      away_team_id: values.away_team_id,
+    },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}`);

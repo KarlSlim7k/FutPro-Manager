@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import { TEAM_STATUS_VALUES, type TeamStatus } from "@/types/database";
 
@@ -140,16 +141,20 @@ export async function createTeamAction(
     };
   }
 
-  const { error: insertError } = await supabase.from("teams").insert({
-    league_id: league.id,
-    name: values.name,
-    slug: values.slug,
-    logo_url: values.logo_url || null,
-    primary_color: values.primary_color || null,
-    secondary_color: values.secondary_color || null,
-    founded_year: foundedYear,
-    status: values.status as TeamStatus,
-  });
+  const { data: insertedTeam, error: insertError } = await supabase
+    .from("teams")
+    .insert({
+      league_id: league.id,
+      name: values.name,
+      slug: values.slug,
+      logo_url: values.logo_url || null,
+      primary_color: values.primary_color || null,
+      secondary_color: values.secondary_color || null,
+      founded_year: foundedYear,
+      status: values.status as TeamStatus,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return {
@@ -158,6 +163,16 @@ export async function createTeamAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "team.created",
+    entityType: "team",
+    entityId: insertedTeam?.id ?? null,
+    metadata: { slug: values.slug, name: values.name, league_slug: leagueSlug },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/teams`);
   redirect(`/dashboard/leagues/${leagueSlug}/teams`);

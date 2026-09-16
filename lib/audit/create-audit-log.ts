@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export interface CreateAuditLogParams {
   supabase: SupabaseClient;
   actorId: string;
-  leagueId: string;
+  leagueId: string | null;
   action: string;
   entityType: string;
   entityId: string | null;

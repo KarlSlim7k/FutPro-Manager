@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import {
   DOMINANT_FOOT_VALUES,
@@ -224,6 +225,16 @@ export async function updatePlayerAction(
       formError: "No tienes permisos para actualizar este jugador.",
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "player.updated",
+    entityType: "player",
+    entityId: currentPlayer.id,
+    metadata: { league_slug: leagueSlug, full_name: values.full_name },
+  });
 
   const playerDetailPath = `/dashboard/leagues/${leagueSlug}/players/${currentPlayer.id}`;
   revalidatePath(`/dashboard/leagues/${leagueSlug}/players`);

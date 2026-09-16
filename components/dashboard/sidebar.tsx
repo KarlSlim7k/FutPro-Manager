@@ -11,6 +11,7 @@ const menuItems = [
   { label: "Equipos", href: "/dashboard/teams" },
   { label: "Jugadores", href: "/dashboard/players" },
   { label: "Partidos", href: "/dashboard/matches" },
+  { label: "Auditoría", href: "/dashboard/audit" },
   { label: "Tipos", href: "/dashboard/types" },
 ];
 

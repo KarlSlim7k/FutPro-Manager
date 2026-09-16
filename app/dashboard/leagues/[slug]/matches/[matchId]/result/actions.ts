@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { recalculateStandingsForSeason } from "@/lib/standings/recalculate-standings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -216,6 +217,46 @@ export async function updateMatchResultAction(
     leagueId: leagueData.id,
     seasonId: matchData.season_id,
   });
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: leagueData.id,
+    action: "match.result_updated",
+    entityType: "match",
+    entityId: matchId,
+    metadata: {
+      league_slug: leagueSlug,
+      home_score: homeScore,
+      away_score: awayScore,
+    },
+  });
+
+  if (!recalculateResult.success) {
+    await createAuditLog({
+      supabase,
+      actorId: user.id,
+      leagueId: leagueData.id,
+      action: "standings.recalculate_failed",
+      entityType: "season",
+      entityId: matchData.season_id,
+      metadata: { league_slug: leagueSlug, match_id: matchId, trigger: "match_result_update" },
+    });
+  } else {
+    await createAuditLog({
+      supabase,
+      actorId: user.id,
+      leagueId: leagueData.id,
+      action: "standings.recalculated_auto",
+      entityType: "season",
+      entityId: matchData.season_id,
+      metadata: {
+        league_slug: leagueSlug,
+        match_id: matchId,
+        trigger: "match_result_update",
+      },
+    });
+  }
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);

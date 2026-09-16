@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import { MATCH_EVENT_TYPE_VALUES, type MatchEventType } from "@/types/database";
 
@@ -219,6 +220,21 @@ export async function createMatchEventAction(
       formError: "No tienes permisos para registrar eventos en este partido.",
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: leagueData.id,
+    action: "match.event_created",
+    entityType: "match_event",
+    entityId: insertedRows[0].id ?? null,
+    metadata: {
+      league_slug: leagueSlug,
+      match_id: matchId,
+      event_type: values.event_type,
+      team_id: values.team_id,
+    },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);

@@ -195,6 +195,22 @@ export async function updateMatchResultAction(
     values.status === "completed" || matchData.status === "completed";
   let standingsWarning: string | null = null;
 
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "match.result_updated",
+    entityType: "match",
+    entityId: matchId,
+    metadata: {
+      league_slug: leagueSlug,
+      previous_match_status: matchData.status,
+      new_match_status: values.status,
+      home_score: Number(values.home_score),
+      away_score: Number(values.away_score),
+    },
+  });
+
   if (shouldRecalculateStandings) {
     const recalculateResult = await recalculateStandingsForSeason({
       supabase,

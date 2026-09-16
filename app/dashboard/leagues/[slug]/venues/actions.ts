@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 
 type CreateVenueField = "name" | "address" | "city" | "state" | "latitude" | "longitude";
@@ -127,15 +128,19 @@ export async function createVenueAction(
     };
   }
 
-  const { error: insertError } = await supabase.from("venues").insert({
-    league_id: league.id,
-    name: values.name,
-    address: values.address || null,
-    city: values.city || null,
-    state: values.state || null,
-    latitude,
-    longitude,
-  });
+  const { data: insertedVenue, error: insertError } = await supabase
+    .from("venues")
+    .insert({
+      league_id: league.id,
+      name: values.name,
+      address: values.address || null,
+      city: values.city || null,
+      state: values.state || null,
+      latitude,
+      longitude,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     return {
@@ -144,6 +149,16 @@ export async function createVenueAction(
       formError: mapInsertErrorMessage(insertError.code, insertError.message, insertError.details),
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "venue.created",
+    entityType: "venue",
+    entityId: insertedVenue?.id ?? null,
+    metadata: { name: values.name, league_slug: leagueSlug },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/venues`);

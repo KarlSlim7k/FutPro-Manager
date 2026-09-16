@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 
 type Field = "name" | "slug" | "description" | "city" | "state" | "region" | "country";
 
@@ -51,20 +52,34 @@ export async function createLeagueAction(
 
   if (Object.keys(fieldErrors).length > 0) return { values, fieldErrors, formError: null };
 
-  const { error } = await supabase.from("leagues").insert({
-    name: values.name,
-    slug: values.slug,
-    description: values.description || null,
-    city: values.city || null,
-    state: values.state || null,
-    region: values.region || null,
-    country: values.country,
-    is_public: false,
-    status: "draft",
-    created_by: user.id,
-  });
+  const { data: insertedLeague, error } = await supabase
+    .from("leagues")
+    .insert({
+      name: values.name,
+      slug: values.slug,
+      description: values.description || null,
+      city: values.city || null,
+      state: values.state || null,
+      region: values.region || null,
+      country: values.country,
+      is_public: false,
+      status: "draft",
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
 
   if (error) return { values, fieldErrors: {}, formError: mapError(error.code, error.message) };
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: insertedLeague?.id ?? null,
+    action: "league.created",
+    entityType: "league",
+    entityId: insertedLeague?.id ?? null,
+    metadata: { slug: values.slug, name: values.name },
+  });
 
   revalidatePath("/dashboard/leagues");
   redirect(`/dashboard/leagues/${values.slug}`);

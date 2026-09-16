@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 
 const EDITABLE_MATCH_STATUS_VALUES = ["scheduled", "postponed", "cancelled"] as const;
@@ -183,6 +184,20 @@ export async function updateMatchAction(
       formError: "No tienes permisos para actualizar este partido.",
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: leagueData.id,
+    action: "match.updated",
+    entityType: "match",
+    entityId: matchId,
+    metadata: {
+      league_slug: leagueSlug,
+      scheduled_at: scheduledAtDate.toISOString(),
+      status: values.status,
+    },
+  });
 
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches`);
   revalidatePath(`/dashboard/leagues/${leagueSlug}/matches/${matchId}`);

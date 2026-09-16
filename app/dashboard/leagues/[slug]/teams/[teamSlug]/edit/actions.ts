@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import { TEAM_STATUS_VALUES, type TeamStatus } from "@/types/database";
 
@@ -231,6 +232,16 @@ export async function updateTeamAction(
       formError: "No se pudo actualizar el equipo por permisos de acceso (RLS).",
     };
   }
+
+  await createAuditLog({
+    supabase,
+    actorId: user.id,
+    leagueId: league.id,
+    action: "team.updated",
+    entityType: "team",
+    entityId: currentTeam.id,
+    metadata: { league_slug: leagueSlug, slug: values.slug },
+  });
 
   const previousDetailPath = `/dashboard/leagues/${leagueSlug}/teams/${currentTeam.slug}`;
   const nextDetailPath = `/dashboard/leagues/${leagueSlug}/teams/${updatedTeam.slug}`;
