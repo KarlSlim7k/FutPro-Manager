@@ -253,7 +253,7 @@ Validar conversión, navegación pública, responsive, accesibilidad básica y b
 **Archivos probables**
 
 - Sin cambios de producto obligatorios.
-- Opcional documentación: `docs/QA_PUBLIC_VIEWS.md` o nuevo registro QA si se desea documentar evidencia.
+- Opcional documentación: `docs/qa/QA_PUBLIC_VIEWS.md` o nuevo registro QA si se desea documentar evidencia.
 
 **Cambios concretos**
 

@@ -65,4 +65,4 @@ Validacion de la vista de auditoria por liga y la instrumentacion de acciones ad
 
 ## Referencia cruzada
 
-- Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.
+- Ver consolidado RC pre-MVP: [`QA_RELEASE_CANDIDATE.md`](./QA_RELEASE_CANDIDATE.md).

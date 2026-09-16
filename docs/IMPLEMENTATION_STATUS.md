@@ -150,7 +150,7 @@ Estado actual del MVP:
 
 ## QA Release Candidate pre-MVP (2026-05-19)
 
-- **Documento fuente:** `docs/QA_RELEASE_CANDIDATE.md`.
+- **Documento fuente:** `docs/qa/QA_RELEASE_CANDIDATE.md`.
 - **Resultado de comandos:** `npm run lint` ✅, `npm run build` ✅, `npm test` no configurado.
 - **Validado:** build/lint, árbol de rutas públicas y dashboard, preservación de guardrails de permisos/auditoría/standings por code review.
 - **Code-reviewed only:** flujos funcionales con mutación real (roles, árbitros, recálculo manual/automático) y responsive visual real.
@@ -159,7 +159,7 @@ Estado actual del MVP:
 
 ## QA UI/UX pre-MVP (2026-05-19)
 
-- **Documento fuente:** `docs/QA_UI_UX_PRE_MVP.md`.
+- **Documento fuente:** `docs/qa/QA_UI_UX_PRE_MVP.md`.
 - **Commit base:** `dfcea05`.
 - **Resultado de comandos:** `npm run lint` ✅, `npm run build` ✅ (34 rutas).
 - **Validado:** auditoría visual, semántica, accesibilidad, formularios, consistencia visual y permisos por code review.
@@ -206,7 +206,7 @@ Estado actual del MVP:
 - 2026-09-16: Cierre operativo al 100% del rol `coach` (operaciones deportivas completas en jugadores, plantilla, eventos y Hub; controles administrativos bloqueados).
 - 2026-09-15: Cierre operativo al 100% del rol `team_admin` (staff, plantilla, logo, foto jugador, eventos filtrados, eliminación de eventos y Hub "Mis equipos").
 - 2026-09-15: Auditoría exhaustiva completada (instrumentación, vista global, exportación CSV, retención/purga) y RBAC granular v1.
-- 2026-05-19: QA UI/UX pre-MVP completado — fixes de accesibilidad, semántica y consistencia visual (`docs/QA_UI_UX_PRE_MVP.md`).
+- 2026-05-19: QA UI/UX pre-MVP completado — fixes de accesibilidad, semántica y consistencia visual (`docs/qa/QA_UI_UX_PRE_MVP.md`).
 - 2026-05-19: Media Uploads MVP implementado (`a4f6e86`).
 - 2026-05-19: Setup real de Storage completado para `league-media` (`ace2702`).
 - 2026-05-19: QA real de media uploads validada con usuario dedicado (`5f748f7`).
@@ -220,6 +220,5 @@ Estado actual del MVP:
 - 2026-05-04: Hardening UX de permisos en dashboard (`lib/permissions/league-permissions.ts` + ocultamiento de CTAs administrativas segun rol).
 - 2026-05-04: Detalle publico de partido (`app/liga/[slug]/matches/[matchId]/page.tsx`) + enlaces desde lista de partidos y detalle de equipo.
 
-
-- Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.
+- Referencia: `docs/qa/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.
 

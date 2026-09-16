@@ -95,4 +95,4 @@ El flujo de resultados y standings queda validado manualmente para el MVP con us
 
 ---
 
-Ver también [`docs/QA_RESPONSIVE_PERMISSIONS.md`](./QA_RESPONSIVE_PERMISSIONS.md) para la validación visual y multi-rol posterior.
+Ver también [`QA_RESPONSIVE_PERMISSIONS.md`](./QA_RESPONSIVE_PERMISSIONS.md) para la validación visual y multi-rol posterior.

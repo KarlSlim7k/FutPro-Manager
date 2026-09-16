@@ -123,4 +123,4 @@ where id = '<USER_UUID>';
 No usar `service_role` en frontend; mantenerlo solo en entornos server-side confiables.
 
 
-- Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.
+- Referencia: `docs/qa/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.

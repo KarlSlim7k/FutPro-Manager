@@ -83,4 +83,4 @@ with check (
 );
 ```
 
-Si no puedes garantizar una policy SQL segura por limitaciones del esquema actual, usa el setup manual en Dashboard y valida el flujo real con el checklist de `docs/QA_MEDIA_UPLOADS.md`.
+Si no puedes garantizar una policy SQL segura por limitaciones del esquema actual, usa el setup manual en Dashboard y valida el flujo real con el checklist de `docs/qa/QA_MEDIA_UPLOADS.md`.

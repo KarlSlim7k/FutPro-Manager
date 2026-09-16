@@ -179,4 +179,4 @@ Validación del hardening UX de permisos en el dashboard de FutPro Manager.
 
 ## Referencia cruzada
 
-- Ver consolidado RC pre-MVP: `docs/QA_RELEASE_CANDIDATE.md`.
+- Ver consolidado RC pre-MVP: [`QA_RELEASE_CANDIDATE.md`](./QA_RELEASE_CANDIDATE.md).

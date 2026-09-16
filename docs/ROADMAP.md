@@ -125,14 +125,14 @@ Pulido visual/UX del dashboard, responsive, `ToolbarActions`, accesibilidad bás
 - ✅ Accesibilidad: labels añadidos a inputs sin label (`entity-image-upload`, `referee-assignment`, `league-member-role`).
 - ✅ Formularios: help text en `photo_url` de `create-player`; todos los forms principales con labels/errors/pending.
 - ✅ Consistencia visual: botones one-off reemplazados por componente `Button` estándar en 3 formularios.
-- ✅ Documentación: `docs/QA_UI_UX_PRE_MVP.md` generado.
+- ✅ Documentación: `docs/qa/QA_UI_UX_PRE_MVP.md` generado.
 - **Post-MVP:** QA cross-browser real, E2E automatizado, visual regression tests.
 
 ### Fase 5 - QA visual final (Completada para MVP)
-- ✅ QA Release Candidate pre-MVP ejecutado (2026-05-19): `docs/QA_RELEASE_CANDIDATE.md`.
-- ✅ QA UI/UX pre-MVP ejecutado (2026-05-19): `docs/QA_UI_UX_PRE_MVP.md`.
+- ✅ QA Release Candidate pre-MVP ejecutado (2026-05-19): `docs/qa/QA_RELEASE_CANDIDATE.md`.
+- ✅ QA UI/UX pre-MVP ejecutado (2026-05-19): `docs/qa/QA_UI_UX_PRE_MVP.md`.
 - ✅ `npm run lint` y `npm run build` en verde tras todos los fixes.
 - **Pendiente post-MVP:** QA manual cross-browser con navegador real, QA funcional multi-cuenta por rol, E2E automatizado.
 
 
-- Referencia: `docs/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.
+- Referencia: `docs/qa/QA_MEDIA_UPLOADS.md` para QA de Media Uploads MVP.

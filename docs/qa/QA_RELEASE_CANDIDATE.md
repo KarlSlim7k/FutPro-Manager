@@ -122,7 +122,7 @@ Revisión de patrones responsive en componentes/listados/tablas:
 Apto para pruebas controladas del MVP (staging/entorno QA con cuentas reales), **no** para declaración de “producción comercial lista”.
 
 ## Referencias QA relacionadas
-- `docs/QA_PUBLIC_VIEWS.md`
-- `docs/QA_AUDIT_LOGS.md`
-- `docs/QA_PERMISSIONS_UX.md`
-- `docs/QA_STANDINGS_HARDENING.md`
+- [QA_PUBLIC_VIEWS.md](./QA_PUBLIC_VIEWS.md)
+- [QA_AUDIT_LOGS.md](./QA_AUDIT_LOGS.md)
+- [QA_PERMISSIONS_UX.md](./QA_PERMISSIONS_UX.md)
+- [QA_STANDINGS_HARDENING.md](./QA_STANDINGS_HARDENING.md)
