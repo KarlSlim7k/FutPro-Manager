@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/members/role-badge";
 import { createClient } from "@/lib/supabase/server";
 import { listUsersViaRpcAction } from "@/app/dashboard/users/actions";
+import { UserRoleControls, UserSuspensionControls } from "@/components/users/user-admin-controls";
 import type { AppRole } from "@/types/database";
 
 interface UsersPageProps {
@@ -94,6 +95,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     avatar_url: string | null;
     phone: string | null;
     global_role: AppRole;
+    is_suspended: boolean;
     created_at: string;
     last_sign_in_at: string | null;
     league_memberships: number;
@@ -104,7 +106,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   let usingFallback = false;
 
   if (!rpcResult.error) {
-    users = rpcResult.users;
+    users = rpcResult.users.map((u) => ({ ...u, is_suspended: u.is_suspended ?? false }));
     totalShown = users.length;
   } else {
     usingFallback = true;
@@ -132,6 +134,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         avatar_url: p.avatar_url,
         phone: p.phone,
         global_role: p.global_role,
+        is_suspended: false,
         created_at: p.created_at,
         last_sign_in_at: null,
         league_memberships: 0,
@@ -265,6 +268,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                   <th className="px-4 py-3">Ligas</th>
                   <th className="px-4 py-3">Registro</th>
                   <th className="px-4 py-3">Último acceso</th>
+                  <th className="px-4 py-3">Administración</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -303,10 +307,25 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                     </td>
                     <td className="px-4 py-3">
                       <RoleBadge role={u.global_role} />
+                      {u.is_suspended ? (
+                        <span className="mt-1 block text-[10px] font-semibold text-red-600">SUSPENDIDO</span>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3">{u.league_memberships}</td>
                     <td className="px-4 py-3">{formatDateTime(u.created_at)}</td>
                     <td className="px-4 py-3">{formatDateTime(u.last_sign_in_at) ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-2">
+                        <UserRoleControls
+                          targetUserId={u.id}
+                          currentRole={u.global_role}
+                          isSelf={u.id === user.id}
+                        />
+                        {!usingFallback ? (
+                          <UserSuspensionControls targetUserId={u.id} isSuspended={u.is_suspended} />
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

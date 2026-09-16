@@ -43,6 +43,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Bloqueo de usuarios suspendidos: solo consulta ligera al perfil en rutas del dashboard.
+  if (user && isDashboardRoute) {
+    const { data: suspendedProfile } = await supabase
+      .from("profiles")
+      .select("is_suspended")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (suspendedProfile?.is_suspended) {
+      await supabase.auth.signOut();
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("suspended", "1");
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   if (user && isLoginRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";

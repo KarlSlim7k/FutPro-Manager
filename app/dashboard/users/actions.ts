@@ -11,6 +11,7 @@ export interface AdminUserRow {
   avatar_url: string | null;
   phone: string | null;
   global_role: AppRole;
+  is_suspended?: boolean;
   created_at: string;
   last_sign_in_at: string | null;
   league_memberships: number;

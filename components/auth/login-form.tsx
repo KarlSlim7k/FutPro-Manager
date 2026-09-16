@@ -70,9 +70,10 @@ const ROLE_OPTIONS: RoleOption[] = [
 type LoginFormProps = {
   initialMode?: AuthMode;
   onModeChange?: (mode: AuthMode) => void;
+  suspendedNotice?: boolean;
 };
 
-export function LoginForm({ initialMode = "login", onModeChange }: LoginFormProps) {
+export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice }: LoginFormProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
@@ -82,7 +83,9 @@ export function LoginForm({ initialMode = "login", onModeChange }: LoginFormProp
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<RoleOption["id"]>("league_admin");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    suspendedNotice ? "Tu cuenta ha sido suspendida. Contacta al administrador de la plataforma." : null
+  );
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -166,6 +169,20 @@ export function LoginForm({ initialMode = "login", onModeChange }: LoginFormProp
 
       if (signInError) {
         setError(mapAuthError(signInError.message));
+        setIsLoading(false);
+        return;
+      }
+
+      // Verificacion de suspension: si la cuenta fue suspendida por un super_admin,
+      // se cierra la sesion recien iniciada con un mensaje claro.
+      const { data: suspendedProfile } = await supabase
+        .from("profiles")
+        .select("is_suspended")
+        .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+        .maybeSingle();
+      if (suspendedProfile?.is_suspended) {
+        await supabase.auth.signOut();
+        setError("Tu cuenta ha sido suspendida. Contacta al administrador de la plataforma.");
         setIsLoading(false);
         return;
       }

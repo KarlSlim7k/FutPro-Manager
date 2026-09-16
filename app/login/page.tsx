@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; suspended?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -29,7 +29,7 @@ export default async function LoginPage({
     redirect("/dashboard");
   }
 
-  const { mode } = await searchParams;
+  const { mode, suspended } = await searchParams;
   const initialMode =
     mode === "register"
       ? "register"
@@ -210,7 +210,7 @@ export default async function LoginPage({
               {/* Micro línea decorativa superior */}
               <div className="absolute inset-x-8 -top-px h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
 
-              <LoginForm initialMode={initialMode} />
+              <LoginForm initialMode={initialMode} suspendedNotice={suspended === "1"} />
             </div>
           </section>
         </div>
