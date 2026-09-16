@@ -8,9 +8,11 @@ import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { createClient } from "@/lib/supabase/server";
-import type { League, Match, Season, Team, Venue } from "@/types/database";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
+import type { Match, Season, Team, Venue } from "@/types/database";
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
+export const revalidate = 60;
+
 type SeasonOption = Pick<Season, "id" | "name" | "start_date">;
 type TeamOption = Pick<Team, "id" | "name" | "logo_url">;
 type VenueOption = Pick<Venue, "id" | "name">;
@@ -35,14 +37,7 @@ interface LeagueMatchesPublicPageProps {
 
 export async function generateMetadata({ params }: LeagueMatchesPublicPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("leagues")
-    .select("name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const data = await getPublicLeagueBySlug(slug);
 
   if (!data) {
     return { title: "Liga no encontrada | FutPro Manager" };
@@ -70,25 +65,13 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
   const teamIdFilter = Array.isArray(rawTeamId) ? rawTeamId[0] : rawTeamId;
   const roundFilter = Array.isArray(rawRound) ? rawRound[0] : rawRound;
 
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
 
-  const { data: leagueData, error: leagueError } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (leagueError) {
-    throw leagueError;
-  }
-
-  if (!leagueData) {
+  if (!league) {
     notFound();
   }
 
-  const league = leagueData as LeagueSummary;
+  const supabase = await createClient();
 
   const [
     { data: seasonsData, error: seasonsError },
@@ -133,6 +116,9 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
     );
   }
 
+  const validTeamId = teamIdFilter && teams.some((t) => t.id === teamIdFilter) ? teamIdFilter : null;
+  const validRound = roundFilter ? roundFilter.trim() : "";
+
   let matchesQuery = supabase
     .from("matches")
     .select("id, season_id, home_team_id, away_team_id, venue_id, scheduled_at, status, home_score, away_score, round_name")
@@ -142,21 +128,32 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
   if (statusFilter && ["scheduled", "in_progress", "completed", "postponed", "cancelled"].includes(statusFilter)) {
     matchesQuery = matchesQuery.eq("status", statusFilter);
   }
+  if (validTeamId) {
+    matchesQuery = matchesQuery.or(`home_team_id.eq.${validTeamId},away_team_id.eq.${validTeamId}`);
+  }
+  if (validRound) {
+    matchesQuery = matchesQuery.eq("round_name", validRound);
+  }
 
-  const { data: matchesData, error: matchesError } = await matchesQuery.order("scheduled_at", { ascending: true });
+  const [
+    { data: matchesData, error: matchesError },
+    { data: roundsData },
+  ] = await Promise.all([
+    matchesQuery.order("scheduled_at", { ascending: true }),
+    supabase
+      .from("matches")
+      .select("round_name")
+      .eq("league_id", league.id)
+      .eq("season_id", selectedSeason.id)
+      .not("round_name", "is", null),
+  ]);
 
   if (matchesError) {
     throw matchesError;
   }
 
-  const validTeamId = teamIdFilter && teams.some((t) => t.id === teamIdFilter) ? teamIdFilter : null;
-  const validRound = roundFilter ? roundFilter.trim() : "";
-  const matches = ((matchesData ?? []) as MatchListItem[]).filter((m) => {
-    const okTeam = validTeamId ? m.home_team_id === validTeamId || m.away_team_id === validTeamId : true;
-    const okRound = validRound ? (m.round_name ?? "").toLowerCase() === validRound.toLowerCase() : true;
-    return okTeam && okRound;
-  });
-  const availableRounds = [...new Set(((matchesData ?? []) as MatchListItem[]).map((m) => m.round_name).filter(Boolean))] as string[];
+  const matches = (matchesData ?? []) as MatchListItem[];
+  const availableRounds = [...new Set((roundsData ?? []).map((m) => m.round_name).filter(Boolean))] as string[];
 
   const teamsMap = new Map(teams.map((team) => [team.id, team]));
   const venuesMap = new Map(venues.map((venue) => [venue.id, venue.name]));

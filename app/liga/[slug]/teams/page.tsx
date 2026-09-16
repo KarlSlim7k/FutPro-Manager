@@ -8,9 +8,11 @@ import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { createClient } from "@/lib/supabase/server";
-import type { League, Team } from "@/types/database";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
+import type { Team } from "@/types/database";
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status" | "logo_url">;
+export const revalidate = 60;
+
 type TeamItem = Pick<Team, "id" | "name" | "slug" | "status">;
 
 interface Props {
@@ -19,14 +21,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: league } = await supabase
-    .from("leagues")
-    .select("name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const league = await getPublicLeagueBySlug(slug);
   if (!league) return { title: "No encontrado | FutPro Manager" };
   const title = `Equipos - ${league.name} | FutPro Manager`;
   const description = `Listado de equipos de ${league.name}.`;
@@ -52,18 +47,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicTeamsPage({ params }: Props) {
   const { slug } = await params;
+  const league = await getPublicLeagueBySlug(slug);
+
+  if (!league) notFound();
+
   const supabase = await createClient();
-
-  const { data: leagueData } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status, logo_url")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (!leagueData) notFound();
-  const league = leagueData as LeagueSummary;
 
   const { data: teamsData } = await supabase
     .from("teams")

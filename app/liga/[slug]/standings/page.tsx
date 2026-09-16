@@ -11,7 +11,8 @@ import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { createClient } from "@/lib/supabase/server";
-import type { League, Season, Standing } from "@/types/database";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
+import type { Season, Standing } from "@/types/database";
 
 import { SeasonStatsTabs, type StatsTabType } from "@/components/stats/season-stats-tabs";
 import { TopScorersTable } from "@/components/stats/top-scorers-table";
@@ -20,7 +21,8 @@ import { PlayoffBracket } from "@/components/playoffs/playoff-bracket";
 import { getSeasonStats } from "@/lib/stats/get-season-stats";
 import { getSeasonPlayoffs } from "@/lib/playoffs/get-season-playoffs";
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
+export const revalidate = 60;
+
 type SeasonItem = Pick<Season, "id" | "name" | "slug" | "status" | "start_date" | "end_date">;
 type StandingItem = Pick<
   Standing,
@@ -52,14 +54,7 @@ function formatDate(value: string) {
 
 export async function generateMetadata({ params }: LeagueStandingsPublicPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("leagues")
-    .select("name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const data = await getPublicLeagueBySlug(slug);
 
   if (!data) {
     return { title: "Liga no encontrada | FutPro Manager" };
@@ -89,25 +84,13 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
       ? tabValue
       : "standings";
 
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
 
-  const { data: leagueData, error: leagueError } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (leagueError) {
-    throw leagueError;
-  }
-
-  if (!leagueData) {
+  if (!league) {
     notFound();
   }
 
-  const league = leagueData as LeagueSummary;
+  const supabase = await createClient();
 
   const { data: seasonsData, error: seasonsError } = await supabase
     .from("seasons")
@@ -182,7 +165,8 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
         .eq("league_id", league.id)
         .eq("season_id", selectedSeason.id)
         .eq("status", "completed")
-        .order("scheduled_at", { ascending: true }),
+        .order("scheduled_at", { ascending: false })
+        .limit(teamIds.length * 5),
     ]);
 
     if (teamsError) {
@@ -203,13 +187,23 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
         hResult = "L";
         aResult = "W";
       }
+
       const hList = formMap.get(match.home_team_id) || [];
-      hList.push(hResult);
-      formMap.set(match.home_team_id, hList);
+      if (hList.length < 5) {
+        hList.push(hResult);
+        formMap.set(match.home_team_id, hList);
+      }
 
       const aList = formMap.get(match.away_team_id) || [];
-      aList.push(aResult);
-      formMap.set(match.away_team_id, aList);
+      if (aList.length < 5) {
+        aList.push(aResult);
+        formMap.set(match.away_team_id, aList);
+      }
+    }
+
+    // Invertir para preservar orden cronológico (de más antiguo a más reciente)
+    for (const [tId, results] of formMap.entries()) {
+      formMap.set(tId, [...results].reverse());
     }
   }
 
@@ -219,7 +213,7 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
     .map((standing) => ({
       ...standing,
       team: teamMap.get(standing.team_id) ?? null,
-      form: (formMap.get(standing.team_id) || []).slice(-5),
+      form: formMap.get(standing.team_id) || [],
     }))
     .sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
@@ -230,17 +224,31 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
       return aName.localeCompare(bName, "es", { sensitivity: "base" });
     });
 
+  const needsStats = currentTab === "scorers" || currentTab === "fair-play";
+  const needsPlayoffs = currentTab === "playoffs";
+
   const [seasonStats, playoffsData] = await Promise.all([
-    getSeasonStats({
-      supabase,
-      leagueId: league.id,
-      seasonId: selectedSeason.id,
-    }),
-    getSeasonPlayoffs({
-      supabase,
-      leagueId: league.id,
-      seasonId: selectedSeason.id,
-    }),
+    needsStats
+      ? getSeasonStats({
+          supabase,
+          leagueId: league.id,
+          seasonId: selectedSeason.id,
+        })
+      : Promise.resolve({ topScorers: [], fairPlayTeams: [], fairPlayPlayers: [] }),
+    needsPlayoffs
+      ? getSeasonPlayoffs({
+          supabase,
+          leagueId: league.id,
+          seasonId: selectedSeason.id,
+        })
+      : Promise.resolve({
+          roundOf16: [],
+          quarterFinals: [],
+          semiFinals: [],
+          thirdPlace: null,
+          final: null,
+          hasPlayoffs: false,
+        }),
   ]);
 
   return (

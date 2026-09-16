@@ -12,7 +12,9 @@ export async function getSeasonPlayoffs({
 }): Promise<PlayoffBracketData> {
   const { data: matchesData, error: matchesError } = await supabase
     .from("matches")
-    .select("*")
+    .select(
+      "id, league_id, season_id, home_team_id, away_team_id, venue_id, referee_id, scheduled_at, status, home_score, away_score, home_penalty_score, away_penalty_score, round_name, stage, series_id, leg, created_at, updated_at"
+    )
     .eq("league_id", leagueId)
     .eq("season_id", seasonId);
 

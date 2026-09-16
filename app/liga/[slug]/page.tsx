@@ -10,13 +10,12 @@ import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicMatchCard } from "@/components/public/public-match-card";
 import { createClient } from "@/lib/supabase/server";
-import { getSeasonStats } from "@/lib/stats/get-season-stats";
-import type { League, Match, Standing } from "@/types/database";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
+import { getSeasonTopScorer } from "@/lib/stats/get-season-top-scorer";
+import type { TopScorerItem } from "@/lib/stats/get-season-stats";
+import type { Match, Standing } from "@/types/database";
 
-type PublicLeague = Pick<
-  League,
-  "id" | "name" | "slug" | "description" | "status" | "logo_url"
->;
+export const revalidate = 60;
 
 interface LeaguePublicPageProps {
   params: Promise<{ slug: string }>;
@@ -26,14 +25,7 @@ export async function generateMetadata({
   params,
 }: LeaguePublicPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("leagues")
-    .select("name, description")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const data = await getPublicLeagueBySlug(slug);
 
   if (!data) {
     return { title: "Liga no encontrada | FutPro Manager" };
@@ -66,25 +58,13 @@ export default async function LeaguePublicPage({
   params,
 }: LeaguePublicPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
 
-  const { data: leagueData, error: leagueError } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status, logo_url")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (leagueError) {
-    throw leagueError;
-  }
-
-  if (!leagueData) {
+  if (!league) {
     notFound();
   }
 
-  const league = leagueData as PublicLeague;
+  const supabase = await createClient();
 
   const [
     { data: seasonsData },
@@ -130,7 +110,7 @@ export default async function LeaguePublicPage({
   let upcomingMatches: Match[] = [];
   let recentResults: Match[] = [];
   let topStandings: Standing[] = [];
-  let topScorer = null;
+  let topScorer: TopScorerItem | null = null;
 
   if (latestSeason) {
     const [
@@ -170,7 +150,7 @@ export default async function LeaguePublicPage({
         .order("goal_difference", { ascending: false })
         .order("goals_for", { ascending: false })
         .limit(4),
-      getSeasonStats({
+      getSeasonTopScorer({
         supabase,
         leagueId: league.id,
         seasonId: latestSeason.id,
@@ -180,9 +160,7 @@ export default async function LeaguePublicPage({
     upcomingMatches = (upcomingData ?? []) as Match[];
     recentResults = (recentData ?? []) as Match[];
     topStandings = (standingsData ?? []) as Standing[];
-    if (stats.topScorers && stats.topScorers.length > 0) {
-      topScorer = stats.topScorers[0];
-    }
+    topScorer = stats;
   }
 
   return (

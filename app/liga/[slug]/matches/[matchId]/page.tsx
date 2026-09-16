@@ -13,9 +13,10 @@ import { PublicMatchEvents } from "@/components/public/public-match-events";
 import { PublicLiveMatchHeader } from "@/components/public/public-live-match-header";
 import { MatchShareCard } from "@/components/social/match-share-card";
 import { createClient } from "@/lib/supabase/server";
-import type { League, Match, Season, Team, Venue, MatchEvent, Player } from "@/types/database";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
+import type { Match, Season, Team, Venue, MatchEvent, Player } from "@/types/database";
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status">;
+export const revalidate = 60;
 type MatchDetail = Pick<
   Match,
   | "id"
@@ -65,19 +66,13 @@ function formatStatusLabel(status: MatchDetail["status"]) {
 
 export async function generateMetadata({ params }: PublicMatchDetailPageProps): Promise<Metadata> {
   const { slug, matchId } = await params;
-  const supabase = await createClient();
-
-  const { data: leagueData } = await supabase
-    .from("leagues")
-    .select("id, name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const leagueData = await getPublicLeagueBySlug(slug);
 
   if (!leagueData) {
     return { title: "Partido no encontrado | FutPro Manager" };
   }
+
+  const supabase = await createClient();
 
   const { data: matchData } = await supabase
     .from("matches")
@@ -121,25 +116,13 @@ export async function generateMetadata({ params }: PublicMatchDetailPageProps): 
 
 export default async function PublicMatchDetailPage({ params }: PublicMatchDetailPageProps) {
   const { slug, matchId } = await params;
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
 
-  const { data: leagueData, error: leagueError } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (leagueError) {
-    throw leagueError;
-  }
-
-  if (!leagueData) {
+  if (!league) {
     notFound();
   }
 
-  const league = leagueData as LeagueSummary;
+  const supabase = await createClient();
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
