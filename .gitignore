@@ -1,11 +1,71 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+.yarn/cache
+
+# Next.js build & outputs
+/.next/
+/out/
+build/
+dist/
+
+# Production build artifacts
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Testing & coverage
+/coverage/
+*.lcov
+
+# Debug & npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# Environment variables & secrets (CRÍTICO: nunca subir credenciales al repo)
 .env
 .env.local
-.env.*.local
-node_modules
-.next
-.github
-.vscode
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+*.env
+*.env.*
+!.env.example
+
+# Supabase secrets, temporary files & test seeds
 supabase/.temp/
-.agents
-.claude
-*.tsbuildinfo
+supabase/.branches/
+supabase/.env
+supabase/*.local.sql
+supabase/seed_test_users*.sql
+*.seed.local.sql
+
+# Operating System & IDE configurations
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# Certificates & cryptographic keys
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# AI / agent working folders
+.agents/
+.claude/
+.gemini/
+.github/

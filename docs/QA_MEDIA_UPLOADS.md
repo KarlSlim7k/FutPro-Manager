@@ -57,8 +57,8 @@ Fecha: 2026-05-19
 
 ## QA real con usuario dedicado
 - Fecha: 2026-05-19.
-- Proyecto Supabase: `wyntbcsgnbpznimcixqb`.
-- Usuario QA: `qa.codex.futpro@gmail.com`.
+- Proyecto Supabase: `<project-ref>`.
+- Usuario QA: `qa@ejemplo.com`.
 - `profiles.global_role`: `viewer`.
 - Rol de liga: `league_admin` solo en `liga-qa-codex`.
 - Liga QA: `Liga QA Codex` (`liga-qa-codex`).

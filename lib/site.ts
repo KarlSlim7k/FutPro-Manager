@@ -2,7 +2,8 @@
 // WhatsApp is intentionally unconfigured: the dedicated business number
 // is pending, so the UI renders WhatsApp entry points as "Próximamente".
 
-export const CONTACT_EMAIL = "karoldelgado7k@gmail.com";
+export const CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contacto@futpromanager.com";
 
 // Set to the dedicated WhatsApp number (digits only, with country code,
 // e.g. "5212821234567") once available. `null` = coming soon.
