@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { MatchSeasonSelector } from "@/components/matches/match-season-selector";
 import { PublicMatchCard } from "@/components/public/public-match-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
@@ -102,7 +101,7 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
 
   if (!selectedSeason) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+      <main className="w-full">
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <PublicLeagueHeader league={league} />
           <PublicNav leagueSlug={league.slug} />
@@ -158,44 +157,81 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
   const venuesMap = new Map(venues.map((venue) => [venue.id, venue.name]));
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Temporadas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <form method="get" className="space-y-3">
-            <MatchSeasonSelector
-              leagueSlug={league.slug}
-              seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
-              selectedSeasonId={selectedSeason.id}
-              basePath="/liga"
-            />
-            <p className="text-sm text-gray-600">Mostrando calendario para <span className="font-medium text-gray-900">{selectedSeason.name}</span>.</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label htmlFor="team-filter" className="text-xs text-gray-600">Equipo</label>
-                <select id="team-filter" name="teamId" defaultValue={validTeamId ?? ""} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
-                  <option value="">Todos</option>
-                  {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
-                </select>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-base font-bold text-white">Temporadas y Filtros</h2>
+          </div>
+          <div className="space-y-4 pt-4">
+            <form method="get" className="space-y-4">
+              <MatchSeasonSelector
+                leagueSlug={league.slug}
+                seasons={seasons.map((season) => ({ id: season.id, name: season.name }))}
+                selectedSeasonId={selectedSeason.id}
+                basePath="/liga"
+              />
+              <p className="text-xs text-gray-400">
+                Mostrando calendario para <span className="font-semibold text-white">{selectedSeason.name}</span>.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="team-filter" className="text-xs font-medium text-gray-300">
+                    Equipo
+                  </label>
+                  <select
+                    id="team-filter"
+                    name="teamId"
+                    defaultValue={validTeamId ?? ""}
+                    className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="" className="bg-slate-900 text-white">Todos los equipos</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id} className="bg-slate-900 text-white">
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="round-filter" className="text-xs font-medium text-gray-300">
+                    Jornada
+                  </label>
+                  <select
+                    id="round-filter"
+                    name="round"
+                    defaultValue={validRound}
+                    className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="" className="bg-slate-900 text-white">Todas las jornadas</option>
+                    {availableRounds.map((round) => (
+                      <option key={round} value={round} className="bg-slate-900 text-white">
+                        {round}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label htmlFor="round-filter" className="text-xs text-gray-600">Jornada</label>
-                <select id="round-filter" name="round" defaultValue={validRound} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
-                  <option value="">Todas</option>
-                  {availableRounds.map((round) => <option key={round} value={round}>{round}</option>)}
-                </select>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-emerald-950/40 transition"
+                >
+                  Aplicar filtros
+                </button>
+                <a
+                  href={`/liga/${league.slug}/matches?seasonId=${selectedSeason.id}`}
+                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium text-gray-300 hover:bg-white/10 hover:text-white transition"
+                >
+                  Limpiar
+                </a>
               </div>
-            </div>
-          <div className="flex gap-2"><button type="submit" className="rounded-lg bg-emerald-700 px-3 py-2 text-sm text-white">Aplicar filtros</button><a href={`/liga/${league.slug}/matches?seasonId=${selectedSeason.id}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700">Limpiar</a></div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {matches.length === 0 ? (
           <EmptyState

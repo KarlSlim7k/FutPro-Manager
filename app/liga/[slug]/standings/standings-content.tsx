@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StandingMobileCard } from "@/components/standings/standing-mobile-card";
@@ -178,46 +177,47 @@ export async function StandingsContent({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Resumen</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+        <div className="border-b border-white/10 pb-3">
+          <h3 className="text-base font-bold text-white">Resumen</h3>
+        </div>
+        <div className="pt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <Eyebrow>Temporada seleccionada</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">{seasonName}</p>
+              <Eyebrow className="text-emerald-400">Temporada seleccionada</Eyebrow>
+              <p className="mt-1 text-sm font-semibold text-white">{seasonName}</p>
             </div>
             <div>
-              <Eyebrow>Estado de temporada</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">{formatLabel(seasonStatus)}</p>
+              <Eyebrow className="text-emerald-400">Estado de temporada</Eyebrow>
+              <p className="mt-1 text-sm text-gray-200">{formatLabel(seasonStatus)}</p>
             </div>
             <div>
-              <Eyebrow>Rango</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">
+              <Eyebrow className="text-emerald-400">Rango</Eyebrow>
+              <p className="mt-1 text-sm text-gray-200">
                 {formatDate(seasonStart)} - {formatDate(seasonEnd)}
               </p>
             </div>
             <div>
-              <Eyebrow>Equipos en tabla</Eyebrow>
-              <p className="mt-1 text-sm font-medium text-gray-900">{sortedStandings.length}</p>
+              <Eyebrow className="text-emerald-400">Equipos en tabla</Eyebrow>
+              <p className="mt-1 text-sm font-semibold text-white">{sortedStandings.length}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {currentTab === "standings" && (
         sortedStandings.length === 0 ? (
           <EmptyState
             title="Sin tabla para la temporada seleccionada"
             description="Aún no hay tabla de posiciones generada para esta temporada. La tabla se actualiza automáticamente cuando se guardan resultados de partidos finalizados."
+            className="border-white/10 bg-slate-900/60 backdrop-blur-xl text-white [&>h3]:text-white [&>div]:text-gray-400"
           />
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Clasificación General</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+            <div className="border-b border-white/10 pb-3">
+              <h3 className="text-base font-bold text-white">Clasificación General</h3>
+            </div>
+            <div className="pt-4">
               <div className="space-y-3 md:hidden">
                 {sortedStandings.map((standing, index) => (
                   <StandingMobileCard
@@ -226,62 +226,66 @@ export async function StandingsContent({
                     position={index + 1}
                     leagueSlug={leagueSlug}
                     basePath="/liga"
+                    theme="dark"
                   />
                 ))}
               </div>
 
               <div className="hidden md:block">
-                <StandingsTableView rows={sortedStandings} leagueSlug={leagueSlug} basePath="/liga" />
+                <StandingsTableView rows={sortedStandings} leagueSlug={leagueSlug} basePath="/liga" theme="dark" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )
       )}
 
       {currentTab === "playoffs" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Liguilla y Fases Finales</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-bold text-white">Liguilla y Fases Finales</h3>
+          </div>
+          <div className="pt-4">
             <PlayoffBracket
               bracket={playoffsData}
               leagueSlug={leagueSlug}
               basePath="/liga"
+              theme="dark"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {currentTab === "scorers" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Tabla de Goleo Individual</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-bold text-white">Tabla de Goleo Individual</h3>
+          </div>
+          <div className="pt-4">
             <TopScorersTable
               scorers={seasonStats.topScorers}
               leagueSlug={leagueSlug}
               basePath="/liga"
+              theme="dark"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {currentTab === "fair-play" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Fair Play y Amonestaciones</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-bold text-white">Fair Play y Amonestaciones</h3>
+          </div>
+          <div className="pt-4">
             <FairPlayTable
               teams={seasonStats.fairPlayTeams}
               players={seasonStats.fairPlayPlayers}
               leagueSlug={leagueSlug}
               basePath="/liga"
+              theme="dark"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </>
   );

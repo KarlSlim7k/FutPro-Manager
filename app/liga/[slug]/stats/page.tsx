@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
@@ -117,7 +116,7 @@ export default async function LeagueStatsPublicPage({
 
   if (seasons.length === 0) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+      <main className="w-full">
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <PublicLeagueHeader league={league} />
           <PublicNav leagueSlug={league.slug} />
@@ -150,18 +149,18 @@ export default async function LeagueStatsPublicPage({
   });
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
 
         {/* Selector de Temporadas */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4">
           <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-gray-900">
+            <h2 className="text-2xl font-bold tracking-tight text-white">
               Estadísticas y Líderes
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-400">
               Goleadores, asistencias, vallas invictas y juego limpio por temporada.
             </p>
           </div>
@@ -178,38 +177,38 @@ export default async function LeagueStatsPublicPage({
         </div>
 
         {/* Resumen de la Temporada */}
-        <Card className="border-gray-200 bg-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Temporada Activa</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-bold text-white">Temporada Activa</h3>
+          </div>
+          <div className="pt-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Eyebrow>Nombre</Eyebrow>
-                <p className="mt-1 text-sm font-medium text-gray-900">{selectedSeason.name}</p>
+                <Eyebrow className="text-emerald-400">Nombre</Eyebrow>
+                <p className="mt-1 text-sm font-semibold text-white">{selectedSeason.name}</p>
               </div>
               <div>
-                <Eyebrow>Estado</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">{formatLabel(selectedSeason.status)}</p>
+                <Eyebrow className="text-emerald-400">Estado</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">{formatLabel(selectedSeason.status)}</p>
               </div>
               <div>
-                <Eyebrow>Periodo</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">
+                <Eyebrow className="text-emerald-400">Periodo</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">
                   {formatDate(selectedSeason.start_date)} - {formatDate(selectedSeason.end_date)}
                 </p>
               </div>
               <div>
-                <Eyebrow>Total Partidos</Eyebrow>
-                <p className="mt-1 text-sm font-medium text-gray-900">
+                <Eyebrow className="text-emerald-400">Total Partidos</Eyebrow>
+                <p className="mt-1 text-sm font-semibold text-white">
                   {seasonStats.overview.completedMatches} / {seasonStats.overview.totalMatches} completados
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Tarjetas de Métricas Globales */}
-        <SeasonOverviewCards overview={seasonStats.overview} />
+        <SeasonOverviewCards overview={seasonStats.overview} theme="dark" />
 
         {/* Tabs de Estadísticas Específicas */}
         <SeasonStatsTabs
@@ -217,83 +216,82 @@ export default async function LeagueStatsPublicPage({
           basePath={`/liga/${league.slug}/stats`}
           allowedTabs={["scorers", "assists", "clean-sheets", "fair-play"]}
           defaultTab="scorers"
+          theme="dark"
         />
 
         {/* Contenido de la Pestaña Activa */}
         {currentTab === "scorers" && (
-          <Card className="border-gray-200 bg-white">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Tabla de Goleo Individual</span>
-                <span className="text-xs font-normal text-gray-500">
-                  {seasonStats.topScorers.length} jugadores con gol
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="text-base font-bold text-white">Tabla de Goleo Individual</h3>
+              <span className="text-xs font-normal text-gray-400">
+                {seasonStats.topScorers.length} jugadores con gol
+              </span>
+            </div>
+            <div className="pt-4">
               <TopScorersTable
                 scorers={seasonStats.topScorers}
                 leagueSlug={league.slug}
                 basePath="/liga"
+                theme="dark"
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {currentTab === "assists" && (
-          <Card className="border-gray-200 bg-white">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Máximos Asistentes</span>
-                <span className="text-xs font-normal text-gray-500">
-                  {seasonStats.topAssists.length} asistentes registrados
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="text-base font-bold text-white">Máximos Asistentes</h3>
+              <span className="text-xs font-normal text-gray-400">
+                {seasonStats.topAssists.length} asistentes registrados
+              </span>
+            </div>
+            <div className="pt-4">
               <TopAssistsTable
                 assists={seasonStats.topAssists}
                 leagueSlug={league.slug}
                 basePath="/liga"
+                theme="dark"
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {currentTab === "clean-sheets" && (
-          <Card className="border-gray-200 bg-white">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Vallas Invictas por Equipo</span>
-                <span className="text-xs font-normal text-gray-500">
-                  Partidos con portería a cero
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="text-base font-bold text-white">Vallas Invictas por Equipo</h3>
+              <span className="text-xs font-normal text-gray-400">
+                Partidos con portería a cero
+              </span>
+            </div>
+            <div className="pt-4">
               <CleanSheetsTable
                 cleanSheets={seasonStats.cleanSheets}
                 leagueSlug={league.slug}
                 basePath="/liga"
+                theme="dark"
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {currentTab === "fair-play" && (
-          <Card className="border-gray-200 bg-white">
-            <CardHeader>
-              <CardTitle>Fair Play y Amonestaciones</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+            <div className="border-b border-white/10 pb-3">
+              <h3 className="text-base font-bold text-white">Fair Play y Amonestaciones</h3>
+            </div>
+            <div className="pt-4">
               <FairPlayTable
                 teams={seasonStats.fairPlayTeams}
                 players={seasonStats.fairPlayPlayers}
                 leagueSlug={league.slug}
                 basePath="/liga"
+                theme="dark"
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
       </section>
     </main>

@@ -15,6 +15,7 @@ interface MatchShareCardProps {
   matchStatus: string;
   matchDate: string;
   matchUrl?: string;
+  theme?: "light" | "dark";
 }
 
 export function MatchShareCard({
@@ -28,6 +29,7 @@ export function MatchShareCard({
   matchStatus,
   matchDate,
   matchUrl,
+  theme = "light",
 }: MatchShareCardProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -138,9 +140,13 @@ export function MatchShareCard({
         variant="secondary"
         size="sm"
         onClick={handleShareWhatsApp}
-        className="flex items-center gap-2 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-300"
+        className={`flex items-center gap-2 text-xs font-semibold ${
+          theme === "dark"
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200"
+            : "text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-300"
+        }`}
       >
-        <MessageCircle className="h-4 w-4 text-emerald-600" />
+        <MessageCircle className="h-4 w-4 text-emerald-500" />
         <span>Enviar por WhatsApp</span>
       </Button>
 
@@ -150,9 +156,13 @@ export function MatchShareCard({
         size="sm"
         onClick={handleDownloadImage}
         disabled={isGenerating}
-        className="flex items-center gap-2 text-xs font-semibold text-gray-700 hover:text-gray-900 border-gray-300"
+        className={`flex items-center gap-2 text-xs font-semibold ${
+          theme === "dark"
+            ? "border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white"
+            : "text-gray-700 hover:text-gray-900 border-gray-300"
+        }`}
       >
-        <Download className="h-4 w-4 text-gray-500" />
+        <Download className={`h-4 w-4 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`} />
         <span>{isGenerating ? "Generando..." : "Descargar Imagen PNG"}</span>
       </Button>
 
@@ -160,9 +170,13 @@ export function MatchShareCard({
         type="button"
         variant="ghost"
         onClick={handleCopyLink}
-        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800"
+        className={`flex items-center gap-1.5 text-xs ${
+          theme === "dark"
+            ? "text-gray-400 hover:text-white hover:bg-white/5"
+            : "text-gray-500 hover:text-gray-800"
+        }`}
       >
-        {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Share2 className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Share2 className="h-3.5 w-3.5" />}
         <span>{copied ? "¡Enlace copiado!" : "Copiar link"}</span>
       </Button>
     </div>

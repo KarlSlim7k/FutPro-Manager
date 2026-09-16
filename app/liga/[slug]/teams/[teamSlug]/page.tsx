@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
@@ -200,7 +199,7 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
   const seasons = (seasonsData ?? []) as SeasonItem[];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
@@ -212,44 +211,44 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
           ]}
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{team.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-xl font-bold text-white">{team.name}</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 pt-4">
             <div>
-              <Eyebrow>Estado</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">{formatLabel(team.status)}</p>
+              <Eyebrow className="text-emerald-400">Estado</Eyebrow>
+              <p className="mt-1 text-sm text-gray-200">{formatLabel(team.status)}</p>
             </div>
             <div>
-              <Eyebrow>Liga</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">{league.name}</p>
+              <Eyebrow className="text-emerald-400">Liga</Eyebrow>
+              <p className="mt-1 text-sm text-gray-200">{league.name}</p>
             </div>
             {team.founded_year ? (
               <div>
-                <Eyebrow>Año de fundación</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">{String(team.founded_year)}</p>
+                <Eyebrow className="text-emerald-400">Año de fundación</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">{String(team.founded_year)}</p>
               </div>
             ) : null}
             {team.logo_url ? (
               <div className="sm:col-span-2">
-                <Eyebrow>Logo</Eyebrow>
+                <Eyebrow className="text-emerald-400">Logo</Eyebrow>
                 <div className="mt-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={team.logo_url}
                     alt={`Logo de ${team.name}`}
-                    className="h-24 w-24 rounded-lg border border-gray-200 object-contain"
+                    className="h-24 w-24 rounded-xl border border-white/10 bg-white/5 object-contain p-2"
                   />
                 </div>
               </div>
             ) : null}
             {team.primary_color ? (
               <div>
-                <Eyebrow>Color primario</Eyebrow>
-                <div className="mt-1 flex items-center gap-2 text-sm text-gray-900">
+                <Eyebrow className="text-emerald-400">Color primario</Eyebrow>
+                <div className="mt-1 flex items-center gap-2 text-sm text-gray-200">
                   <span
-                    className="inline-flex h-4 w-4 rounded border border-gray-300"
+                    className="inline-flex h-4 w-4 rounded border border-white/20"
                     style={{ backgroundColor: team.primary_color }}
                   />
                   {team.primary_color}
@@ -258,18 +257,18 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
             ) : null}
             {team.secondary_color ? (
               <div>
-                <Eyebrow>Color secundario</Eyebrow>
-                <div className="mt-1 flex items-center gap-2 text-sm text-gray-900">
+                <Eyebrow className="text-emerald-400">Color secundario</Eyebrow>
+                <div className="mt-1 flex items-center gap-2 text-sm text-gray-200">
                   <span
-                    className="inline-flex h-4 w-4 rounded border border-gray-300"
+                    className="inline-flex h-4 w-4 rounded border border-white/20"
                     style={{ backgroundColor: team.secondary_color }}
                   />
                   {team.secondary_color}
                 </div>
               </div>
             ) : null}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {seasons.length === 0 ? (
           <EmptyState
@@ -376,12 +375,12 @@ async function PublicTeamSeasonContent({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Temporadas</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-gray-600">
+      <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+        <div className="border-b border-white/10 pb-3">
+          <h2 className="text-base font-bold text-white">Temporadas</h2>
+        </div>
+        <div className="space-y-3 pt-4">
+          <p className="text-xs text-gray-400">
             Selecciona una temporada para ver la plantilla y los partidos del equipo.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -391,10 +390,10 @@ async function PublicTeamSeasonContent({
                 <Link
                   key={seasonItem.id}
                   href={`/liga/${league.slug}/teams/${team.slug}?seasonId=${seasonItem.id}`}
-                  className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 ${
+                  className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
                     isActive
-                      ? "border-emerald-700 bg-emerald-700 text-white"
-                      : "border-gray-300 bg-white text-gray-700 hover:border-emerald-600 hover:text-emerald-700"
+                      ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-300 font-semibold shadow-sm"
+                      : "border-white/10 bg-white/5 text-gray-300 hover:border-emerald-500/30 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   {seasonItem.name}
@@ -402,12 +401,12 @@ async function PublicTeamSeasonContent({
               );
             })}
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs text-gray-400">
             Mostrando información para{" "}
-            <span className="font-medium text-gray-900">{selectedSeason.name}</span>.
+            <span className="font-semibold text-white">{selectedSeason.name}</span>.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {rosterRegistrations.length === 0 ? (
         <EmptyState
@@ -415,18 +414,22 @@ async function PublicTeamSeasonContent({
           description="Este equipo aún no tiene jugadores registrados en la temporada seleccionada."
         />
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>{rosterRegistrations.length} jugadores registrados</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-base font-bold text-white">{rosterRegistrations.length} jugadores registrados</h2>
+          </div>
+          <div className="pt-4">
             <div className="space-y-3 md:hidden">
               {rosterRegistrations.map((registration) => (
-                <Card key={registration.id}>
-                  <CardContent className="space-y-2 p-4 text-sm text-gray-700">
+                <div key={registration.id} className="rounded-xl border border-white/10 bg-white/5 p-4 text-white shadow-sm">
+                  <div className="space-y-2 text-sm text-gray-300">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold text-gray-900">
-                        {registration.player ? (<Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-700 hover:text-emerald-800 hover:underline">{registration.player.full_name}</Link>) : "Jugador no disponible"}
+                      <p className="font-semibold text-white">
+                        {registration.player ? (
+                          <Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-400 hover:text-emerald-300 hover:underline font-medium">
+                            {registration.player.full_name}
+                          </Link>
+                        ) : "Jugador no disponible"}
                       </p>
                       <StatusBadge
                         variant={registrationStatusStyles[registration.status].variant}
@@ -435,9 +438,9 @@ async function PublicTeamSeasonContent({
                         {formatLabel(registration.status)}
                       </StatusBadge>
                     </div>
-                    <p>Número: {registration.jersey_number ?? "Sin número"}</p>
-                    <p>Posición: {registration.player?.preferred_position || "No definida"}</p>
-                    <p>
+                    <p className="text-xs text-gray-400">Número: <span className="text-white font-medium">{registration.jersey_number ?? "Sin número"}</span></p>
+                    <p className="text-xs text-gray-400">Posición: <span className="text-white font-medium">{registration.player?.preferred_position || "No definida"}</span></p>
+                    <p className="text-xs text-gray-400">
                       Estado del jugador:{" "}
                       {registration.player ? (
                         <StatusBadge
@@ -450,43 +453,47 @@ async function PublicTeamSeasonContent({
                         "No disponible"
                       )}
                     </p>
-                    <p>Fecha de registro: {formatDateTime(registration.registered_at)}</p>
-                  </CardContent>
-                </Card>
+                    <p className="text-xs text-gray-400">Fecha de registro: <span className="text-gray-300">{formatDateTime(registration.registered_at)}</span></p>
+                  </div>
+                </div>
               ))}
             </div>
 
-            <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
-              <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
-                <thead className="bg-gray-50">
-                  <tr className="text-left text-gray-500">
+            <div className="hidden overflow-x-auto rounded-xl border border-white/10 bg-slate-900/40 md:block">
+              <table className="min-w-full divide-y divide-white/10 bg-transparent text-sm text-gray-200">
+                <thead className="bg-white/5 text-gray-400">
+                  <tr className="text-left">
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Jugador</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Jugador</Eyebrow>
                     </th>
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Número</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Número</Eyebrow>
                     </th>
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Estado registro</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Estado registro</Eyebrow>
                     </th>
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Fecha registro</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Fecha registro</Eyebrow>
                     </th>
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Posición</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Posición</Eyebrow>
                     </th>
                     <th className="px-4 py-3">
-                      <Eyebrow as="span">Estado jugador</Eyebrow>
+                      <Eyebrow as="span" className="text-gray-400">Estado jugador</Eyebrow>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 text-gray-700">
+                <tbody className="divide-y divide-white/5 text-gray-300">
                   {rosterRegistrations.map((registration) => (
-                    <tr key={registration.id}>
-                      <td className="px-4 py-3 font-medium text-gray-900">
-                        {registration.player ? (<Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-700 hover:text-emerald-800 hover:underline">{registration.player.full_name}</Link>) : "No disponible"}
+                    <tr key={registration.id} className="transition hover:bg-white/5">
+                      <td className="px-4 py-3 font-medium text-white">
+                        {registration.player ? (
+                          <Link href={`/liga/${league.slug}/players/${registration.player.id}`} className="text-emerald-400 hover:text-emerald-300 hover:underline font-medium">
+                            {registration.player.full_name}
+                          </Link>
+                        ) : "No disponible"}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-gray-300">
                         {registration.jersey_number ?? "Sin número"}
                       </td>
                       <td className="px-4 py-3">
@@ -497,10 +504,10 @@ async function PublicTeamSeasonContent({
                           {formatLabel(registration.status)}
                         </StatusBadge>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-gray-400">
                         {formatDateTime(registration.registered_at)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-gray-300">
                         {registration.player?.preferred_position || "No definida"}
                       </td>
                       <td className="px-4 py-3">
@@ -520,12 +527,12 @@ async function PublicTeamSeasonContent({
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Partidos del equipo</h2>
+        <h2 className="mb-4 text-lg font-bold text-white">Partidos del equipo</h2>
         {matches.length === 0 ? (
           <EmptyState
             title="Sin partidos programados"

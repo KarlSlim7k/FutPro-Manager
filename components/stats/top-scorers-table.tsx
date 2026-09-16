@@ -8,13 +8,17 @@ interface TopScorersTableProps {
   scorers: TopScorerItem[];
   leagueSlug: string;
   basePath?: string;
+  theme?: "light" | "dark";
 }
 
 export function TopScorersTable({
   scorers,
   leagueSlug,
   basePath = "/liga",
+  theme,
 }: TopScorersTableProps) {
+  const isDark = theme === "dark" || (theme === undefined && basePath.startsWith("/liga"));
+
   if (scorers.length === 0) {
     return (
       <EmptyState
@@ -31,21 +35,25 @@ export function TopScorersTable({
         {scorers.map((scorer, index) => (
           <div
             key={scorer.playerId}
-            className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 shadow-xs"
+            className={`flex items-center justify-between rounded-xl border p-3 shadow-sm ${
+              isDark ? "border-white/10 bg-white/5 text-white" : "border-gray-200 bg-white shadow-xs"
+            }`}
           >
             <div className="flex items-center gap-3">
               <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
                 index === 0
-                  ? "bg-amber-100 text-amber-800"
+                  ? isDark ? "bg-amber-500/20 text-amber-300" : "bg-amber-100 text-amber-800"
                   : index === 1
-                  ? "bg-slate-100 text-slate-700"
+                  ? isDark ? "bg-slate-700/50 text-slate-200" : "bg-slate-100 text-slate-700"
                   : index === 2
-                  ? "bg-orange-100 text-orange-800"
-                  : "bg-gray-50 text-gray-600"
+                  ? isDark ? "bg-orange-500/20 text-orange-300" : "bg-orange-100 text-orange-800"
+                  : isDark ? "bg-white/10 text-gray-400" : "bg-gray-50 text-gray-600"
               }`}>
                 {index + 1}
               </span>
-              <div className="relative h-9 w-9 overflow-hidden rounded-full bg-gray-100 border border-gray-200 shrink-0">
+              <div className={`relative h-9 w-9 overflow-hidden rounded-full border shrink-0 ${
+                isDark ? "bg-slate-800 border-white/10" : "bg-gray-100 border-gray-200"
+              }`}>
                 {scorer.playerPhoto ? (
                   <Image
                     src={scorer.playerPhoto}
@@ -54,7 +62,9 @@ export function TopScorersTable({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-500">
+                  <div className={`flex h-full w-full items-center justify-center text-xs font-semibold ${
+                    isDark ? "text-gray-400" : "text-gray-500"
+                  }`}>
                     {scorer.playerName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -62,15 +72,15 @@ export function TopScorersTable({
               <div className="min-w-0">
                 <TextLink
                   href={`${basePath}/${leagueSlug}/players/${scorer.playerId}`}
-                  className="truncate font-medium text-gray-900 block"
+                  className={`truncate font-medium block ${isDark ? "text-white hover:text-emerald-400" : "text-gray-900"}`}
                 >
                   {scorer.playerName}
                 </TextLink>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 truncate">
+                <div className={`flex items-center gap-1.5 text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}>
                   {scorer.teamSlug ? (
                     <TextLink
                       href={`${basePath}/${leagueSlug}/teams/${scorer.teamSlug}`}
-                      className="text-gray-500 hover:text-gray-700"
+                      className={isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-700"}
                     >
                       {scorer.teamName}
                     </TextLink>
@@ -78,16 +88,16 @@ export function TopScorersTable({
                     <span>{scorer.teamName}</span>
                   )}
                   {scorer.penaltyGoals > 0 && (
-                    <span className="text-gray-400">({scorer.penaltyGoals} pen.)</span>
+                    <span className={isDark ? "text-gray-500" : "text-gray-400"}>({scorer.penaltyGoals} pen.)</span>
                   )}
                 </div>
               </div>
             </div>
             <div className="text-right pl-2">
-              <span className="text-lg font-black text-emerald-600">
+              <span className={`text-lg font-black ${isDark ? "text-emerald-400" : "text-emerald-600"}`}>
                 {scorer.totalGoals}
               </span>
-              <span className="block text-[10px] text-gray-400 uppercase tracking-wider">
+              <span className={`block text-[10px] uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-400"}`}>
                 Goles
               </span>
             </div>
@@ -96,49 +106,55 @@ export function TopScorersTable({
       </div>
 
       {/* Vista Desktop Table */}
-      <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
-        <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
-          <thead className="bg-gray-50">
-            <tr className="text-left text-gray-500">
+      <div className={`hidden overflow-x-auto rounded-xl border md:block ${
+        isDark ? "border-white/10 bg-slate-900/40" : "border-gray-200"
+      }`}>
+        <table className={`min-w-full divide-y text-sm ${
+          isDark ? "divide-white/10 bg-transparent text-gray-200" : "divide-gray-200 bg-white"
+        }`}>
+          <thead className={isDark ? "bg-white/5 text-gray-400" : "bg-gray-50 text-gray-500"}>
+            <tr className="text-left">
               <th scope="col" className="px-4 py-3 w-12 text-center">
-                <Eyebrow as="span">#</Eyebrow>
+                <Eyebrow as="span" className={isDark ? "text-gray-400" : undefined}>#</Eyebrow>
               </th>
               <th scope="col" className="px-4 py-3">
-                <Eyebrow as="span">Jugador</Eyebrow>
+                <Eyebrow as="span" className={isDark ? "text-gray-400" : undefined}>Jugador</Eyebrow>
               </th>
               <th scope="col" className="px-4 py-3">
-                <Eyebrow as="span">Equipo</Eyebrow>
+                <Eyebrow as="span" className={isDark ? "text-gray-400" : undefined}>Equipo</Eyebrow>
               </th>
               <th scope="col" className="px-4 py-3 text-center" title="Goles de jugada">
-                <Eyebrow as="span">Jugada</Eyebrow>
+                <Eyebrow as="span" className={isDark ? "text-gray-400" : undefined}>Jugada</Eyebrow>
               </th>
               <th scope="col" className="px-4 py-3 text-center" title="Goles de penal">
-                <Eyebrow as="span">Penal</Eyebrow>
+                <Eyebrow as="span" className={isDark ? "text-gray-400" : undefined}>Penal</Eyebrow>
               </th>
               <th scope="col" className="px-4 py-3 text-center" title="Total de goles">
-                <Eyebrow as="span" className="font-bold text-gray-900">Total Goles</Eyebrow>
+                <Eyebrow as="span" className={`font-bold ${isDark ? "text-emerald-400" : "text-gray-900"}`}>Total Goles</Eyebrow>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 text-gray-700">
+          <tbody className={`divide-y ${isDark ? "divide-white/5 text-gray-300" : "divide-gray-100 text-gray-700"}`}>
             {scorers.map((scorer, index) => (
-              <tr key={scorer.playerId} className="transition hover:bg-gray-50">
-                <td className="px-4 py-3 text-center font-medium text-gray-500">
+              <tr key={scorer.playerId} className={`transition ${isDark ? "hover:bg-white/5" : "hover:bg-gray-50"}`}>
+                <td className="px-4 py-3 text-center font-medium">
                   <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                     index === 0
-                      ? "bg-amber-100 text-amber-800"
+                      ? isDark ? "bg-amber-500/20 text-amber-300" : "bg-amber-100 text-amber-800"
                       : index === 1
-                      ? "bg-slate-100 text-slate-700"
+                      ? isDark ? "bg-slate-700/50 text-slate-200" : "bg-slate-100 text-slate-700"
                       : index === 2
-                      ? "bg-orange-100 text-orange-800"
-                      : ""
+                      ? isDark ? "bg-orange-500/20 text-orange-300" : "bg-orange-100 text-orange-800"
+                      : isDark ? "text-gray-400" : "text-gray-500"
                   }`}>
                     {index + 1}
                   </span>
                 </td>
-                <td className="px-4 py-3 font-medium text-gray-900">
+                <td className={`px-4 py-3 font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
                   <div className="flex items-center gap-3">
-                    <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-100 border border-gray-200 shrink-0">
+                    <div className={`relative h-8 w-8 overflow-hidden rounded-full border shrink-0 ${
+                      isDark ? "bg-slate-800 border-white/10" : "bg-gray-100 border-gray-200"
+                    }`}>
                       {scorer.playerPhoto ? (
                         <Image
                           src={scorer.playerPhoto}
@@ -147,28 +163,36 @@ export function TopScorersTable({
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-500">
+                        <div className={`flex h-full w-full items-center justify-center text-xs font-semibold ${
+                          isDark ? "text-gray-400" : "text-gray-500"
+                        }`}>
                           {scorer.playerName.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
-                    <TextLink href={`${basePath}/${leagueSlug}/players/${scorer.playerId}`}>
+                    <TextLink
+                      href={`${basePath}/${leagueSlug}/players/${scorer.playerId}`}
+                      className={isDark ? "text-white hover:text-emerald-400 font-medium" : undefined}
+                    >
                       {scorer.playerName}
                     </TextLink>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-gray-600">
+                <td className={`px-4 py-3 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
                   {scorer.teamSlug ? (
-                    <TextLink href={`${basePath}/${leagueSlug}/teams/${scorer.teamSlug}`}>
+                    <TextLink
+                      href={`${basePath}/${leagueSlug}/teams/${scorer.teamSlug}`}
+                      className={isDark ? "text-gray-300 hover:text-emerald-400" : undefined}
+                    >
                       {scorer.teamName}
                     </TextLink>
                   ) : (
                     scorer.teamName
                   )}
                 </td>
-                <td className="px-4 py-3 text-center text-gray-500">{scorer.goals}</td>
-                <td className="px-4 py-3 text-center text-gray-500">{scorer.penaltyGoals}</td>
-                <td className="px-4 py-3 text-center font-extrabold text-emerald-600 text-base">
+                <td className={`px-4 py-3 text-center ${isDark ? "text-gray-400" : "text-gray-500"}`}>{scorer.goals}</td>
+                <td className={`px-4 py-3 text-center ${isDark ? "text-gray-400" : "text-gray-500"}`}>{scorer.penaltyGoals}</td>
+                <td className={`px-4 py-3 text-center font-extrabold text-base ${isDark ? "text-emerald-400" : "text-emerald-600"}`}>
                   {scorer.totalGoals}
                 </td>
               </tr>

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
@@ -61,7 +62,7 @@ export default async function PublicTeamsPage({ params }: Props) {
   const teams = (teamsData ?? []) as TeamItem[];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
@@ -83,12 +84,22 @@ export default async function PublicTeamsPage({ params }: Props) {
               <Link
                 key={team.id}
                 href={`/liga/${league.slug}/teams/${team.slug}`}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+                className="group flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 p-4 shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:bg-slate-900/80 hover:shadow-emerald-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
-                <span className="font-medium text-gray-900">{team.name}</span>
-                <StatusBadge variant={team.status === "active" ? "success" : "neutral"}>
-                  {team.status === "active" ? "Activo" : "Inactivo"}
-                </StatusBadge>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-bold group-hover:bg-emerald-500/20 group-hover:border-emerald-500/30 transition-colors">
+                    {team.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="font-semibold text-white group-hover:text-emerald-400 transition-colors truncate">
+                    {team.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <StatusBadge variant={team.status === "active" ? "success" : "neutral"}>
+                    {team.status === "active" ? "Activo" : "Inactivo"}
+                  </StatusBadge>
+                  <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
               </Link>
             ))}
           </div>

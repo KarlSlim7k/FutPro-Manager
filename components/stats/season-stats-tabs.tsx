@@ -11,6 +11,7 @@ interface SeasonStatsTabsProps {
   basePath: string;
   allowedTabs?: StatsTabType[];
   defaultTab?: StatsTabType;
+  theme?: "light" | "dark";
 }
 
 const ALL_TABS: { id: StatsTabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -51,7 +52,9 @@ export function SeasonStatsTabs({
   basePath,
   allowedTabs,
   defaultTab = "standings",
+  theme,
 }: SeasonStatsTabsProps) {
+  const isDark = theme === "dark" || (theme === undefined && basePath.startsWith("/liga"));
   const searchParams = useSearchParams();
 
   const tabs = allowedTabs
@@ -70,24 +73,33 @@ export function SeasonStatsTabs({
   };
 
   return (
-    <div className="border-b border-gray-200">
+    <div className={`border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
       <nav className="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto pb-1 sm:pb-0" aria-label="Tabs de estadísticas">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.id;
           const Icon = tab.icon;
+
+          const activeTabClass = isDark
+            ? "border-emerald-400 text-emerald-400 font-semibold"
+            : "border-emerald-600 text-emerald-700 font-semibold";
+
+          const inactiveTabClass = isDark
+            ? "border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200"
+            : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700";
+
+          const activeIconClass = isDark ? "text-emerald-400" : "text-emerald-600";
+          const inactiveIconClass = isDark ? "text-gray-400" : "text-gray-400";
 
           return (
             <Link
               key={tab.id}
               href={createTabHref(tab.id)}
               className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-emerald-600 text-emerald-700 font-semibold"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                isActive ? activeTabClass : inactiveTabClass
               }`}
               aria-current={isActive ? "page" : undefined}
             >
-              <Icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-400"}`} />
+              <Icon className={`h-4 w-4 ${isActive ? activeIconClass : inactiveIconClass}`} />
               <span>{tab.label}</span>
             </Link>
           );

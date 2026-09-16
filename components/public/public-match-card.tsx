@@ -1,7 +1,7 @@
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TextLink } from "@/components/ui/text-link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import type { MatchStatus } from "@/types/database";
 
 type PublicMatchCardProps = {
@@ -16,6 +16,7 @@ type PublicMatchCardProps = {
   detailHref?: string;
   homeTeamLogo?: string | null;
   awayTeamLogo?: string | null;
+  className?: string;
 };
 
 function formatDateTime(date: string) {
@@ -40,78 +41,81 @@ export function PublicMatchCard({
   detailHref,
   homeTeamLogo,
   awayTeamLogo,
+  className,
 }: PublicMatchCardProps) {
   return (
-    <Card className="transition hover:shadow-sm">
-      <CardHeader className="space-y-3 pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+    <div
+      className={cn(
+        "rounded-2xl border border-white/10 bg-slate-900/70 p-4 sm:p-5 backdrop-blur-md shadow-xl text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-500/30",
+        className
+      )}
+    >
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
             {roundName || "Jornada"}
           </span>
           <MatchStatusBadge status={status} />
         </div>
 
         {/* Enfrentamiento con logos */}
-        <div className="flex items-center justify-between gap-2 sm:gap-3 pt-1">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 pt-1">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
             {homeTeamLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={homeTeamLogo}
                 alt=""
-                className="h-7 w-7 sm:h-8 sm:w-8 rounded border border-gray-200 object-contain shrink-0"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg border border-white/10 object-contain shrink-0 bg-white/5 p-0.5"
               />
             ) : null}
-            <CardTitle className="text-xs sm:text-sm font-semibold truncate text-gray-900">
+            <span className="text-xs sm:text-sm font-bold truncate text-white">
               {homeTeamName}
-            </CardTitle>
+            </span>
           </div>
 
-          <div className="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-center min-w-[50px] sm:min-w-[58px]">
+          <div className="shrink-0 rounded-xl border border-white/15 bg-black/50 px-3 py-1 text-center min-w-[54px] sm:min-w-[62px]">
             {status === "completed" || status === "in_progress" ? (
-              <span className="text-sm sm:text-base font-bold tracking-tight text-gray-900">
+              <span className="text-sm sm:text-base font-mono font-bold tracking-tight text-emerald-400">
                 {homeScore} – {awayScore}
               </span>
             ) : (
-              <span className="text-xs font-semibold text-gray-400">vs</span>
+              <span className="text-xs font-mono font-semibold text-gray-400">vs</span>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 flex-1 min-w-0 text-right">
-            <CardTitle className="text-xs sm:text-sm font-semibold truncate text-gray-900">
+          <div className="flex items-center justify-end gap-2.5 flex-1 min-w-0 text-right">
+            <span className="text-xs sm:text-sm font-bold truncate text-white">
               {awayTeamName}
-            </CardTitle>
+            </span>
             {awayTeamLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={awayTeamLogo}
                 alt=""
-                className="h-7 w-7 sm:h-8 sm:w-8 rounded border border-gray-200 object-contain shrink-0"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg border border-white/10 object-contain shrink-0 bg-white/5 p-0.5"
               />
             ) : null}
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-2 text-xs sm:text-sm text-gray-600 border-t border-gray-50 pt-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="border-t border-white/10 pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300">
           <p className="truncate">
-            <span className="font-medium text-gray-800">Fecha:</span> {formatDateTime(scheduledAt)}
+            <span className="text-gray-400 font-medium">Fecha:</span> {formatDateTime(scheduledAt)}
+            {venueName ? ` · Sede: ${venueName}` : ""}
           </p>
+
+          {detailHref ? (
+            <Link
+              href={detailHref}
+              className="inline-flex items-center gap-1 font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
+            >
+              <span>Ver cédula</span>
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          ) : null}
         </div>
-        {venueName ? (
-          <p className="truncate">
-            <span className="font-medium text-gray-800">Sede:</span> {venueName}
-          </p>
-        ) : null}
-        {detailHref ? (
-          <div className="pt-2">
-            <TextLink href={detailHref} className="inline-flex min-h-[44px] items-center gap-1.5 touch-manipulation">
-              Ver detalle del partido <ArrowRight className="h-4 w-4" aria-hidden />
-            </TextLink>
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

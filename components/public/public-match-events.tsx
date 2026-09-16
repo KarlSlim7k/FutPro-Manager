@@ -129,8 +129,8 @@ export function PublicMatchEvents({
   }
 
   return (
-    <section className="space-y-4" aria-label="Eventos públicos del partido">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+    <section className="space-y-5" aria-label="Eventos públicos del partido">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
         {[
           { label: "Total", value: summary.total },
           { label: "Goles", value: summary.goals },
@@ -138,9 +138,9 @@ export function PublicMatchEvents({
           { label: "Sustituciones", value: summary.substitutions },
           { label: "Penales", value: summary.penalties },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-3 text-center">
-            <p className="text-xs text-gray-600">{item.label}</p>
-            <p className="text-lg font-semibold text-gray-900">{item.value}</p>
+          <div key={item.label} className="rounded-xl border border-white/10 bg-slate-900/60 p-3 text-center backdrop-blur-md">
+            <p className="text-xs text-gray-400">{item.label}</p>
+            <p className="text-xl font-bold text-white mt-0.5">{item.value}</p>
           </div>
         ))}
       </div>
@@ -157,10 +157,10 @@ export function PublicMatchEvents({
               aria-selected={selected}
               aria-label={`Filtrar por ${option.label}`}
               onClick={() => setActiveFilter(option.key)}
-              className={`rounded-full border px-3 py-1.5 text-sm transition ${
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
                 selected
-                  ? "border-emerald-700 bg-emerald-700 text-white"
-                  : "border-gray-300 bg-white text-gray-700 hover:border-emerald-500 hover:text-emerald-700"
+                  ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-300 shadow-sm"
+                  : "border-white/10 bg-white/5 text-gray-300 hover:border-emerald-500/30 hover:text-white hover:bg-white/10"
               }`}
             >
               {option.label}
@@ -176,9 +176,9 @@ export function PublicMatchEvents({
         />
       ) : (
         <div className="relative">
-          <div className="absolute bottom-2 left-4 top-2 w-px bg-gray-200" aria-hidden />
+          <div className="absolute bottom-2 left-4 top-2 w-px bg-white/10" aria-hidden />
 
-          <ul className="space-y-4" aria-live="polite">
+          <ul className="space-y-3.5" aria-live="polite">
             {filteredEvents.map((event) => {
               const eventTypeLabel = formatEventType(event.event_type);
               const eventVisual = getEventVisual(event.event_type);
@@ -187,44 +187,46 @@ export function PublicMatchEvents({
               const side = resolveSideLabel(event.team_id, homeTeamId, awayTeamId);
 
               return (
-                <li key={event.id} className="relative flex items-start gap-4">
+                <li key={event.id} className="relative flex items-start gap-3.5">
                   <EventIcon
                     type={event.event_type}
                     className={eventVisual.className}
                   />
 
-                  <article className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                  <article className="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-900/60 p-3.5 shadow-md backdrop-blur-md">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Eyebrow as="span" tone="brand">
+                      <Eyebrow as="span" tone="brand" className="text-emerald-400 font-mono">
                         {event.minute}&apos;
                       </Eyebrow>
-                      <span className="text-sm font-medium text-gray-900">{eventTypeLabel}</span>
+                      <span className="text-sm font-semibold text-white">{eventTypeLabel}</span>
                       {side ? (
-                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                        <span className="inline-flex rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-gray-300">
                           {side}
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-600">
-                      <span className="break-words">Equipo: {team?.name ?? "No especificado"}</span>
+                    <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-300">
+                      <span className="break-words">
+                        Equipo: <span className="text-white font-medium">{team?.name ?? "No especificado"}</span>
+                      </span>
                       <span className="break-words">
                         Jugador:{" "}
                         {player ? (
                           <Link
-                            className="font-medium text-emerald-700 hover:text-emerald-800 hover:underline"
+                            className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
                             href={`/liga/${leagueSlug}/players/${player.id}`}
                           >
                             {player.full_name}
                           </Link>
                         ) : (
-                          "No especificado"
+                          <span className="text-gray-400">No especificado</span>
                         )}
                       </span>
                     </div>
 
                     {event.notes ? (
-                      <p className="mt-1 break-words text-xs text-gray-500">Notas: {event.notes}</p>
+                      <p className="mt-1.5 break-words text-xs text-gray-400">Notas: {event.notes}</p>
                     ) : null}
                   </article>
                 </li>

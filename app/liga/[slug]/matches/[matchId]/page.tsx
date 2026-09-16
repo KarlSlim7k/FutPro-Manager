@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
@@ -251,7 +250,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
@@ -269,65 +268,71 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
           awayTeam={awayTeamData}
         />
 
-        <Card>
-          <CardHeader className="space-y-2">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="space-y-2 border-b border-white/10 pb-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
-              <CardTitle className="text-xl">
+              <h2 className="text-xl font-bold text-white">
                 {homeTeamData.name} vs {awayTeamData.name}
-              </CardTitle>
+              </h2>
               <MatchStatusBadge status={match.status} />
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-400">
               {match.round_name ? `${match.round_name} · ` : null}
               {season ? season.name : "Temporada no definida"}
             </p>
-          </CardHeader>
+          </div>
 
-          <CardContent className="space-y-6">
+          <div className="space-y-6 pt-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Eyebrow>Equipo local</Eyebrow>
+                <Eyebrow className="text-emerald-400">Equipo local</Eyebrow>
                 {homeTeam?.slug ? (
-                  <TextLink href={`/liga/${league.slug}/teams/${homeTeam.slug}`}>
+                  <TextLink
+                    href={`/liga/${league.slug}/teams/${homeTeam.slug}`}
+                    className="text-white hover:text-emerald-400 font-medium"
+                  >
                     {homeTeam.name}
                   </TextLink>
                 ) : (
-                  <p className="mt-1 text-sm text-gray-900">
+                  <p className="mt-1 text-sm text-gray-200">
                     {homeTeam?.name ?? "No disponible"}
                   </p>
                 )}
               </div>
               <div>
-                <Eyebrow>Equipo visitante</Eyebrow>
+                <Eyebrow className="text-emerald-400">Equipo visitante</Eyebrow>
                 {awayTeam?.slug ? (
-                  <TextLink href={`/liga/${league.slug}/teams/${awayTeam.slug}`}>
+                  <TextLink
+                    href={`/liga/${league.slug}/teams/${awayTeam.slug}`}
+                    className="text-white hover:text-emerald-400 font-medium"
+                  >
                     {awayTeam.name}
                   </TextLink>
                 ) : (
-                  <p className="mt-1 text-sm text-gray-900">
+                  <p className="mt-1 text-sm text-gray-200">
                     {awayTeam?.name ?? "No disponible"}
                   </p>
                 )}
               </div>
               <div>
-                <Eyebrow>Marcador</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">
+                <Eyebrow className="text-emerald-400">Marcador</Eyebrow>
+                <p className="mt-1 text-sm font-semibold text-white">
                   {match.status === "completed"
                     ? `${match.home_score} - ${match.away_score}`
                     : "Marcador pendiente"}
                 </p>
               </div>
               <div>
-                <Eyebrow>Estado</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">{formatStatusLabel(match.status)}</p>
+                <Eyebrow className="text-emerald-400">Estado</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">{formatStatusLabel(match.status)}</p>
               </div>
               <div>
-                <Eyebrow>Fecha y hora</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">{formatDateTime(match.scheduled_at)}</p>
+                <Eyebrow className="text-emerald-400">Fecha y hora</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">{formatDateTime(match.scheduled_at)}</p>
               </div>
               <div>
-                <Eyebrow>Sede</Eyebrow>
-                <p className="mt-1 text-sm text-gray-900">
+                <Eyebrow className="text-emerald-400">Sede</Eyebrow>
+                <p className="mt-1 text-sm text-gray-200">
                   {venue
                     ? [venue.name, venue.address, venue.city, venue.state]
                         .filter(Boolean)
@@ -337,25 +342,25 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
               </div>
               {match.round_name ? (
                 <div>
-                  <Eyebrow>Jornada</Eyebrow>
-                  <p className="mt-1 text-sm text-gray-900">{match.round_name}</p>
+                  <Eyebrow className="text-emerald-400">Jornada</Eyebrow>
+                  <p className="mt-1 text-sm text-gray-200">{match.round_name}</p>
                 </div>
               ) : null}
               {season ? (
                 <div>
-                  <Eyebrow>Temporada</Eyebrow>
-                  <p className="mt-1 text-sm text-gray-900">{season.name}</p>
+                  <Eyebrow className="text-emerald-400">Temporada</Eyebrow>
+                  <p className="mt-1 text-sm text-gray-200">{season.name}</p>
                 </div>
               ) : null}
             </div>
 
             {/* Difusión y Redes */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl bg-white/5 p-4 border border-white/10">
               <div className="space-y-0.5">
-                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
                   Difusión y Redes
                 </span>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-400">
                   Comparte el marcador por WhatsApp o descarga la imagen oficial para redes sociales.
                 </p>
               </div>
@@ -369,21 +374,32 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
                 awayScore={match.away_score}
                 matchStatus={match.status}
                 matchDate={formatDateTime(match.scheduled_at)}
+                theme="dark"
               />
             </div>
 
-            <div className="flex flex-wrap gap-4 border-t border-gray-100 pt-4">
-              <TextLink href={`/liga/${league.slug}/matches`}><ArrowLeft className="h-4 w-4" aria-hidden /> Ver todos los partidos</TextLink>
-              <TextLink href={`/liga/${league.slug}/standings`}>Tabla de posiciones</TextLink>
+            <div className="flex flex-wrap gap-4 border-t border-white/10 pt-4">
+              <TextLink
+                href={`/liga/${league.slug}/matches`}
+                className="text-emerald-400 hover:text-emerald-300 font-medium"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden /> Ver todos los partidos
+              </TextLink>
+              <TextLink
+                href={`/liga/${league.slug}/standings`}
+                className="text-emerald-400 hover:text-emerald-300 font-medium"
+              >
+                Tabla de posiciones
+              </TextLink>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Eventos del partido</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-base font-bold text-white">Eventos del partido</h2>
+          </div>
+          <div className="pt-4">
             <PublicMatchEvents
               events={events}
               teams={teams}
@@ -392,8 +408,8 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
               awayTeamId={match.away_team_id}
               leagueSlug={league.slug}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
     </main>
   );

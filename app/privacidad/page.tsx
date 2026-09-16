@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Eyebrow } from "@/components/ui/eyebrow";
+import { ArrowLeft, ShieldCheck, Trophy } from "lucide-react";
 import { PublicFooter } from "@/components/public/public-footer";
 
 export const metadata: Metadata = {
@@ -12,35 +11,82 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-b from-emerald-50 via-white to-gray-100">
-      <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white selection:bg-emerald-500 selection:text-white flex flex-col justify-between">
+      {/* Luces de ambiente y orbes de fondo */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-emerald-600/15 blur-[120px] animate-float-ambient"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-1/4 -right-40 h-[600px] w-[600px] rounded-full bg-teal-600/10 blur-[140px] animate-pulse-glow-ring"
+      />
+
+      {/* Trazos geométricos de cancha de fútbol en SVG */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full stroke-emerald-500/[0.035] stroke-[1.5]"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <pattern
+            id="privacy-tactical-grid"
+            width="60"
+            height="60"
+            patternUnits="userSpaceOnUse"
+          >
+            <path d="M 60 0 L 0 0 0 60" fill="none" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#privacy-tactical-grid)" />
+        <circle cx="80%" cy="30%" r="220" fill="none" className="stroke-emerald-400/[0.04]" />
+      </svg>
+
+      <main className="relative z-10 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Barra superior de navegación */}
+        <header className="mb-8 flex items-center justify-between animate-enter-fade-down">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-gray-200 backdrop-blur-md transition hover:border-emerald-400/40 hover:bg-white/10 hover:text-white"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden /> Volver al inicio
+            <ArrowLeft className="h-3.5 w-3.5 transition group-hover:-translate-x-0.5 text-emerald-400" />
+            <span>Volver al inicio</span>
           </Link>
-          <div className="mt-4">
-            <Eyebrow tone="brand" className="text-sm tracking-[0.16em]">
-              Legal y Cumplimiento
-            </Eyebrow>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Aviso de Privacidad Integral
-            </h1>
-            <p className="mt-2 text-sm text-gray-500">
-              Última actualización: Septiembre de 2026
-            </p>
+
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 shadow-md shadow-emerald-950">
+              <Trophy className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-sm font-bold tracking-tight text-white">
+              FutPro <span className="text-emerald-400">Manager</span>
+            </span>
+          </Link>
+        </header>
+
+        {/* Encabezado */}
+        <div className="mb-8 space-y-3 animate-enter-fade-up">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 backdrop-blur-md">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Legal y Cumplimiento</span>
           </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Aviso de Privacidad{" "}
+            <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 bg-clip-text text-transparent">
+              Integral
+            </span>
+          </h1>
+          <p className="text-xs text-gray-400 font-mono">
+            Última actualización: Septiembre de 2026
+          </p>
         </div>
 
-        <div className="space-y-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-10 text-gray-700 leading-relaxed text-sm sm:text-base">
+        <div className="space-y-8 rounded-3xl border border-white/10 bg-slate-900/60 p-6 sm:p-10 backdrop-blur-xl shadow-2xl shadow-emerald-950/40 text-gray-300 leading-relaxed text-sm sm:text-base animate-enter-fade-up anim-delay-150">
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-lg sm:text-xl font-bold text-white">
               1. Identidad y Domicilio del Responsable
             </h2>
             <p>
-              <strong>FutPro Manager</strong>, con operación y desarrollo en el
+              <strong className="text-white">FutPro Manager</strong>, con operación y desarrollo en el
               municipio de Perote, Veracruz, México, es responsable del uso,
               tratamiento y protección de los datos personales recabados a través
               del portal web y sus servicios conexos, en estricto apego a la Ley
@@ -50,153 +96,130 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-lg sm:text-xl font-bold text-white">
               2. Datos Personales que Recabamos
             </h2>
             <p>
               Para prestar los servicios de gestión deportiva y consulta
               pública, recabamos las siguientes categorías de datos:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-gray-600">
+            <ul className="list-disc pl-5 space-y-1.5 text-gray-300">
               <li>
-                <strong>Administradores y Delegados:</strong> Nombre completo,
-                correo electrónico, credenciales de acceso y teléfono de
-                contacto opcional.
+                <strong className="text-white">Administradores de liga y cuerpo técnico:</strong> nombre
+                completo, dirección de correo electrónico, contraseña cifrada,
+                número de teléfono (opcional) y rol asignado en la liga.
               </li>
               <li>
-                <strong>Jugadores y Cuerpos Técnicos:</strong> Nombre completo,
-                fotografía deportiva de perfil, número de dorsal, posición de
-                juego, historial de partidos, estadísticas individuales (goles,
-                asistencias, tarjetas) y equipo al que pertenece.
+                <strong className="text-white">Jugadores:</strong> nombre, apellidos, fotografía de
+                perfil (opcional), número dorsal, posición deportiva y estadísticas
+                en partidos oficiales. No recabamos datos biométricos ni
+                documentos de identidad sensible sin consentimiento expreso.
               </li>
               <li>
-                <strong>Árbitros:</strong> Nombre completo y designaciones
-                arbitrales en partidos de la liga.
-              </li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              3. Tratamiento de Datos de Menores de Edad
-            </h2>
-            <p>
-              En caso de que en la liga participen categorías juveniles o
-              infantiles, el registro y publicación de información (nombres y
-              fotografías) de menores de edad requiere del consentimiento expreso
-              y previo de sus padres, tutores o representantes legales, recabado
-              bajo estricta responsabilidad de la directiva de la liga y los
-              delegados de cada equipo. FutPro Manager no recaba datos sensibles
-              adicionales de menores.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              4. Finalidades del Tratamiento
-            </h2>
-            <p>
-              Los datos personales recabados serán utilizados para las siguientes
-              finalidades primarias e indispensables:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-gray-600">
-              <li>
-                Generación y validación de cédulas arbitrales oficiales.
+                <strong className="text-white">Árbitros y oficiales:</strong> nombre, designación de
+                partido e incidencias reportadas en cédula arbitral.
               </li>
               <li>
-                Publicación de roles de juego, resultados, tablas de clasificación
-                y estadísticas deportivas de acceso público.
-              </li>
-              <li>
-                Autenticación y administración de permisos de acceso en el panel de
-                control.
-              </li>
-              <li>
-                Verificación de elegibilidad deportiva y control disciplinario
-                (tarjetas y sanciones).
+                <strong className="text-white">Usuarios y visitantes públicos:</strong> dirección IP,
+                identificadores de dispositivo y analíticas de navegación anónimas
+                con fines de rendimiento y seguridad.
               </li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              5. Transferencia de Datos
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              3. Finalidades del Tratamiento
+            </h2>
+            <p>Los datos recabados son utilizados para:</p>
+            <ul className="list-disc pl-5 space-y-1.5 text-gray-300">
+              <li>Creación y gestión de cuentas de usuario en la plataforma.</li>
+              <li>
+                Administración de ligas, temporadas, calendarios de juego y
+                cédulas arbitrales digitales.
+              </li>
+              <li>
+                Publicación de resultados deportivos, tablas de posiciones y
+                estadísticas de goleo en el portal público.
+              </li>
+              <li>
+                Comunicación operativa relacionada con el servicio, avisos de
+                seguridad y recuperación de accesos.
+              </li>
+              <li>
+                Atención a solicitudes de soporte, dudas y demostraciones del
+                sistema.
+              </li>
+            </ul>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              4. Transferencia de Datos
             </h2>
             <p>
-              FutPro Manager no vende, no arrienda ni transfiere datos personales a
-              terceros comerciales ajenos a la operación deportiva. Las únicas
-              transferencias que se realizan son hacia proveedores de
-              infraestructura en la nube con altos estándares de seguridad (como
-              Supabase/AWS) para el exclusivo almacenamiento y respaldo de la base
-              de datos.
+              FutPro Manager <strong className="text-white">no vende, alquila ni comercializa</strong> sus
+              datos personales a terceros. Únicamente compartimos información con
+              proveedores de infraestructura tecnológica indispensables para la
+              operación (alojamiento en la nube y bases de datos seguras con cifrado en reposo y en tránsito), bajo estrictos acuerdos de
+              confidencialidad.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              6. Uso de Cookies
-            </h2>
-            <p>
-              Este sitio utiliza únicamente cookies estrictamente necesarias
-              para su funcionamiento: mantener tu sesión iniciada, proteger el
-              acceso al panel de control y garantizar la seguridad de la
-              plataforma (cookies de autenticación de nuestro proveedor
-              Supabase). No utilizamos cookies de publicidad, rastreo de
-              terceros ni analítica con identificación personal.
-            </p>
-            <p>
-              Al visitar el sitio por primera vez te mostramos un aviso donde
-              puedes aceptar todas las cookies o continuar solo con las
-              necesarias; tu elección se guarda en tu propio navegador y puedes
-              cambiarla en cualquier momento desde el enlace
-              &quot;Preferencias de cookies&quot; al pie de página. También
-              puedes borrar o bloquear cookies desde la configuración de tu
-              navegador, aunque hacerlo puede impedir iniciar sesión.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              7. Ejercicio de Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición)
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              5. Derechos ARCO y Revocación del Consentimiento
             </h2>
             <p>
               Usted tiene derecho a conocer qué datos personales tenemos de usted,
               para qué los utilizamos y las condiciones del uso que les damos
               (Acceso). Asimismo, es su derecho solicitar la corrección de su
-              información en caso de que esté desactualizada o sea inexacta
-              (Rectificación); que la eliminemos de nuestros registros cuando
-              considere que la misma no está siendo utilizada adecuadamente
-              (Cancelación); así como oponerse al uso de sus datos para fines
-              específicos (Oposición).
+              información personal en caso de que esté desactualizada, sea
+              inexacta o incompleta (Rectificación); que la eliminemos de
+              nuestros registros o bases de datos cuando considere que la misma
+              no está siendo utilizada adecuadamente (Cancelación); así como
+              oponerse al uso de sus datos personales para fines específicos
+              (Oposición).
             </p>
             <p>
-              Para ejercer cualquiera de los derechos ARCO, o solicitar la remoción
-              de una fotografía o perfil de jugador, puede ponerse en contacto con
-              nuestro equipo mediante correo electrónico a:{" "}
-              <a
-                href="mailto:privacidad@futpromanager.com"
-                className="text-emerald-700 underline font-medium"
-              >
-                privacidad@futpromanager.com
-              </a>{" "}
-              o a través de los canales de atención y WhatsApp oficial.
+              Para el ejercicio de cualquiera de los derechos ARCO o para revocar
+              su consentimiento, envíe una solicitud a través de nuestra página de{" "}
+              <Link href="/contacto" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline">
+                Contacto
+              </Link>
+              . Su solicitud será atendida en un plazo máximo de 20 días hábiles.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              8. Modificaciones al Aviso de Privacidad
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              6. Uso de Cookies y Tecnologías de Rastreo
             </h2>
             <p>
-              FutPro Manager se reserva el derecho de actualizar el presente
-              Aviso de Privacidad para reflejar cambios en nuestras prácticas
-              operativas o disposiciones legales aplicables. Cualquier cambio será
-              publicado oportunamente en este mismo apartado.
+              Utilizamos cookies estrictamente necesarias para el inicio de sesión
+              y la seguridad de la sesión, así como cookies analíticas para
+              comprender el uso del sitio. Puede gestionar sus preferencias en
+              cualquier momento desde el pie de página del portal.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              7. Cambios al Aviso de Privacidad
+            </h2>
+            <p>
+              El presente aviso de privacidad puede sufrir modificaciones,
+              cambios o actualizaciones derivadas de nuevos requerimientos legales
+              o de mejoras en nuestras prácticas de privacidad. Cualquier cambio
+              sustancial será publicado en esta misma sección.
             </p>
           </section>
         </div>
       </main>
-      <PublicFooter />
+
+      <div className="relative z-10 mt-16">
+        <PublicFooter theme="dark" />
+      </div>
     </div>
   );
 }

@@ -151,7 +151,11 @@ export function ContactForm() {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isPending} className="w-full h-12 text-base sm:text-sm font-semibold gap-2 touch-manipulation">
+      <Button
+        type="submit"
+        disabled={isPending}
+        className="w-full h-12 text-sm font-semibold rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg shadow-emerald-900/20 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation hover:shadow-emerald-900/30 active:scale-[0.99]"
+      >
         <Send className="h-4 w-4" aria-hidden />
         {isPending ? "Enviando..." : "Enviar mensaje"}
       </Button>

@@ -76,7 +76,7 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
 
   if (seasons.length === 0) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+      <main className="w-full">
         <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <PublicLeagueHeader league={league} />
           <PublicNav leagueSlug={league.slug} />
@@ -101,25 +101,25 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
   const selectedSeason = seasonId ? seasons.find((seasonItem) => seasonItem.id === seasonId)! : fallbackSeason;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Temporadas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-gray-600">Selecciona una temporada para consultar sus estadísticas.</p>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-2.5">
+            <h2 className="text-base font-bold text-white">Temporadas</h2>
+          </div>
+          <div className="space-y-3 pt-3">
+            <p className="text-xs text-gray-300">Selecciona una temporada para consultar sus estadísticas.</p>
             <StandingsSeasonSelector
               leagueSlug={league.slug}
               seasons={seasons.map((seasonItem) => ({ id: seasonItem.id, name: seasonItem.name }))}
               selectedSeasonId={selectedSeason.id}
               basePath="/liga"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <SeasonStatsTabs
           currentTab={currentTab}
@@ -129,19 +129,19 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
         <Suspense
           key={`${selectedSeason.id}-${currentTab}`}
           fallback={
-            <Card>
-              <CardHeader>
-                <CardTitle>Clasificación General</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+              <div className="border-b border-white/10 pb-2.5">
+                <h2 className="text-base font-bold text-white">Clasificación General</h2>
+              </div>
+              <div className="pt-4">
                 <div className="animate-pulse space-y-2" aria-label="Cargando tabla de posiciones">
-                  <div className="h-4 w-full rounded bg-gray-100" />
-                  <div className="h-4 w-5/6 rounded bg-gray-100" />
-                  <div className="h-4 w-4/6 rounded bg-gray-100" />
-                  <div className="h-4 w-3/6 rounded bg-gray-100" />
+                  <div className="h-4 w-full rounded bg-white/5" />
+                  <div className="h-4 w-5/6 rounded bg-white/5" />
+                  <div className="h-4 w-4/6 rounded bg-white/5" />
+                  <div className="h-4 w-3/6 rounded bg-white/5" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           }
         >
           <StandingsContent

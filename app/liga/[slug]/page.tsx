@@ -176,53 +176,53 @@ export default async function LeaguePublicPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
 
         {/* Quick Highlights Strip */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Eyebrow tone="brand" className="text-xs">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-5 backdrop-blur-md shadow-xl text-white">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Temporada
-            </Eyebrow>
-            <p className="mt-1 truncate text-base font-bold text-gray-900 sm:text-lg">
+            </span>
+            <p className="mt-1 truncate text-base font-bold text-white sm:text-lg">
               {latestSeason ? latestSeason.name : "Sin temporada"}
             </p>
-            <p className="text-xs capitalize text-gray-500">
+            <p className="text-xs capitalize text-gray-400">
               {latestSeason ? latestSeason.status.replace(/_/g, " ") : "Inactivo"}
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Eyebrow tone="brand" className="text-xs">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-5 backdrop-blur-md shadow-xl text-white">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Equipos
-            </Eyebrow>
-            <p className="mt-1 text-base font-bold text-gray-900 sm:text-lg">
+            </span>
+            <p className="mt-1 text-base font-bold text-white sm:text-lg">
               {resolvedTeamCount}
             </p>
-            <p className="text-xs text-gray-500">Clubes registrados</p>
+            <p className="text-xs text-gray-400">Clubes registrados</p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Eyebrow tone="brand" className="text-xs">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-5 backdrop-blur-md shadow-xl text-white">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Partidos
-            </Eyebrow>
-            <p className="mt-1 text-base font-bold text-gray-900 sm:text-lg">
+            </span>
+            <p className="mt-1 text-base font-bold text-white sm:text-lg">
               {resolvedMatchCount}
             </p>
-            <p className="text-xs text-gray-500">En calendario</p>
+            <p className="text-xs text-gray-400">En calendario</p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Eyebrow tone="brand" className="text-xs">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-5 backdrop-blur-md shadow-xl text-white">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Consulta pública
-            </Eyebrow>
-            <p className="mt-1 text-base font-bold text-emerald-700 sm:text-lg">
+            </span>
+            <p className="mt-1 text-base font-bold text-emerald-400 sm:text-lg">
               En tiempo real
             </p>
-            <p className="text-xs text-gray-500">Actualizado al día</p>
+            <p className="text-xs text-gray-400">Actualizado al día</p>
           </div>
         </div>
 
@@ -231,24 +231,24 @@ export default async function LeaguePublicPage({
             {/* Columna Principal: Partidos (7 columnas) */}
             <div className="space-y-6 lg:col-span-7">
               {/* Próximos Partidos */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 backdrop-blur-xl shadow-xl text-white">
+                <div className="flex flex-row items-center justify-between pb-3 border-b border-white/10">
                   <div>
-                    <Eyebrow tone="brand" className="text-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                       En agenda
-                    </Eyebrow>
-                    <CardTitle className="text-lg">Próximos Partidos</CardTitle>
+                    </span>
+                    <h2 className="text-lg font-bold text-white">Próximos Partidos</h2>
                   </div>
                   <Link
                     href={`/liga/${league.slug}/matches`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
                   >
                     Ver calendario <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="pt-4">
                   {upcomingMatches.length === 0 ? (
-                    <p className="py-4 text-center text-sm text-gray-500">
+                    <p className="py-4 text-center text-sm text-gray-400">
                       No hay partidos programados próximamente.
                     </p>
                   ) : (
@@ -282,30 +282,30 @@ export default async function LeaguePublicPage({
                       ))}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Últimos Resultados */}
               {recentResults.length > 0 ? (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 backdrop-blur-xl shadow-xl text-white">
+                  <div className="flex flex-row items-center justify-between pb-3 border-b border-white/10">
                     <div>
-                      <Eyebrow tone="brand" className="text-xs">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                         Marcadores
-                      </Eyebrow>
-                      <CardTitle className="text-lg">
+                      </span>
+                      <h2 className="text-lg font-bold text-white">
                         Resultados Recientes
-                      </CardTitle>
+                      </h2>
                     </div>
                     <Link
                       href={`/liga/${league.slug}/matches`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
                     >
                       Todos los resultados <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                     </Link>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="divide-y divide-gray-100">
+                  </div>
+                  <div className="pt-2">
+                    <div className="divide-y divide-white/5">
                       {recentResults.map((m) => {
                         const homeName =
                           teamsMap.get(m.home_team_id)?.name ?? "Local";
@@ -315,86 +315,86 @@ export default async function LeaguePublicPage({
                           <Link
                             key={m.id}
                             href={`/liga/${league.slug}/matches/${m.id}`}
-                            className="flex items-center justify-between py-3 transition hover:bg-gray-50 -mx-2 px-2 rounded-lg"
+                            className="flex items-center justify-between py-3 transition hover:bg-white/5 -mx-2 px-3 rounded-xl"
                           >
                             <div className="flex-1 truncate pr-2">
-                              <p className="truncate text-sm font-medium text-gray-900">
+                              <p className="truncate text-sm font-semibold text-white">
                                 {homeName}{" "}
-                                <span className="font-bold text-emerald-700">
+                                <span className="font-mono font-bold text-emerald-400">
                                   {m.home_score}
                                 </span>{" "}
                                 –{" "}
-                                <span className="font-bold text-emerald-700">
+                                <span className="font-mono font-bold text-emerald-400">
                                   {m.away_score}
                                 </span>{" "}
                                 {awayName}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-gray-400">
                                 {m.round_name || "Partido finalizado"}
                               </p>
                             </div>
-                            <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-emerald-700">
+                            <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-semibold text-emerald-400">
                               Detalle <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
                           </Link>
                         );
                       })}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ) : null}
             </div>
 
             {/* Columna Lateral: Clasificación y Figuras (5 columnas) */}
             <div className="space-y-6 lg:col-span-5">
               {/* Mini Tabla de Posiciones */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 backdrop-blur-xl shadow-xl text-white">
+                <div className="flex flex-row items-center justify-between pb-3 border-b border-white/10">
                   <div>
-                    <Eyebrow tone="brand" className="text-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                       Líderes
-                    </Eyebrow>
-                    <CardTitle className="text-lg">Clasificación</CardTitle>
+                    </span>
+                    <h2 className="text-lg font-bold text-white">Clasificación</h2>
                   </div>
                   <Link
                     href={`/liga/${league.slug}/standings`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
                   >
                     Ver tabla completa <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="pt-3">
                   {topStandings.length === 0 ? (
-                    <p className="py-4 text-center text-sm text-gray-500">
+                    <p className="py-4 text-center text-sm text-gray-400">
                       Aún no hay tabla calculada para esta temporada.
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="border-b border-gray-100 text-left text-gray-500">
+                          <tr className="border-b border-white/10 text-left text-gray-400">
                             <th className="pb-2 font-medium">#</th>
                             <th className="pb-2 font-medium">Equipo</th>
                             <th className="pb-2 text-center font-medium">PJ</th>
                             <th className="pb-2 text-center font-medium">DG</th>
-                            <th className="pb-2 text-center font-bold text-gray-900">
+                            <th className="pb-2 text-center font-bold text-white">
                               Pts
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-white/5">
                           {topStandings.map((row, idx) => {
                             const team = teamsMap.get(row.team_id);
                             return (
-                              <tr key={row.id} className="text-gray-800">
-                                <td className="py-2.5 pr-2 font-bold text-emerald-800">
+                              <tr key={row.id} className="text-gray-300">
+                                <td className="py-2.5 pr-2 font-bold text-emerald-400">
                                   {idx + 1}
                                 </td>
-                                <td className="py-2.5 font-medium truncate max-w-[140px]">
+                                <td className="py-2.5 font-medium truncate max-w-[140px] text-white">
                                   {team?.slug ? (
                                     <Link
                                       href={`/liga/${league.slug}/teams/${team.slug}`}
-                                      className="hover:text-emerald-700 hover:underline"
+                                      className="hover:text-emerald-300 hover:underline"
                                     >
                                       {team.name}
                                     </Link>
@@ -402,15 +402,15 @@ export default async function LeaguePublicPage({
                                     team?.name ?? "Equipo"
                                   )}
                                 </td>
-                                <td className="py-2.5 text-center text-gray-500">
+                                <td className="py-2.5 text-center text-gray-400">
                                   {row.played}
                                 </td>
-                                <td className="py-2.5 text-center text-gray-500">
+                                <td className="py-2.5 text-center text-gray-400">
                                   {row.goal_difference > 0
                                     ? `+${row.goal_difference}`
                                     : row.goal_difference}
                                 </td>
-                                <td className="py-2.5 text-center font-bold text-gray-900">
+                                <td className="py-2.5 text-center font-bold text-emerald-400">
                                   {row.points}
                                 </td>
                               </tr>
@@ -420,36 +420,36 @@ export default async function LeaguePublicPage({
                       </table>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Líder de Goleo (Pichichi) */}
               {topScorer ? (
-                <Card className="border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40">
-                  <CardHeader className="pb-2">
-                    <Eyebrow tone="brand" className="text-xs">
+                <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/60 via-slate-900/80 to-slate-900/90 p-5 backdrop-blur-xl shadow-xl text-white">
+                  <div className="pb-2 border-b border-white/10">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                       Goleador del Torneo
-                    </Eyebrow>
-                    <CardTitle className="text-base">
+                    </span>
+                    <h2 className="text-base font-bold text-white">
                       Líder de Goleo Individual
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
+                    </h2>
+                  </div>
+                  <div className="space-y-3 pt-3">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Link
                           href={`/liga/${league.slug}/players/${topScorer.playerId}`}
-                          className="font-semibold text-gray-900 hover:text-emerald-700 hover:underline"
+                          className="font-bold text-white hover:text-emerald-300 hover:underline"
                         >
                           {topScorer.playerName}
                         </Link>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {topScorer.teamName}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-white shadow-sm">
+                      <div className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-3 py-1.5 text-white shadow-md">
                         <Volleyball className="h-4 w-4" aria-hidden />
-                        <span className="text-base font-bold">
+                        <span className="text-base font-bold font-mono">
                           {topScorer.totalGoals}
                         </span>
                         <span className="text-[10px] uppercase tracking-wide opacity-90">
@@ -457,33 +457,32 @@ export default async function LeaguePublicPage({
                         </span>
                       </div>
                     </div>
-                    <div className="pt-1">
+                    <div className="pt-1 border-t border-white/10">
                       <Link
                         href={`/liga/${league.slug}/standings?tab=scorers`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
                       >
                         Ver tabla completa de goleo <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                       </Link>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ) : null}
 
               {/* Enlace a Liguilla y Playoff */}
-              <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4">
-                <Eyebrow className="text-xs text-blue-800">
+              <div className="rounded-2xl border border-blue-500/30 bg-blue-950/40 p-5 backdrop-blur-md text-white">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-300">
                   Fase Eliminatoria
-                </Eyebrow>
-                <h3 className="mt-1 text-sm font-semibold text-gray-900">
+                </span>
+                <h3 className="mt-1 text-sm font-bold text-white">
                   Liguilla y Fases Finales
                 </h3>
-                <p className="mt-1 text-xs text-gray-600">
-                  Consulta el cuadro de cruces, cuartos de final, semifinales y
-                  la gran final del torneo.
+                <p className="mt-1 text-xs text-gray-300 leading-relaxed">
+                  Consulta el cuadro de cruces, cuartos de final, semifinales y la gran final del torneo.
                 </p>
                 <Link
                   href={`/liga/${league.slug}/standings?tab=playoffs`}
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline"
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300 hover:underline"
                 >
                   Ver bracket de liguilla <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </Link>

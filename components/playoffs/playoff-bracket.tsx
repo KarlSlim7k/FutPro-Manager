@@ -9,6 +9,7 @@ interface PlayoffBracketProps {
   bracket: PlayoffBracketData;
   leagueSlug: string;
   basePath?: string;
+  theme?: "light" | "dark";
 }
 
 function TeamRow({
@@ -18,6 +19,7 @@ function TeamRow({
   isWinner,
   leagueSlug,
   basePath,
+  isDark = false,
 }: {
   team: PlayoffTeam;
   score: number;
@@ -25,41 +27,59 @@ function TeamRow({
   isWinner: boolean;
   leagueSlug: string;
   basePath: string;
+  isDark?: boolean;
 }) {
+  const winnerBg = isDark ? "bg-emerald-500/15 font-bold text-white" : "bg-emerald-50/80 font-bold text-gray-900";
+  const regularBg = isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-700 hover:bg-gray-50";
+
   return (
     <div
       className={`flex items-center justify-between px-3 py-2 transition-colors ${
-        isWinner ? "bg-emerald-50/80 font-bold text-gray-900" : "text-gray-700 hover:bg-gray-50"
+        isWinner ? winnerBg : regularBg
       }`}
     >
       <div className="flex items-center gap-2.5 min-w-0 pr-2">
-        <div className="relative h-6 w-6 overflow-hidden rounded-full bg-gray-100 border border-gray-200 shrink-0">
+        <div className={`relative h-6 w-6 overflow-hidden rounded-full shrink-0 border ${
+          isDark ? "bg-slate-800 border-white/10" : "bg-gray-100 border-gray-200"
+        }`}>
           {team.logo_url ? (
             <Image src={team.logo_url} alt={team.name} fill className="object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-gray-500">
+            <div className={`flex h-full w-full items-center justify-center text-[10px] font-semibold ${
+              isDark ? "text-gray-400" : "text-gray-500"
+            }`}>
               {team.name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
         <TextLink
           href={`${basePath}/${leagueSlug}/teams/${team.slug}`}
-          className={`truncate text-xs sm:text-sm ${isWinner ? "text-emerald-950 font-semibold" : "text-gray-800"}`}
+          className={`truncate text-xs sm:text-sm ${
+            isWinner
+              ? isDark ? "text-emerald-300 font-semibold" : "text-emerald-950 font-semibold"
+              : isDark ? "text-gray-200 hover:text-emerald-400" : "text-gray-800"
+          }`}
         >
           {team.name}
         </TextLink>
         {isWinner && (
-          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" aria-label="Ganador" />
+          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" aria-label="Ganador" />
         )}
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0 text-right">
         {penalties !== null && (
-          <span className="rounded-xs bg-gray-100 px-1 py-0.5 text-[10px] font-normal text-gray-500" title="Penales">
+          <span className={`rounded-xs px-1 py-0.5 text-[10px] font-normal ${
+            isDark ? "bg-white/10 text-gray-400" : "bg-gray-100 text-gray-500"
+          }`} title="Penales">
             ({penalties}p)
           </span>
         )}
-        <span className={`min-w-6 text-center text-sm ${isWinner ? "font-black text-emerald-700" : "font-semibold text-gray-600"}`}>
+        <span className={`min-w-6 text-center text-sm ${
+          isWinner
+            ? isDark ? "font-black text-emerald-400" : "font-black text-emerald-700"
+            : isDark ? "font-semibold text-gray-300" : "font-semibold text-gray-600"
+        }`}>
           {score}
         </span>
       </div>
@@ -72,31 +92,39 @@ function MatchSeriesCard({
   leagueSlug,
   basePath,
   isFinal = false,
+  isDark = false,
 }: {
   series: PlayoffSeries;
   leagueSlug: string;
   basePath: string;
   isFinal?: boolean;
+  isDark?: boolean;
 }) {
+  const cardBorder = isFinal
+    ? "border-amber-400/60 ring-2 ring-amber-400/20"
+    : isDark ? "border-white/10" : "border-gray-200";
+
+  const cardBg = isDark ? "bg-slate-900/60 backdrop-blur-md" : "bg-white";
+
+  const headerBg = isFinal
+    ? isDark ? "bg-amber-950/40 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
+    : isDark ? "bg-white/5 text-gray-300 border-white/10" : "bg-gray-50 text-gray-500 border-gray-100";
+
   return (
     <div
-      className={`rounded-xl border bg-white shadow-xs overflow-hidden transition hover:shadow-md ${
-        isFinal ? "border-amber-400 ring-2 ring-amber-300/30" : "border-gray-200"
-      }`}
+      className={`rounded-xl border shadow-sm overflow-hidden transition hover:shadow-md ${cardBorder} ${cardBg}`}
     >
-      <div className={`px-3 py-1.5 text-[11px] font-medium border-b flex items-center justify-between ${
-        isFinal ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-gray-50 text-gray-500 border-gray-100"
-      }`}>
+      <div className={`px-3 py-1.5 text-[11px] font-medium border-b flex items-center justify-between ${headerBg}`}>
         <span className="flex items-center gap-1 font-semibold uppercase tracking-wider">
-          {isFinal && <Trophy className="h-3.5 w-3.5 text-amber-600" />}
+          {isFinal && <Trophy className="h-3.5 w-3.5 text-amber-400" />}
           {isFinal ? "Gran Final" : series.stage.replace(/_/g, " ")}
         </span>
-        <span className="text-[10px] text-gray-400">
+        <span className={`text-[10px] ${isDark ? "text-gray-400" : "text-gray-400"}`}>
           {series.format === "two_legged" ? "Ida y Vuelta (Global)" : "Partido Único"}
         </span>
       </div>
 
-      <div className="divide-y divide-gray-100">
+      <div className={`divide-y ${isDark ? "divide-white/5" : "divide-gray-100"}`}>
         <TeamRow
           team={series.teamA}
           score={series.teamAScore}
@@ -104,6 +132,7 @@ function MatchSeriesCard({
           isWinner={series.winnerId === series.teamA.id}
           leagueSlug={leagueSlug}
           basePath={basePath}
+          isDark={isDark}
         />
         <TeamRow
           team={series.teamB}
@@ -112,23 +141,26 @@ function MatchSeriesCard({
           isWinner={series.winnerId === series.teamB.id}
           leagueSlug={leagueSlug}
           basePath={basePath}
+          isDark={isDark}
         />
       </div>
 
       {/* Partidos individuales de la serie */}
       {series.matches.length > 0 && (
-        <div className="bg-gray-50/70 px-3 py-1.5 border-t border-gray-100 text-[11px] text-gray-500 flex flex-wrap gap-2 justify-between">
+        <div className={`px-3 py-1.5 border-t text-[11px] flex flex-wrap gap-2 justify-between ${
+          isDark ? "bg-white/5 border-white/10 text-gray-400" : "bg-gray-50/70 border-gray-100 text-gray-500"
+        }`}>
           {series.matches.map((m, idx) => (
             <TextLink
               key={m.id}
               href={`${basePath}/${leagueSlug}/matches/${m.id}`}
-              className="text-gray-500 hover:text-emerald-700"
+              className={isDark ? "text-gray-400 hover:text-emerald-400" : "text-gray-500 hover:text-emerald-700"}
             >
               {series.format === "two_legged" ? (idx === 0 ? "Ida: " : "Vuelta: ") : "Detalle: "}
-              <span className="font-semibold text-gray-700">
+              <span className={`font-semibold ${isDark ? "text-gray-200" : "text-gray-700"}`}>
                 {m.home_score} - {m.away_score}
               </span>
-              {m.status !== "completed" && <span className="text-amber-600 ml-1">({m.status})</span>}
+              {m.status !== "completed" && <span className="text-amber-400 ml-1">({m.status})</span>}
             </TextLink>
           ))}
         </div>
@@ -141,7 +173,9 @@ export function PlayoffBracket({
   bracket,
   leagueSlug,
   basePath = "/liga",
+  theme,
 }: PlayoffBracketProps) {
+  const isDark = theme === "dark" || (theme === undefined && basePath.startsWith("/liga"));
   if (!bracket.hasPlayoffs) {
     return (
       <EmptyState
@@ -158,8 +192,8 @@ export function PlayoffBracket({
           {/* Columna 1: Cuartos de Final (o Semifinales si no hay cuartos) */}
           {bracket.quarterFinals.length > 0 ? (
             <div className="space-y-4">
-              <div className="text-center pb-1 border-b border-gray-200">
-                <Eyebrow as="div">Cuartos de Final</Eyebrow>
+              <div className={`text-center pb-1 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                <Eyebrow as="div" className={isDark ? "text-gray-300 font-semibold" : undefined}>Cuartos de Final</Eyebrow>
               </div>
               <div className="space-y-4">
                 {bracket.quarterFinals.map((series) => (
@@ -168,6 +202,7 @@ export function PlayoffBracket({
                     series={series}
                     leagueSlug={leagueSlug}
                     basePath={basePath}
+                    isDark={isDark}
                   />
                 ))}
               </div>
@@ -177,8 +212,8 @@ export function PlayoffBracket({
           {/* Columna 2: Semifinales */}
           {bracket.semiFinals.length > 0 ? (
             <div className="space-y-4">
-              <div className="text-center pb-1 border-b border-gray-200">
-                <Eyebrow as="div">Semifinales</Eyebrow>
+              <div className={`text-center pb-1 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                <Eyebrow as="div" className={isDark ? "text-gray-300 font-semibold" : undefined}>Semifinales</Eyebrow>
               </div>
               <div className="space-y-6">
                 {bracket.semiFinals.map((series) => (
@@ -187,6 +222,7 @@ export function PlayoffBracket({
                     series={series}
                     leagueSlug={leagueSlug}
                     basePath={basePath}
+                    isDark={isDark}
                   />
                 ))}
               </div>
@@ -197,27 +233,31 @@ export function PlayoffBracket({
           <div className="space-y-6">
             {bracket.final && (
               <div className="space-y-2">
-                <div className="text-center pb-1 border-b border-amber-300">
-                  <Eyebrow as="div" className="inline-flex items-center gap-1.5 text-amber-800 font-bold"><Trophy className="h-3.5 w-3.5" aria-hidden /> Gran Final</Eyebrow>
+                <div className={`text-center pb-1 border-b ${isDark ? "border-amber-500/30" : "border-amber-300"}`}>
+                  <Eyebrow as="div" className={`inline-flex items-center gap-1.5 font-bold ${isDark ? "text-amber-400" : "text-amber-800"}`}>
+                    <Trophy className="h-3.5 w-3.5" aria-hidden /> Gran Final
+                  </Eyebrow>
                 </div>
                 <MatchSeriesCard
                   series={bracket.final}
                   leagueSlug={leagueSlug}
                   basePath={basePath}
                   isFinal
+                  isDark={isDark}
                 />
               </div>
             )}
 
             {bracket.thirdPlace && (
               <div className="space-y-2 pt-2">
-                <div className="text-center pb-1 border-b border-gray-200">
-                  <Eyebrow as="div">Tercer Lugar</Eyebrow>
+                <div className={`text-center pb-1 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                  <Eyebrow as="div" className={isDark ? "text-gray-300 font-semibold" : undefined}>Tercer Lugar</Eyebrow>
                 </div>
                 <MatchSeriesCard
                   series={bracket.thirdPlace}
                   leagueSlug={leagueSlug}
                   basePath={basePath}
+                  isDark={isDark}
                 />
               </div>
             )}

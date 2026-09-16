@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -178,7 +177,7 @@ export default async function PublicPlayerPage({ params }: Props) {
   const events = (eventsRes.data ?? []) as EventItem[];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-gray-100">
+    <main className="w-full">
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicLeagueHeader league={league} />
         <PublicNav leagueSlug={league.slug} />
@@ -191,67 +190,67 @@ export default async function PublicPlayerPage({ params }: Props) {
         />
 
         {/* Perfil */}
-        <Card>
-          <CardHeader>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <CardTitle className="text-xl">{player.full_name}</CardTitle>
+              <h2 className="text-xl font-bold text-white">{player.full_name}</h2>
               <StatusBadge variant={PLAYER_STATUS_VARIANTS[player.status]}>
                 {PLAYER_STATUS_LABELS[player.status]}
               </StatusBadge>
             </div>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 pt-4">
             {player.photo_url ? (
               <div className="sm:col-span-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={player.photo_url}
                   alt={`Foto de ${player.full_name}`}
-                  className="h-24 w-24 rounded-lg border border-gray-200 object-cover"
+                  className="h-24 w-24 rounded-xl border border-white/10 bg-white/5 object-cover"
                 />
               </div>
             ) : null}
             <div>
-              <Eyebrow>Posición</Eyebrow>
-              <p className="mt-1 text-sm text-gray-900">
+              <Eyebrow className="text-emerald-400">Posición</Eyebrow>
+              <p className="mt-1 text-sm text-gray-200">
                 {player.preferred_position ?? "No definida"}
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Registros */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Historial de equipos</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-base font-bold text-white">Historial de equipos</h2>
+          </div>
+          <div className="pt-3">
             {registrations.length === 0 ? (
               <EmptyState
                 title="Sin registros"
                 description="No hay registros de plantillas disponibles para este jugador."
               />
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-white/10">
                 {registrations.map((r) => {
                   const team = teamsMap.get(r.team_id);
                   const season = seasonsMap.get(r.season_id);
                   return (
-                    <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                    <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3.5">
                       <div className="space-y-0.5">
                         {team?.slug ? (
                           <Link
                             href={`/liga/${league.slug}/teams/${team.slug}`}
-                            className="text-sm font-medium text-emerald-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+                            className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                           >
                             {team.name}
                           </Link>
                         ) : (
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-semibold text-white">
                             {team?.name ?? "No disponible"}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {season?.name ?? "Temporada no disponible"}
                           {r.jersey_number != null ? ` · #${r.jersey_number}` : ""}
                         </p>
@@ -264,28 +263,28 @@ export default async function PublicPlayerPage({ params }: Props) {
                 })}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Eventos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Eventos recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
+          <div className="border-b border-white/10 pb-3">
+            <h2 className="text-base font-bold text-white">Eventos recientes</h2>
+          </div>
+          <div className="pt-3">
             {events.length === 0 ? (
               <EmptyState
                 title="Sin eventos"
                 description="No hay eventos disponibles para este jugador."
               />
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-white/10">
                 {events.map((e) => (
-                  <div key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
-                    <span className="w-8 shrink-0 text-xs font-medium text-gray-400">
+                  <div key={e.id} className="flex items-center gap-3 py-3 text-sm">
+                    <span className="w-8 shrink-0 text-xs font-mono font-bold text-emerald-400">
                       {e.minute}&apos;
                     </span>
-                    <span className="flex-1 text-gray-700">
+                    <span className="flex-1 text-gray-200">
                       {EVENT_LABELS[e.event_type] ?? e.event_type}
                       {e.notes ? (
                         <span className="ml-1 text-gray-400">· {e.notes}</span>
@@ -293,7 +292,7 @@ export default async function PublicPlayerPage({ params }: Props) {
                     </span>
                     <Link
                       href={`/liga/${league.slug}/matches/${e.match_id}`}
-                      className="shrink-0 text-xs text-emerald-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+                      className="shrink-0 text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     >
                       Ver partido
                     </Link>
@@ -301,8 +300,8 @@ export default async function PublicPlayerPage({ params }: Props) {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
     </main>
   );
