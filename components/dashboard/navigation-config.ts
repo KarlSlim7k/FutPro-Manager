@@ -6,6 +6,7 @@ import {
   Calendar,
   CreditCard,
   User,
+  UserCog,
   Sliders,
   Activity,
   type LucideIcon,
@@ -42,6 +43,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Auditoría", href: "/dashboard/audit", icon: Shield },
         ],
         drawer: [
+          { label: "Usuarios", href: "/dashboard/users", icon: UserCog },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
@@ -53,6 +55,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
           { label: "Partidos", href: "/dashboard/matches", icon: Calendar },
           { label: "Auditoría", href: "/dashboard/audit", icon: Shield },
+          { label: "Usuarios", href: "/dashboard/users", icon: UserCog },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
