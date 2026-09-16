@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
-import { PublicFooter } from "@/components/public/public-footer";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type { Season } from "@/types/database";
@@ -157,7 +156,6 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
           />
         </Suspense>
       </section>
-      <PublicFooter />
     </main>
   );
 }

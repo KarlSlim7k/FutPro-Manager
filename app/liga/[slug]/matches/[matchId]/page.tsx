@@ -6,7 +6,6 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
-import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { PublicMatchEvents } from "@/components/public/public-match-events";
@@ -396,7 +395,6 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
           </CardContent>
         </Card>
       </section>
-      <PublicFooter />
     </main>
   );
 }
