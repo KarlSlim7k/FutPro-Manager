@@ -7,6 +7,7 @@ import { TextLink } from "@/components/ui/text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { DashboardTrendsChart } from "@/components/dashboard/dashboard-trends-chart";
+import { PlatformMetricsCard } from "@/components/dashboard/platform-metrics-card";
 import { createClient } from "@/lib/supabase/server";
 import type { MatchStatus } from "@/types/database";
 
@@ -167,6 +168,15 @@ export default async function DashboardPage() {
 
   let recentActivity: Array<{ id: string; action: string; created_at: string; leagueName: string | null }> = [];
   let isSuperAdmin = false;
+  let platformMetrics: {
+    totalUsers: number;
+    totalLeagues: number;
+    activeLeagues: number;
+    totalTeams: number;
+    totalPlayers: number;
+    matchesLast7Days: number;
+    matchesCompletedLast7Days: number;
+  } | null = null;
   let userTeams: Array<{ id: string; name: string; slug: string; role: string; leagueSlug: string }> = [];
   let userAssignedMatches: Array<{
     id: string;
@@ -253,6 +263,41 @@ export default async function DashboardPage() {
       created_at: a.created_at as string,
       leagueName: a.league_id ? (auditLeagueNames.get(a.league_id as string) ?? null) : null,
     }));
+
+    // Métricas globales de plataforma (solo super_admin): conteos exactos con RLS mediante.
+    if (isSuperAdmin) {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [
+        { count: totalUsers },
+        { count: totalLeagues },
+        { count: activeLeagues },
+        { count: totalTeams },
+        { count: totalPlayers },
+        { count: matchesLast7Days },
+        { count: matchesCompletedLast7Days },
+      ] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("leagues").select("id", { count: "exact", head: true }),
+        supabase.from("leagues").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("teams").select("id", { count: "exact", head: true }),
+        supabase.from("players").select("id", { count: "exact", head: true }),
+        supabase.from("matches").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+        supabase
+          .from("matches")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "completed")
+          .gte("created_at", sevenDaysAgo),
+      ]);
+      platformMetrics = {
+        totalUsers: totalUsers ?? 0,
+        totalLeagues: totalLeagues ?? 0,
+        activeLeagues: activeLeagues ?? 0,
+        totalTeams: totalTeams ?? 0,
+        totalPlayers: totalPlayers ?? 0,
+        matchesLast7Days: matchesLast7Days ?? 0,
+        matchesCompletedLast7Days: matchesCompletedLast7Days ?? 0,
+      };
+    }
   }
 
   function formatDateTime(value: string) {
@@ -281,6 +326,8 @@ export default async function DashboardPage() {
         totalRedCards={totalRedCards}
         roundTrends={roundTrends}
       />
+
+      {platformMetrics ? <PlatformMetricsCard metrics={platformMetrics} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

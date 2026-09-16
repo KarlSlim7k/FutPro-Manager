@@ -7,6 +7,7 @@ import {
   CreditCard,
   User,
   UserCog,
+  Mail,
   Sliders,
   Activity,
   type LucideIcon,
@@ -44,6 +45,8 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         ],
         drawer: [
           { label: "Usuarios", href: "/dashboard/users", icon: UserCog },
+          { label: "Admin ligas", href: "/dashboard/leagues/admin", icon: Trophy },
+          { label: "Mensajes", href: "/dashboard/contact-messages", icon: Mail },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
@@ -53,9 +56,11 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         all: [
           { label: "Panel de control", href: "/dashboard", icon: Home, exact: true },
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
+          { label: "Admin ligas", href: "/dashboard/leagues/admin", icon: Trophy },
           { label: "Partidos", href: "/dashboard/matches", icon: Calendar },
           { label: "Auditoría", href: "/dashboard/audit", icon: Shield },
           { label: "Usuarios", href: "/dashboard/users", icon: UserCog },
+          { label: "Mensajes", href: "/dashboard/contact-messages", icon: Mail },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
