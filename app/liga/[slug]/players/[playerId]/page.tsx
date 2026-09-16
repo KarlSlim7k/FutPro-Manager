@@ -9,9 +9,9 @@ import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type {
-  League,
   MatchEvent,
   MatchEventType,
   Player,
@@ -23,11 +23,37 @@ import type {
 } from "@/types/database";
 import type { StatusBadgeVariant } from "@/components/ui/status-badge";
 
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data: leagues } = await supabase
+    .from("leagues")
+    .select("id, slug")
+    .eq("is_public", true)
+    .eq("status", "active");
+
+  if (!leagues || leagues.length === 0) return [];
+
+  const leagueIds = leagues.map((l) => l.id);
+  const leagueMap = new Map(leagues.map((l) => [l.id, l.slug]));
+
+  const { data: players } = await supabase
+    .from("players")
+    .select("id, league_id")
+    .in("league_id", leagueIds)
+    .limit(50);
+
+  return (players ?? []).map((p) => ({
+    slug: leagueMap.get(p.league_id) ?? "",
+    playerId: p.id,
+  }));
+}
+
 interface Props {
   params: Promise<{ slug: string; playerId: string }>;
 }
 
-type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status" | "logo_url">;
 type PlayerDetail = Pick<Player, "id" | "full_name" | "status" | "preferred_position" | "photo_url">;
 type Registration = Pick<PlayerTeamRegistration, "id" | "team_id" | "season_id" | "status" | "jersey_number" | "registered_at">;
 type TeamItem = Pick<Team, "id" | "name" | "slug">;
@@ -77,15 +103,10 @@ const EVENT_LABELS: Record<MatchEventType, string> = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, playerId } = await params;
-  const supabase = await createClient();
-  const { data: league } = await supabase
-    .from("leagues")
-    .select("id, name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const league = await getPublicLeagueBySlug(slug);
   if (!league) return { title: "No encontrado | FutPro Manager" };
+
+  const supabase = createPublicClient();
   const { data: player } = await supabase
     .from("players")
     .select("full_name")
@@ -114,17 +135,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicPlayerPage({ params }: Props) {
   const { slug, playerId } = await params;
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
+  if (!league) notFound();
 
-  const { data: leagueData } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status, logo_url")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-  if (!leagueData) notFound();
-  const league = leagueData as LeagueSummary;
+  const supabase = createPublicClient();
 
   const { data: playerData } = await supabase
     .from("players")

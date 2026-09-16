@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { League } from "@/types/database";
 
 export type PublicLeague = Pick<
@@ -14,7 +14,7 @@ export type PublicLeague = Pick<
  */
 export const getPublicLeagueBySlug = cache(
   async (slug: string): Promise<PublicLeague | null> => {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("leagues")
       .select("id, name, slug, description, status, logo_url")

@@ -10,7 +10,8 @@ import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { PublicMatchCard } from "@/components/public/public-match-card";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
+import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type {
   League,
   Match,
@@ -20,6 +21,32 @@ import type {
   Season,
   Team,
 } from "@/types/database";
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data: leagues } = await supabase
+    .from("leagues")
+    .select("id, slug")
+    .eq("is_public", true)
+    .eq("status", "active");
+
+  if (!leagues || leagues.length === 0) return [];
+
+  const leagueIds = leagues.map((l) => l.id);
+  const leagueMap = new Map(leagues.map((l) => [l.id, l.slug]));
+
+  const { data: teams } = await supabase
+    .from("teams")
+    .select("slug, league_id")
+    .in("league_id", leagueIds);
+
+  return (teams ?? []).map((t) => ({
+    slug: leagueMap.get(t.league_id) ?? "",
+    teamSlug: t.slug,
+  }));
+}
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug" | "description" | "status" | "logo_url">;
 type TeamDetail = Pick<
@@ -91,20 +118,13 @@ function formatDateTime(value: string) {
 
 export async function generateMetadata({ params }: PublicTeamDetailPageProps): Promise<Metadata> {
   const { slug, teamSlug } = await params;
-  const supabase = await createClient();
-
-  const { data: leagueData } = await supabase
-    .from("leagues")
-    .select("id, name")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
+  const leagueData = await getPublicLeagueBySlug(slug);
 
   if (!leagueData) {
     return { title: "Equipo no encontrado | FutPro Manager" };
   }
 
+  const supabase = createPublicClient();
   const { data: teamData } = await supabase
     .from("teams")
     .select("name")
@@ -118,16 +138,24 @@ export async function generateMetadata({ params }: PublicTeamDetailPageProps): P
 
   const title = `${teamData.name} - ${leagueData.name} | FutPro Manager`;
   const description = `Ficha pública del equipo ${teamData.name} en ${leagueData.name}.`;
-  return { title, description, openGraph: {
+  return {
+    title,
+    description,
+    openGraph: {
       title,
       description,
       type: "website",
       locale: "es_MX",
       siteName: "FutPro Manager",
       images: [{ url: "/og/futpro-manager.jpg", width: 640, height: 640 }],
-    }, twitter: { card: "summary", title, description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
       images: ["/og/futpro-manager.jpg"],
-    } };
+    },
+  };
 }
 
 export default async function PublicTeamDetailPage({ params, searchParams }: PublicTeamDetailPageProps) {
@@ -135,25 +163,13 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
   const { seasonId: rawSeasonId } = await searchParams;
   const seasonId = Array.isArray(rawSeasonId) ? rawSeasonId[0] : rawSeasonId;
 
-  const supabase = await createClient();
+  const league = await getPublicLeagueBySlug(slug);
 
-  const { data: leagueData, error: leagueError } = await supabase
-    .from("leagues")
-    .select("id, name, slug, description, status, logo_url")
-    .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (leagueError) {
-    throw leagueError;
-  }
-
-  if (!leagueData) {
+  if (!league) {
     notFound();
   }
 
-  const league = leagueData as LeagueSummary;
+  const supabase = createPublicClient();
 
   const { data: teamData, error: teamError } = await supabase
     .from("teams")
@@ -287,7 +303,7 @@ async function PublicTeamSeasonContent({
   team: TeamDetail;
   seasons: SeasonItem[];
   seasonId: string | undefined;
-  supabase: Awaited<ReturnType<typeof createClient>>;
+  supabase: ReturnType<typeof createPublicClient>;
 }) {
   const fallbackSeason = seasons[0];
 

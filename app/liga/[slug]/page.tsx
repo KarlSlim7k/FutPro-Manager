@@ -9,13 +9,26 @@ import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicMatchCard } from "@/components/public/public-match-card";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import { getSeasonTopScorer } from "@/lib/stats/get-season-top-scorer";
 import type { TopScorerItem } from "@/lib/stats/get-season-stats";
 import type { Match, Standing } from "@/types/database";
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("leagues")
+    .select("slug")
+    .eq("is_public", true)
+    .eq("status", "active");
+
+  return (data ?? []).map((league) => ({
+    slug: league.slug,
+  }));
+}
 
 interface LeaguePublicPageProps {
   params: Promise<{ slug: string }>;
@@ -64,7 +77,7 @@ export default async function LeaguePublicPage({
     notFound();
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const [
     { data: seasonsData },

@@ -10,7 +10,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicFooter } from "@/components/public/public-footer";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type { Season, Standing } from "@/types/database";
 
@@ -90,7 +90,7 @@ export default async function LeagueStandingsPublicPage({ params, searchParams }
     notFound();
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: seasonsData, error: seasonsError } = await supabase
     .from("seasons")

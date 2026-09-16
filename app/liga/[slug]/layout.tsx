@@ -1,4 +1,18 @@
 import { PublicFooter } from "@/components/public/public-footer";
+import { createPublicClient } from "@/lib/supabase/public";
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("leagues")
+    .select("slug")
+    .eq("is_public", true)
+    .eq("status", "active");
+
+  return (data ?? []).map((league) => ({
+    slug: league.slug,
+  }));
+}
 
 export default function LeaguePublicLayout({
   children,

@@ -12,11 +12,38 @@ import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { PublicMatchEvents } from "@/components/public/public-match-events";
 import { PublicLiveMatchHeader } from "@/components/public/public-live-match-header";
 import { MatchShareCard } from "@/components/social/match-share-card";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type { Match, Season, Team, Venue, MatchEvent, Player } from "@/types/database";
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data: leagues } = await supabase
+    .from("leagues")
+    .select("id, slug")
+    .eq("is_public", true)
+    .eq("status", "active");
+
+  if (!leagues || leagues.length === 0) return [];
+
+  const leagueIds = leagues.map((l) => l.id);
+  const leagueMap = new Map(leagues.map((l) => [l.id, l.slug]));
+
+  const { data: matches } = await supabase
+    .from("matches")
+    .select("id, league_id")
+    .in("league_id", leagueIds)
+    .order("scheduled_at", { ascending: false })
+    .limit(50);
+
+  return (matches ?? []).map((m) => ({
+    slug: leagueMap.get(m.league_id) ?? "",
+    matchId: m.id,
+  }));
+}
+
 type MatchDetail = Pick<
   Match,
   | "id"
@@ -72,7 +99,7 @@ export async function generateMetadata({ params }: PublicMatchDetailPageProps): 
     return { title: "Partido no encontrado | FutPro Manager" };
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: matchData } = await supabase
     .from("matches")
@@ -122,7 +149,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
     notFound();
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: matchData, error: matchError } = await supabase
     .from("matches")
