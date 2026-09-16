@@ -13,6 +13,9 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
+// Nota: formatBytes vive duplicado (server para stats, client para la lista)
+// porque las funciones no son serializables como props server -> client.
+
 interface StoragePageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -122,7 +125,7 @@ export default async function StorageAdminPage({ searchParams }: StoragePageProp
                   description="No hay objetos que coincidan con la búsqueda."
                 />
               ) : (
-                <StorageObjectList objects={overview.objects} formatBytes={formatBytes} />
+                <StorageObjectList objects={overview.objects} />
               )}
             </CardContent>
           </Card>

@@ -3,12 +3,18 @@
 import { useState, useTransition } from "react";
 import { deleteStorageObjectAction, type StorageObjectRow } from "@/app/dashboard/storage/actions";
 
-interface StorageObjectListProps {
-  objects: StorageObjectRow[];
-  formatBytes: (bytes: number) => string;
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
-export function StorageObjectList({ objects, formatBytes }: StorageObjectListProps) {
+interface StorageObjectListProps {
+  objects: StorageObjectRow[];
+}
+
+export function StorageObjectList({ objects }: StorageObjectListProps) {
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Record<string, string>>({});
 
