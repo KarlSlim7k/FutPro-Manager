@@ -13,6 +13,7 @@ const menuItems = [
   { label: "Partidos", href: "/dashboard/matches" },
   { label: "Auditoría", href: "/dashboard/audit" },
   { label: "Suscripciones", href: "/dashboard/subscriptions" },
+  { label: "Mi perfil", href: "/dashboard/profile" },
   { label: "Tipos", href: "/dashboard/types" },
 ];
 

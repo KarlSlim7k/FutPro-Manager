@@ -61,8 +61,7 @@ Estado actual del MVP:
 ### Partidos
 - **Estado:** Implementado (cobertura 100% para league_admin y referee).
 - **Evidencia en repo:** `app/dashboard/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/edit/page.tsx`, `app/dashboard/leagues/[slug]/matches/[matchId]/cedula/page.tsx`, `components/matches/*`, `components/referees/*`.
-- **Funcionalidad existente:** creación, edición y detalle de partidos por liga; filtros de calendario por estado/equipo/jornada y filtro rápido "Solo mis partidos asignados"; asignación de cuerpo arbitral completo (`match_officials`: árbitro central, primer asistente, segundo asistente y cuarto oficial) manteniendo retrocompatibilidad total con `matches.referee_id` mediante trigger de sincronización bidireccional; historial de arbitraje desde auditoría (`match.referee_updated`, `match.referee_removed`, `match.officials_updated`); hub "Mis partidos asignados" en `/dashboard/matches` y widget en `/dashboard`; calendario y gestión de disponibilidad arbitral (`referee_availabilities` y `RefereeAvailabilityManager`) con detección de árbitros no disponibles en el formulario de designación (`RefereeAssignmentForm`); centro de notificaciones in-app en header (`user_notifications` y `NotificationBell`) con avisos automáticos de designación arbitral; panel arbitral destacado en detalle de partido; cédula oficial física y digital (`/cedula`) lista para impresión con desglose de cuerpo arbitral y líneas de firmas formales; tarjetas de partido con insignia `Mi partido asignado` y enlaces directos a detalle, resultado, eventos y cédula; protección fail-closed en edición de programación/sede para roles no administradores.
-- **Pendiente:** auditoría automática SQL/event-bus (Frente 3) y media/métricas avanzadas (Frente 4).
+- **Post-MVP Frentes 1, 2, 3 y 4:** 100% completados (Multi-árbitro, disponibilidad y notificaciones, auditoría automática SQL y media/métricas avanzadas).
 
 ### Resultados y eventos de partido
 - **Estado:** Implementado.
@@ -88,7 +87,7 @@ Estado actual del MVP:
   - `coach`: 100% (gestión deportiva integral: alta, edición y foto de jugadores; inscripción, dorsal, estado y baja en plantilla de sus equipos; registro y eliminación de eventos en partidos donde participa su club; acceso directo en Hub "Mis equipos"; bloqueo estricto en UI y server actions de edición de equipo, logo, staff, marcadores y administración de liga).
   - `referee`: 100% (gestión arbitral completa: hubs y widgets "Mis partidos asignados" en dashboard y partidos, captura y ajuste de resultado técnico con restricción estricta de trigger RLS `ensure_match_update_scope`, captura y eliminación de eventos para ambos equipos participantes, consulta e impresión de cédula oficial de partido, panel arbitral en detalle, filtros dedicados en calendario, y bloqueo estricto de edición de programación, sedes, asignación de árbitros y administración institucional o deportiva).
   - `viewer`: 100% (modo consulta informativo sin acciones de mutación).
-- **Pendiente:** multi-árbitro con ternas arbitrales completas y disponibilidad de árbitros.
+- **Post-MVP Frentes 1 y 2 (Multi-árbitro y Disponibilidad):** 100% completados con ternas completas (`match_officials`), retrocompatibilidad bidireccional, notificaciones in-app y calendario de indisponibilidad.
 
 ### Vista pública
 - **Estado:** Implementado para MVP.
@@ -109,17 +108,33 @@ Estado actual del MVP:
 - **QA actualizado (2026-05-18):** detalle de jugador, eventos con filtros, filtros de partidos y SEO basico validados via code review, build y lint (PR #4, PR #5).
 - **QA actualizado (2026-05-19):** `/liga/liga-qa-codex/players/0aae9fd4-111e-4c0b-bb18-d31f7ea0218e` carga sin sesion tras migracion `20260519173826_public_players_read_policy.sql`; jugador inexistente retorna 404; sin controles admin.
 
-### Media uploads
-- **Estado:** Implementado para MVP + mantenimiento.
-- **Evidencia en repo:** `lib/media/upload-media.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/entity-image-preview.tsx`, `components/media/media-cleanup-form.tsx`, server actions de media en liga/equipo/jugador, `app/dashboard/leagues/[slug]/media/actions.ts` (`cleanupOrphanMediaAction`), `docs/QA_MEDIA_UPLOADS.md`, `docs/STORAGE_SETUP.md`.
-- **Funcionalidad existente:** upload de logo de liga, logo de equipo y foto de jugador con validación server-side de MIME/tamaño, metadata en `media_uploads`, auditoría best-effort y fallback controlado cuando falta configuración de Storage. Bucket `league-media` público y policies de lectura/upload verificadas en Supabase (2026-05-19). Limpieza de huérfanos desde detalle de liga (archivos >24h sin referencia, con borrado físico + auditoría `media.orphans_cleaned`).
-- **Pendiente:** hardening post-MVP (transformaciones/crop/resize, múltiples imágenes, avatares, CDN/custom domain).
+### Media uploads y Recursos Multimedia
+- **Estado:** Implementado al 100% (MVP + Post-MVP Frente 4 completo).
+- **Evidencia en repo:** `lib/media/upload-media.ts`, `lib/media/image-processor.ts`, `lib/media/media.test.ts`, `components/media/entity-image-upload-form.tsx`, `components/media/image-cropper-modal.tsx`, `components/media/multi-image-upload-form.tsx`, `components/media/media-gallery-grid.tsx`, `components/media/entity-image-preview.tsx`, `components/media/media-cleanup-form.tsx`, `components/ui/avatar.tsx`, `app/dashboard/profile/`, `app/dashboard/leagues/[slug]/media/`, `supabase/migrations/20260916081652_media_enhancements.sql`.
+- **Funcionalidad existente:**
+  - **Recorte y optimización client-side:** utilidad `cropAndResizeImage` con HTML5 Canvas en navegador (sin dependencias externas pesadas), presets automáticos según entidad (`square` 1:1 para logos y avatares, `portrait` 3:4 para fichas de jugadores, `free` libre), zoom interactivo (1x a 3x), controles de desplazamiento (pan X/Y) y exportación directa en formato comprimido WebP.
+  - **Avatares y perfil de usuario:** módulo dedicado `/dashboard/profile` para todos los roles de la plataforma; componente reutilizable `Avatar` con fallback a iniciales o silueta; subida de foto de perfil con recorte 1:1, auditoría `profile.avatar_updated` y edición de datos personales (`display_name`, `full_name`, `phone`); integración visual destacada en el encabezado (`DashboardHeader`).
+  - **Carga masiva (Multiple uploads):** formulario `MultiImageUploadForm` para selección múltiple de fotografías de partidos o eventos, vista previa en cuadrícula con eliminación individual y subida en lote vía `uploadBatchLeagueMediaAction` con auditoría `media.batch_uploaded`.
+  - **Centro y galería de multimedia por liga:** módulo `/dashboard/leagues/[slug]/media` con cuadrícula de recursos gráficos (`MediaGalleryGrid`), filtros por tipo (logos, jugadores, galería general), copia rápida de URL pública, eliminación física y en BD con auditoría (`media.deleted`), y herramienta de limpieza de archivos huérfanos.
+  - **CDN y optimización de URLs:** helper `resolveCdnMediaUrl` con soporte para dominios de CDN personalizados (`NEXT_PUBLIC_CDN_DOMAIN`) y transformaciones dinámicas de imagen en Supabase (`/render/image/public/...`).
+  - **Schema y RLS de Storage:** migración `20260916081652_media_enhancements.sql` que permite `league_id` nulo en `media_uploads` para media global/avatares y habilita políticas de UPDATE y DELETE en `storage.objects` para el bucket `league-media`.
+
+### Dashboard y Métricas de Competición
+- **Estado:** Implementado al 100%.
+- **Evidencia en repo:** `app/dashboard/page.tsx`, `components/dashboard/dashboard-trends-chart.tsx`.
+- **Funcionalidad existente:**
+  - KPIs principales: Ligas activas, Equipos registrados, Jugadores y Partidos próximos.
+  - Componente de tendencias y analítica (`DashboardTrendsChart`):
+    - Tarjetas de ritmo: total de goles anotados con promedio por partido finalizado y tasa porcentual de avance del calendario de juego.
+    - Balance de disciplina / Fair Play: recuento de tarjetas amarillas y rojas con ratios por partido.
+    - Barra de progreso segmentada de estado de partidos: porcentaje y recuento visual de partidos finalizados, en curso, programados y cancelados/pospuestos.
+    - Gráfica interactiva de barras en SVG puro (sin dependencias externas ni problemas de SSR): alternancia entre goles por jornada y partidos por jornada, con tooltips y valores destacados.
 
 ### Auditoría
-- **Estado:** Implementado (Fase 6C + hardening + búsqueda/retención/global/export).
-- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `lib/audit/create-audit-log.ts`, `lib/audit/audit-search.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `app/dashboard/leagues/[slug]/audit/actions.ts`, `app/dashboard/leagues/[slug]/audit/export/route.ts`, `app/dashboard/audit/page.tsx`, `app/dashboard/audit/export/route.ts`, `components/audit/*`.
-- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas + búsqueda de texto (acción/entidad/metadata); export CSV por liga y global (respeta filtros); purga por retención (90/180/365 días, auditada como `audit.purged`); vista global multi-liga solo `super_admin`; instrumentación best-effort en todos los server actions de liga (creación/edición de liga, temporada, equipo, jugador, sede, partido, resultado, eventos, plantilla, roles, árbitros, media, standings).
-- **Pendiente:** auditoria automatica via triggers SQL o event bus; filtros full-text a nivel BD (pg_trgm); exportacion PDF.
+- **Estado:** Implementado (Fase 6C + hardening + búsqueda/retención/global/export + Triggers SQL automáticos).
+- **Evidencia en repo:** tabla documentada en `docs/DATABASE.md` y políticas en documentación de roles; `supabase/migrations/20260916073000_automatic_audit_triggers.sql`, `lib/audit/create-audit-log.ts`, `lib/audit/audit-search.ts`, `app/dashboard/leagues/[slug]/audit/page.tsx`, `app/dashboard/leagues/[slug]/audit/actions.ts`, `app/dashboard/leagues/[slug]/audit/export/route.ts`, `app/dashboard/audit/page.tsx`, `app/dashboard/audit/export/route.ts`, `components/audit/*`.
+- **Funcionalidad existente:** Vista de auditoria por liga filtrable por accion/entidad/actor/fechas + búsqueda de texto (acción/entidad/metadata); export CSV por liga y global (respeta filtros); purga por retención (90/180/365 días, auditada como `audit.purged`); vista global multi-liga solo `super_admin`; instrumentación best-effort en todos los server actions de liga; triggers SQL automáticos en Postgres (`trg_auto_audit_log` en `matches`, `match_events`, `match_officials`, `team_members`, `player_team_registrations`) de ejecución non-blocking y fail-safe con captura de actor (`auth.uid()`) y metadata estructurada.
+- **Pendiente:** filtros full-text a nivel BD (pg_trgm); exportacion PDF.
 
 ### Tipos y catálogos
 - **Estado:** Implementado como referencia administrativa.

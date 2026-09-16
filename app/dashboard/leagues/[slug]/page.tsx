@@ -4,7 +4,6 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { EntityImagePreview } from "@/components/media/entity-image-preview";
 import { EntityImageUploadForm } from "@/components/media/entity-image-upload-form";
-import { MediaCleanupForm } from "@/components/media/media-cleanup-form";
 import { updateLeagueLogoAction } from "@/app/dashboard/leagues/[slug]/media/actions";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
@@ -274,10 +273,15 @@ export default async function LeagueDetailPage({ params }: LeagueDetailPageProps
         {permissions.canManageLeague && (
           <Card>
             <CardHeader>
-              <CardTitle>Mantenimiento de archivos</CardTitle>
+              <CardTitle>Multimedia y archivos</CardTitle>
             </CardHeader>
-            <CardContent>
-              <MediaCleanupForm leagueSlug={league.slug} />
+            <CardContent className="space-y-3">
+              <p className="text-sm text-gray-600">
+                Galería de imágenes, carga masiva de recursos y mantenimiento de archivos de la liga.
+              </p>
+              <TextLink href={`/dashboard/leagues/${league.slug}/media`}>
+                Gestionar multimedia
+              </TextLink>
             </CardContent>
           </Card>
         )}

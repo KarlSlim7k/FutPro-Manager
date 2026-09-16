@@ -29,6 +29,23 @@ export const AUDIT_ACTION_OPTIONS = [
   "media.team_logo_updated",
   "media.league_logo_updated",
   "media.orphans_cleaned",
+  "media.batch_uploaded",
+  "media.deleted",
+  "profile.avatar_updated",
+  "profile.updated",
+  "match.created_auto",
+  "match.updated_auto",
+  "match.deleted_auto",
+  "match.event_created_auto",
+  "match.event_deleted_auto",
+  "match.official_assigned_auto",
+  "match.official_removed_auto",
+  "team_member.created_auto",
+  "team_member.role_updated_auto",
+  "team_member.removed_auto",
+  "player.registration_created_auto",
+  "player.registration_updated_auto",
+  "player.registration_deleted_auto",
 ] as const;
 
 export const AUDIT_ENTITY_TYPE_OPTIONS = [
@@ -36,12 +53,14 @@ export const AUDIT_ENTITY_TYPE_OPTIONS = [
   "team_member",
   "match",
   "match_event",
+  "match_official",
   "season",
   "league",
   "team",
   "player",
   "player_registration",
   "venue",
+  "profile",
 ] as const;
 
 export type AuditActionOption = (typeof AUDIT_ACTION_OPTIONS)[number];

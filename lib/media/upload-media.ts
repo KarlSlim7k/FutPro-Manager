@@ -5,13 +5,69 @@ export type UploadEntityImageParams = {
   file: File;
   bucket: string;
   path: string;
-  leagueId: string;
+  leagueId?: string | null;
   uploadedBy: string;
   entityType: string;
   entityId: string | null;
   maxSizeBytes: number;
   allowedMimeTypes: string[];
 };
+
+export type MediaUrlOptions = {
+  width?: number;
+  height?: number;
+  quality?: number;
+  resize?: "cover" | "contain" | "fill";
+};
+
+/**
+ * Resuelve la URL pública de un archivo multimedia, aplicando el dominio de CDN
+ * personalizado (NEXT_PUBLIC_CDN_DOMAIN) o transformaciones de imagen de Supabase si están solicitadas.
+ */
+export function resolveCdnMediaUrl(
+  url: string | null | undefined,
+  options?: MediaUrlOptions
+): string {
+  if (!url) return "";
+
+  let resolved = url;
+  const customCdn =
+    process.env.NEXT_PUBLIC_CDN_DOMAIN ||
+    process.env.NEXT_PUBLIC_SUPABASE_MEDIA_CDN_URL;
+
+  if (customCdn) {
+    try {
+      const parsed = new URL(url);
+      const cdnUrl = new URL(
+        customCdn.startsWith("http") ? customCdn : `https://${customCdn}`
+      );
+      parsed.host = cdnUrl.host;
+      parsed.protocol = cdnUrl.protocol;
+      resolved = parsed.toString();
+    } catch {
+      // Fallback a URL original
+    }
+  }
+
+  if (options && (options.width || options.height || options.quality || options.resize)) {
+    if (resolved.includes("/storage/v1/object/public/")) {
+      const params = new URLSearchParams();
+      if (options.width) params.set("width", String(options.width));
+      if (options.height) params.set("height", String(options.height));
+      if (options.quality) params.set("quality", String(options.quality));
+      if (options.resize) params.set("resize", options.resize);
+
+      resolved = resolved.replace(
+        "/storage/v1/object/public/",
+        "/storage/v1/render/image/public/"
+      );
+      const separator = resolved.includes("?") ? "&" : "?";
+      resolved = `${resolved}${separator}${params.toString()}`;
+    }
+  }
+
+  return resolved;
+}
 
 export type UploadEntityImageResult =
   | { success: true; publicUrl: string; path: string; mimeType: string; sizeBytes: number }
@@ -22,6 +78,8 @@ export function sanitizeFileName(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9.-]+/g, "-")
     .replace(/-+/g, "-")
+    .replace(/-\./g, ".")
+    .replace(/\.-/g, ".")
     .replace(/^-|-$/g, "");
   return cleaned || "file";
 }
@@ -104,7 +162,7 @@ export async function uploadEntityImage(params: UploadEntityImageParams): Promis
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
 
   const { error: mediaError } = await supabase.from("media_uploads").insert({
-    league_id: leagueId,
+    league_id: leagueId ?? null,
     uploaded_by: uploadedBy,
     bucket,
     path,

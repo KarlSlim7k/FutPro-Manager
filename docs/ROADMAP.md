@@ -75,16 +75,24 @@
   - Alertas visuales automáticas en los selectores de designación (`RefereeAssignmentForm`) para árbitros que hayan reportado indisponibilidad en la fecha del encuentro.
   - Tabla `user_notifications` y centro de notificaciones in-app (`NotificationBell`) en el header del dashboard con conteo de no leídas, popover interactivo y acción de marcar como leídas.
   - Despacho automático de notificaciones a oficiales al ser asignados o actualizados en un partido vía `updateMatchRefereeAction`.
-- **Post-MVP Frentes pendientes:**
-  - Frente 3: Auditoría automática (triggers SQL / event-bus sin depender estrictamente de server actions).
-  - Frente 4: Media y métricas avanzadas (crop/resize, avatares, múltiples uploads, CDN/custom domain; gráficas y tendencias).
+- **Post-MVP Frente 3 - Auditoría automática vía triggers SQL (Implementado):**
+  - Función `trg_auto_audit_log()` en PostgreSQL (`SECURITY DEFINER`, `search_path = public`) con captura de actor (`auth.uid()`), detección de liga, resolución de entidad y payload JSON estructurado.
+  - Triggers automáticos instalados en `matches`, `match_events`, `match_officials`, `team_members` y `player_team_registrations`.
+  - Mecanismo fail-safe y non-blocking: captura excepciones con bloque `BEGIN ... EXCEPTION` para garantizar que ningún fallo de auditoría interrumpa la mutación de negocio.
+  - Sincronización con el catálogo de acciones de auditoría (`AUDIT_ACTION_OPTIONS` y `AUDIT_ENTITY_TYPE_OPTIONS`) y badges de estado en UI.
+- **Post-MVP Frente 4 - Media y métricas avanzadas (Implementado):**
+  - Utilidad de recorte y compresión client-side (`cropAndResizeImage`) con HTML5 Canvas en navegador, presets automáticos (1:1 cuadrado para logos y avatares, 3:4 para fichas de jugadores, libre/original), zoom de 1x a 3x y controles de desplazamiento en `ImageCropperModal`.
+  - Módulo de perfil y avatares de usuario en `/dashboard/profile`: componente `Avatar` reutilizable con fallback inteligente, avatar en encabezado (`DashboardHeader`), subida de foto de perfil 1:1, edición de datos personales (`display_name`, `full_name`, `phone`) y auditorías `profile.avatar_updated` y `profile.updated`.
+  - Subida masiva de imágenes (`MultiImageUploadForm`) y centro de multimedia por liga en `/dashboard/leagues/[slug]/media`: cuadrícula de catálogo (`MediaGalleryGrid`), filtros por categoría, copia de URL pública, eliminación física y en BD (`media.deleted`), y herramienta de limpieza de huérfanos.
+  - Dominio CDN y optimización de URLs (`resolveCdnMediaUrl`) con soporte para `NEXT_PUBLIC_CDN_DOMAIN` y transformaciones dinámicas de imagen en Supabase (`/render/image/public/...`); migración `20260916081652_media_enhancements.sql` para soporte de media global y políticas UPDATE/DELETE de Storage.
+  - Analítica y tendencias en dashboard (`DashboardTrendsChart`): KPIs de ritmo de goles y partidos completados, balance disciplinario de tarjetas amarillas y rojas, barra de avance segmentada de partidos y gráfica interactiva de barras en SVG puro por jornada.
 
-### Media Uploads MVP (Implementado y validado; hardening post-MVP pendiente)
-- ✅ Upload de logo de liga, logo de equipo y foto de jugador implementado en dashboard.
-- ✅ Validación server-side de MIME/tamaño + registro de metadata en `media_uploads` + auditoría best-effort (`media.*`).
-- ✅ Hardening UX: `accept` configurable por tipo de entidad (SVG solo para logos).
-- ✅ Bucket `league-media` y policies de Supabase Storage configuradas y verificadas en entorno real (2026-05-19).
-- **Post-MVP:** cleanup de huérfanos, borrado físico, crop/resize, múltiples imágenes, avatares y CDN/custom domain.
+### Media Uploads (Implementado al 100% con hardening post-MVP)
+- ✅ Upload de logo de liga, logo de equipo, foto de jugador y avatar de usuario con recorte interactivo client-side (1:1 y 3:4).
+- ✅ Carga masiva de imágenes (multiple uploads) y centro de multimedia por liga (`/media`).
+- ✅ Limpieza de archivos huérfanos (>24h sin referencia) con borrado físico y auditoría.
+- ✅ Optimización de CDN, transformaciones de imagen de Supabase y soporte de dominios personalizados.
+- ✅ Migración de schema y RLS en Storage con políticas seguras de INSERT, UPDATE y DELETE.
 
 ### Fase 7 - Suscripciones/pagos (Base técnica existente, producto pendiente)
 - Tablas base de planes/suscripciones disponibles.

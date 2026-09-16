@@ -1,3 +1,5 @@
+import { resolveCdnMediaUrl } from "@/lib/media/upload-media";
+
 interface EntityImagePreviewProps {
   imageUrl: string | null;
   alt: string;
@@ -9,11 +11,13 @@ export function EntityImagePreview({ imageUrl, alt, label }: EntityImagePreviewP
     return <p className="text-sm text-gray-600">{label}: Sin imagen.</p>;
   }
 
+  const resolvedUrl = resolveCdnMediaUrl(imageUrl);
+
   return (
     <div className="space-y-2">
       <p className="text-sm text-gray-600">{label} actual</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={imageUrl} alt={alt} className="h-24 w-24 rounded-lg border border-gray-200 object-contain" />
+      <img src={resolvedUrl} alt={alt} className="h-24 w-24 rounded-lg border border-gray-200 object-contain" />
     </div>
   );
 }

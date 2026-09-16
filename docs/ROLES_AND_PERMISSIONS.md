@@ -46,10 +46,10 @@
    En `matches`, un referee no admin queda restringido a cambiar `status`, `home_score` y `away_score`.
 6. **Integridad de autoría en eventos:** `match_events.created_by` debe coincidir con el usuario autenticado en inserts y no puede cambiarse en updates (salvo `super_admin`).
 7. **Integridad deportiva en eventos:** `team_id` debe estar en el partido; si hay `player_id`, debe existir registro activo del jugador con ese equipo en la temporada del partido.
+8. **Auditoría automática SQL:** La función `trg_auto_audit_log` opera con `SECURITY DEFINER` y registra mutaciones en `audit_logs` de forma best-effort y non-blocking, preservando el contexto del actor (`auth.uid()`) o `null` si la mutación proviene de procesos internos del motor.
 
 ## Alcance post-MVP
 
-- Auditoría automática mediante triggers SQL / event-bus (Frente 3).
 - Media avanzada (crop, resize, avatares, múltiples uploads) y analítica deportiva (Frente 4).
 
 
@@ -164,12 +164,16 @@ En `lib/permissions/league-permissions.ts`:
 - `app/dashboard/leagues/[slug]/matches/page.tsx` - Listado de partidos (muestra nombre de arbitro en cards).
 - `components/matches/match-card.tsx` - Card de partido (muestra linea de arbitro).
 
-### Pendiente post-MVP
+### Funcionalidad post-MVP implementada
 
-- Tabla de asignaciones de arbitros con historial (auditar quien asigno, cuando, cambios).
-- Soporte multi-arbitro (arbitro principal, asistentes).
-- Calendario de disponibilidad de arbitros.
-- Notificaciones al arbitro asignado.
+- ✅ Tabla de asignaciones de árbitros con historial (auditoría formal con `match.officials_updated`, `match.referee_updated` y visualización en `RefereeHistory`).
+- ✅ Soporte multi-árbitro (cuerpo arbitral de 4 posiciones: central, primer asistente, segundo asistente y cuarto oficial vía `match_officials` y sincronización bidireccional con `matches.referee_id`).
+- ✅ Calendario de disponibilidad de árbitros (`referee_availabilities` y `RefereeAvailabilityManager` con alertas en formulario de designación).
+- ✅ Centro de notificaciones in-app y avisos automáticos a árbitros asignados (`user_notifications` y `NotificationBell`).
+- ✅ Módulo de perfil y avatares de usuario (`/dashboard/profile`, `Avatar`).
+- ✅ Recorte y optimización de imágenes en cliente (`ImageCropperModal`, `cropAndResizeImage`).
+- ✅ Carga masiva de imágenes y centro de multimedia por liga (`/dashboard/leagues/[slug]/media`).
+- ✅ Métricas de torneo, avance de calendario y tendencias en SVG puro (`DashboardTrendsChart`).
 
 
 ## Auditoria visible en UI (Fase 6C)

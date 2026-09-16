@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TextLink } from "@/components/ui/text-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import { DashboardTrendsChart } from "@/components/dashboard/dashboard-trends-chart";
 import { createClient } from "@/lib/supabase/server";
 import type { MatchStatus } from "@/types/database";
 
@@ -77,6 +78,68 @@ export default async function DashboardPage() {
   const safeUpcomingMatchesCount = matchesError ? 0 : (upcomingMatchesCount ?? 0);
 
   const cards = buildCards(leaguesCount ?? 0, teamsCount ?? 0, playersCount ?? 0, safeUpcomingMatchesCount);
+
+  // Consultas de tendencias y métricas de competición
+  const [
+    { data: allMatchesData },
+    { data: matchEventsData },
+  ] = await Promise.all([
+    supabase
+      .from("matches")
+      .select("id, status, home_score, away_score, round_name, scheduled_at")
+      .order("scheduled_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("match_events")
+      .select("event_type")
+      .in("event_type", ["yellow_card", "red_card"])
+      .limit(500),
+  ]);
+
+  const allMatches = allMatchesData ?? [];
+  const statusCounts = {
+    completed: 0,
+    in_progress: 0,
+    scheduled: 0,
+    cancelled: 0,
+    postponed: 0,
+  };
+  let totalGoals = 0;
+  const roundsMap = new Map<string, { matchesCount: number; goalsCount: number }>();
+
+  for (const m of allMatches) {
+    if (m.status in statusCounts) {
+      statusCounts[m.status as keyof typeof statusCounts]++;
+    }
+    if (m.status === "completed") {
+      totalGoals += (m.home_score || 0) + (m.away_score || 0);
+    }
+    const round = m.round_name || "General";
+    const existing = roundsMap.get(round) || { matchesCount: 0, goalsCount: 0 };
+    existing.matchesCount++;
+    if (m.status === "completed") {
+      existing.goalsCount += (m.home_score || 0) + (m.away_score || 0);
+    }
+    roundsMap.set(round, existing);
+  }
+
+  const averageGoalsPerMatch =
+    statusCounts.completed > 0 ? totalGoals / statusCounts.completed : 0;
+
+  let totalYellowCards = 0;
+  let totalRedCards = 0;
+  for (const ev of matchEventsData ?? []) {
+    if (ev.event_type === "yellow_card") totalYellowCards++;
+    if (ev.event_type === "red_card") totalRedCards++;
+  }
+
+  const roundTrends = Array.from(roundsMap.entries())
+    .slice(0, 8)
+    .map(([roundName, data]) => ({
+      roundName,
+      matchesCount: data.matchesCount,
+      goalsCount: data.goalsCount,
+    }));
 
   // Widgets operativos: próximos partidos y actividad reciente (best-effort, RLS mediante)
   const { data: upcomingMatches } = await supabase
@@ -208,6 +271,16 @@ export default async function DashboardPage() {
           <MetricCard key={card.label} {...card} />
         ))}
       </div>
+
+      <DashboardTrendsChart
+        totalMatches={allMatches.length}
+        statusCounts={statusCounts}
+        totalGoals={totalGoals}
+        averageGoalsPerMatch={averageGoalsPerMatch}
+        totalYellowCards={totalYellowCards}
+        totalRedCards={totalRedCards}
+        roundTrends={roundTrends}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

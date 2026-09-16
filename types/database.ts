@@ -262,7 +262,7 @@ export interface AuditLog {
 
 export interface MediaUpload {
   id: string;
-  league_id: string;
+  league_id: string | null;
   uploaded_by: string;
   bucket: string;
   path: string;
