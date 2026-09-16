@@ -13,6 +13,9 @@ export const viewport: Viewport = {
   themeColor: "#059669",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -41,9 +44,15 @@ export const metadata: Metadata = {
     images: ["/og/futpro-manager.jpg"],
   },
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 

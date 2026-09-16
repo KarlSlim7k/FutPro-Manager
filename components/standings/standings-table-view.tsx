@@ -1,5 +1,6 @@
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
+import { StandingMobileCard } from "@/components/standings/standing-mobile-card";
 
 import type { StandingRowViewModel } from "@/components/standings/types";
 
@@ -12,7 +13,23 @@ interface StandingsTableViewProps {
 
 export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/leagues", enableTeamLinks = true }: StandingsTableViewProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <>
+      {/* Vista Mobile Cards (< md) */}
+      <div className="space-y-3 md:hidden">
+        {rows.map((row, index) => (
+          <StandingMobileCard
+            key={`${row.team_id}-${index}`}
+            row={row}
+            position={index + 1}
+            leagueSlug={leagueSlug}
+            basePath={basePath}
+            enableTeamLinks={enableTeamLinks}
+          />
+        ))}
+      </div>
+
+      {/* Vista Desktop / Tablet (md+) */}
+      <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
       <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
         <thead className="bg-gray-50">
           <tr className="text-left text-gray-500">
@@ -116,5 +133,6 @@ export function StandingsTableView({ rows, leagueSlug, basePath = "/dashboard/le
         </tbody>
       </table>
     </div>
+    </>
   );
 }

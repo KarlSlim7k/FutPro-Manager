@@ -17,8 +17,20 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/svg+xml",
       },
       {
-        src: "/og/futpro-manager.png",
-        sizes: "640x640",
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
         type: "image/png",
       },
     ],

@@ -20,7 +20,7 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
   ];
 
   return (
-    <nav className="flex flex-wrap gap-2 border-b border-gray-200 pb-1">
+    <nav className="flex gap-1.5 overflow-x-auto no-scrollbar border-b border-gray-200 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href || (tab.href !== `/liga/${leagueSlug}` && pathname?.startsWith(`${tab.href}/`));
         return (
@@ -29,9 +29,9 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "inline-flex items-center border-b-2 px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2",
+              "inline-flex min-h-[44px] items-center whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition touch-manipulation active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2",
               isActive
-                ? "border-emerald-700 text-emerald-800"
+                ? "border-emerald-700 font-semibold text-emerald-800"
                 : "border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900"
             )}
           >

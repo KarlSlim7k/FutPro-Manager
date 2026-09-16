@@ -1,5 +1,6 @@
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TextLink } from "@/components/ui/text-link";
+import { StandingMobileCard } from "@/components/standings/standing-mobile-card";
 import type { Standing } from "@/types/database";
 
 type StandingsTableProps = {
@@ -19,7 +20,28 @@ export function StandingsTable({ standings, teamMap, leagueSlug }: StandingsTabl
   });
 
   return (
-    <div className="overflow-x-auto">
+    <>
+      {/* Mobile card layout (< md) */}
+      <div className="space-y-3 md:hidden">
+        {sorted.map((row, index) => {
+          const team = teamMap.get(row.team_id);
+          return (
+            <StandingMobileCard
+              key={row.team_id}
+              position={index + 1}
+              leagueSlug={leagueSlug}
+              basePath="/dashboard/leagues"
+              row={{
+                ...row,
+                team: team ? { id: row.team_id, name: team.name, slug: team.slug } : null,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Desktop table layout (md+) */}
+      <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
@@ -89,5 +111,6 @@ export function StandingsTable({ standings, teamMap, leagueSlug }: StandingsTabl
         </tbody>
       </table>
     </div>
+    </>
   );
 }

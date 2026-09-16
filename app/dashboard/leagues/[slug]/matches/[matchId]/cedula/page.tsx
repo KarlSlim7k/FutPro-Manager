@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { TextLink } from "@/components/ui/text-link";
 import { PrintCedulaButton } from "@/components/matches/print-cedula-button";
+import { MobileCedulaTabs } from "@/components/matches/mobile-cedula-tabs";
 import type { League, Match, Season, Team, Venue, Profile, PlayerTeamRegistration, Player, MatchEvent } from "@/types/database";
 
 interface MatchCedulaPageProps {
@@ -294,8 +295,21 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
             </div>
           </div>
 
-          {/* Plantillas de Juego (Lado a Lado) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Modo Cancha Móvil para Árbitro */}
+          <MobileCedulaTabs
+            homeTeamName={homeTeam.name}
+            awayTeamName={awayTeam.name}
+            homeRoster={homeRoster}
+            awayRoster={awayRoster}
+            playerGoals={Object.fromEntries(playerGoalsMap)}
+            playerYellows={Object.fromEntries(playerYellowMap)}
+            playerReds={Object.fromEntries(playerRedMap)}
+            leagueSlug={league.slug}
+            matchId={match.id}
+          />
+
+          {/* Plantillas de Juego Físicas (Lado a Lado solo en md+ o al imprimir) */}
+          <div className="hidden md:grid md:grid-cols-2 gap-4 print:grid print:grid-cols-2">
             {/* Plantilla Local */}
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <div className="bg-gray-100 px-3 py-1.5 font-bold text-xs uppercase tracking-wide border-b border-gray-300 flex justify-between">

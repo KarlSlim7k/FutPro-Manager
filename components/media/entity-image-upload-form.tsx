@@ -95,7 +95,7 @@ export function EntityImageUploadForm({
             accept={accept}
             onChange={handleFileChange}
             required={!selectedFile}
-            className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+            className="block w-full text-sm text-gray-700 touch-manipulation file:mr-3 file:min-h-[44px] file:rounded-md file:border-0 file:bg-gray-100 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 active:file:bg-gray-300"
           />
           <p className="text-xs text-gray-500">{helpText}</p>
         </div>
@@ -132,15 +132,15 @@ export function EntityImageUploadForm({
           </div>
         ) : null}
 
-        <div className="flex items-center gap-2">
-          <Button type="submit" size="sm" disabled={pending || !selectedFile}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="submit" className="min-h-[44px] touch-manipulation text-sm" disabled={pending || !selectedFile}>
             {pending ? "Subiendo..." : buttonText}
           </Button>
           {enableCrop && !isSvg && selectedFile && !hasCropped ? (
             <Button
               type="button"
               variant="secondary"
-              size="sm"
+              className="min-h-[44px] touch-manipulation text-sm"
               onClick={() => setIsCropperOpen(true)}
               disabled={pending}
             >

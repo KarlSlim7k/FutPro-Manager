@@ -96,7 +96,7 @@ export function MultiImageUploadForm({
           multiple
           accept="image/jpeg,image/png,image/webp"
           onChange={handleFilesChange}
-          className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+          className="block w-full text-sm text-gray-700 touch-manipulation file:mr-3 file:min-h-[44px] file:rounded-md file:border-0 file:bg-gray-100 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 active:file:bg-gray-300"
         />
         <p className="text-xs text-gray-500">{helpText}</p>
       </div>
@@ -108,7 +108,7 @@ export function MultiImageUploadForm({
             <button
               type="button"
               onClick={handleClearAll}
-              className="text-red-600 hover:text-red-700 hover:underline"
+              className="min-h-[44px] py-2 text-red-600 hover:text-red-700 hover:underline touch-manipulation"
             >
               Quitar todos
             </button>
@@ -139,7 +139,7 @@ export function MultiImageUploadForm({
                   type="button"
                   onClick={() => handleRemoveFile(index)}
                   aria-label={`Quitar imagen ${preview.name}`}
-                  className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1 text-white opacity-90 transition hover:bg-black group-hover:opacity-100"
+                  className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 p-1 text-white opacity-90 transition hover:bg-black active:bg-black/80 touch-manipulation group-hover:opacity-100"
                 >
                   ✕
                 </button>
@@ -150,7 +150,7 @@ export function MultiImageUploadForm({
       ) : null}
 
       <div className="flex items-center gap-3">
-        <Button type="submit" size="sm" disabled={pending || selectedFiles.length === 0}>
+        <Button type="submit" className="min-h-[44px] touch-manipulation text-sm" disabled={pending || selectedFiles.length === 0}>
           {pending
             ? `Subiendo ${selectedFiles.length} imagen(es)...`
             : `${buttonText} (${selectedFiles.length})`}

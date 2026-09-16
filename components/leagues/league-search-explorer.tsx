@@ -80,19 +80,19 @@ export function LeagueSearchExplorer({
             <Link
               key={league.id}
               href={`/liga/${league.slug}`}
-              className="group flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-emerald-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+              className="group flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm transition hover:border-emerald-300 hover:shadow-md active:scale-[0.99] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
             >
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {league.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={league.logo_url}
                       alt={`Logo de ${league.name}`}
-                      className="h-12 w-12 rounded-lg border border-gray-100 object-contain"
+                      className="h-12 w-12 rounded-lg border border-gray-100 object-contain shrink-0"
                     />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 font-bold text-emerald-800">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 font-bold text-emerald-800 shrink-0">
                       <Volleyball className="h-6 w-6" aria-hidden />
                     </div>
                   )}

@@ -163,7 +163,7 @@ export function LoginForm({ initialMode = "login" }: LoginFormProps) {
           <button
             type="button"
             onClick={() => switchMode("login")}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+            className={`flex min-h-[44px] items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition touch-manipulation ${
               isLogin
                 ? "bg-white text-gray-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1"
                 : "text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1"
@@ -174,7 +174,7 @@ export function LoginForm({ initialMode = "login" }: LoginFormProps) {
           <button
             type="button"
             onClick={() => switchMode("register")}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+            className={`flex min-h-[44px] items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition touch-manipulation ${
               isRegister
                 ? "bg-white text-gray-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1"
                 : "text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1"
@@ -283,7 +283,7 @@ export function LoginForm({ initialMode = "login" }: LoginFormProps) {
         </p>
       ) : null}
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className="w-full h-12 text-base font-semibold touch-manipulation" disabled={isLoading}>
         {isLoading ? "Procesando..." : submitLabel}
       </Button>
 

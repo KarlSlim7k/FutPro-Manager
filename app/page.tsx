@@ -107,34 +107,34 @@ export default function Home() {
               <p className="text-[11px] text-gray-500">Gestión de Fútbol Amateur</p>
             </div>
           </Link>
-          <nav className="flex flex-wrap items-center gap-3 sm:gap-5 text-sm font-medium">
+          <nav className="flex flex-wrap items-center gap-2 sm:gap-5 text-xs sm:text-sm font-medium">
             <Link
               href="/explorar"
-              className="text-gray-600 transition hover:text-emerald-700"
+              className="inline-flex min-h-[44px] items-center py-2 text-gray-600 transition hover:text-emerald-700 touch-manipulation"
             >
               Explorar ligas
             </Link>
             <Link
               href="#planes"
-              className="text-gray-600 transition hover:text-emerald-700"
+              className="hidden sm:inline-flex min-h-[44px] items-center py-2 text-gray-600 transition hover:text-emerald-700 touch-manipulation"
             >
               Planes
             </Link>
             <Link
               href="#faq"
-              className="text-gray-600 transition hover:text-emerald-700"
+              className="hidden sm:inline-flex min-h-[44px] items-center py-2 text-gray-600 transition hover:text-emerald-700 touch-manipulation"
             >
               Preguntas
             </Link>
             <Link
               href="/contacto"
-              className="text-gray-600 transition hover:text-emerald-700"
+              className="inline-flex min-h-[44px] items-center py-2 text-gray-600 transition hover:text-emerald-700 touch-manipulation"
             >
               Contacto
             </Link>
             <Link
               href="/login"
-              className="rounded-lg border border-gray-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-gray-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 active:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 touch-manipulation"
             >
               Iniciar sesión
             </Link>
@@ -142,27 +142,27 @@ export default function Home() {
         </header>
 
         {/* Hero */}
-        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+        <div className="mt-10 sm:mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
           <div>
-            <h1 className="max-w-xl text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            <h1 className="max-w-xl text-3xl sm:text-5xl font-bold tracking-tight text-gray-900 break-words">
               Administra ligas amateur como un profesional
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
+            <p className="mt-4 sm:mt-5 max-w-2xl text-sm sm:text-lg leading-6 sm:leading-7 text-gray-600">
               FutPro Manager centraliza equipos, jugadores, partidos, resultados
               y tablas de posiciones para ligas y torneos de fútbol amateur.
             </p>
 
             {/* Buscador Rápido de Ligas */}
-            <form action="/explorar" method="GET" className="mt-6 flex max-w-md items-center gap-2">
+            <form action="/explorar" method="GET" className="mt-6 flex flex-col sm:flex-row max-w-md items-stretch sm:items-center gap-2">
               <input
                 type="search"
                 name="q"
                 placeholder="¿Buscas tu liga o equipo? Ej. Perote..."
-                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-3 text-base sm:text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+                className="w-full sm:w-auto h-12 sm:h-11 shrink-0 rounded-lg bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 active:bg-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 touch-manipulation"
               >
                 Buscar
               </button>
@@ -171,13 +171,13 @@ export default function Home() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/login?mode=register"
-                className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+                className="inline-flex min-h-[48px] h-12 items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 active:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 touch-manipulation"
               >
                 Crear cuenta gratis
               </Link>
               <Link
                 href="/explorar"
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+                className="inline-flex min-h-[48px] h-12 items-center justify-center gap-1.5 rounded-lg border border-emerald-700 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 active:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 touch-manipulation"
               >
                 Ver liga demo <ArrowUpRight className="h-4 w-4" aria-hidden />
               </Link>

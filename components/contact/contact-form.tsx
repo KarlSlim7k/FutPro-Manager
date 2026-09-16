@@ -16,7 +16,7 @@ const EMPTY_CONTACT_STATE: ContactFormState = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600";
+  "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base sm:text-sm text-gray-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600";
 
 export function ContactForm() {
   const [state, formAction, isPending] = useActionState(
@@ -151,7 +151,7 @@ export function ContactForm() {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isPending} className="w-full gap-2">
+      <Button type="submit" disabled={isPending} className="w-full h-12 text-base sm:text-sm font-semibold gap-2 touch-manipulation">
         <Send className="h-4 w-4" aria-hidden />
         {isPending ? "Enviando..." : "Enviar mensaje"}
       </Button>

@@ -33,6 +33,15 @@ export function ImageCropperModal({
   const [sourceDataUrl, setSourceDataUrl] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const touchStateRef = useRef<{
+    isPinching: boolean;
+    initialDistance: number;
+    initialZoom: number;
+    startX: number;
+    startY: number;
+    initialPanX: number;
+    initialPanY: number;
+  } | null>(null);
 
   // Cargar imagen de origen
   useEffect(() => {
@@ -112,6 +121,60 @@ export function ImageCropperModal({
     img.src = sourceDataUrl;
   }, [sourceDataUrl, imageDimensions, aspectRatio, zoom, panX, panY]);
 
+  // Gestos táctiles de pellizco (pinch zoom) y arrastre (pan)
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+      touchStateRef.current = {
+        isPinching: true,
+        initialDistance: distance,
+        initialZoom: zoom,
+        startX: 0,
+        startY: 0,
+        initialPanX: panX,
+        initialPanY: panY,
+      };
+    } else if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      touchStateRef.current = {
+        isPinching: false,
+        initialDistance: 0,
+        initialZoom: zoom,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        initialPanX: panX,
+        initialPanY: panY,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchStateRef.current) return;
+
+    if (e.touches.length === 2 && touchStateRef.current.isPinching) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const currentDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+      const factor = currentDistance / touchStateRef.current.initialDistance;
+      const newZoom = Math.max(1, Math.min(3, touchStateRef.current.initialZoom * factor));
+      setZoom(Number(newZoom.toFixed(2)));
+    } else if (e.touches.length === 1 && !touchStateRef.current.isPinching) {
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - touchStateRef.current.startX;
+      const deltaY = touch.clientY - touchStateRef.current.startY;
+      const nextPanX = Math.max(-100, Math.min(100, touchStateRef.current.initialPanX + deltaX * 0.8));
+      const nextPanY = Math.max(-100, Math.min(100, touchStateRef.current.initialPanY + deltaY * 0.8));
+      setPanX(Math.round(nextPanX));
+      setPanY(Math.round(nextPanY));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStateRef.current = null;
+  };
+
   const handleApplyCrop = async () => {
     if (!file || !imageDimensions) return;
 
@@ -159,56 +222,61 @@ export function ImageCropperModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="cropper-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
     >
-      <div className="w-full max-w-lg rounded-xl border border-gray-200 bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-2xl max-h-[90dvh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
           <div>
-            <h3 id="cropper-title" className="text-lg font-semibold text-gray-900">
+            <h3 id="cropper-title" className="text-base sm:text-lg font-bold text-gray-900">
               Ajustar y recortar imagen
             </h3>
             <p className="text-xs text-gray-500">
-              Optimiza el encuadre y resolución antes de subir.
+              Usa pellizco o arrastra para encuadrar.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 touch-manipulation"
           >
             ✕
           </button>
         </div>
 
-        {/* Canvas de visualización */}
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+        {/* Canvas de visualización táctil */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-3 touch-none cursor-move select-none"
+        >
           <canvas
             ref={canvasRef}
-            className="max-h-72 max-w-full rounded shadow-sm"
-            style={{ maxHeight: "280px" }}
+            className="max-h-64 sm:max-h-72 max-w-full rounded-lg shadow-sm pointer-events-none"
+            style={{ maxHeight: "260px" }}
           />
-          {imageDimensions ? (
-            <p className="mt-2 text-xs text-gray-500">
-              Original: {imageDimensions.width} × {imageDimensions.height} px
-            </p>
-          ) : (
-            <p className="text-xs text-gray-400">Cargando imagen...</p>
-          )}
+          <span className="mt-2 text-[10px] sm:text-xs text-gray-500">
+            {imageDimensions
+              ? `Táctil: Pellizca para zoom, arrastra para mover`
+              : "Cargando imagen..."}
+          </span>
         </div>
 
-        {/* Controles */}
+        {/* Controles táctiles */}
         <div className="mt-4 space-y-4">
           {/* Selector de proporción */}
           <div>
-            <label className="text-xs font-medium text-gray-700">Proporción</label>
-            <div className="mt-1 flex gap-2">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-1.5">
+              Proporción
+            </label>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setAspectRatio("square")}
-                className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                className={`flex min-h-[44px] items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition touch-manipulation active:scale-95 ${
                   aspectRatio === "square"
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-700 text-white shadow-sm"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -217,9 +285,9 @@ export function ImageCropperModal({
               <button
                 type="button"
                 onClick={() => setAspectRatio("portrait")}
-                className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                className={`flex min-h-[44px] items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition touch-manipulation active:scale-95 ${
                   aspectRatio === "portrait"
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-700 text-white shadow-sm"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -228,76 +296,70 @@ export function ImageCropperModal({
               <button
                 type="button"
                 onClick={() => setAspectRatio("free")}
-                className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                className={`flex min-h-[44px] items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition touch-manipulation active:scale-95 ${
                   aspectRatio === "free"
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-700 text-white shadow-sm"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Original
+                Libre
               </button>
             </div>
           </div>
 
-          {/* Zoom Slider */}
+          {/* Zoom con botones rápidos */}
           <div>
-            <div className="flex items-center justify-between text-xs font-medium text-gray-700">
+            <div className="flex items-center justify-between text-xs font-semibold text-gray-700 uppercase">
               <span>Zoom</span>
               <span>{Math.round(zoom * 100)}%</span>
             </div>
-            <input
-              type="range"
-              min="1"
-              max="3"
-              step="0.05"
-              value={zoom}
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="mt-1 w-full accent-emerald-600"
-            />
-          </div>
-
-          {/* Controles de desplazamiento si zoom > 1 */}
-          {zoom > 1 ? (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-gray-700">Posición horizontal</label>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  step="1"
-                  value={panX}
-                  onChange={(e) => setPanX(parseInt(e.target.value, 10))}
-                  className="mt-1 w-full accent-emerald-600"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-700">Posición vertical</label>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  step="1"
-                  value={panY}
-                  onChange={(e) => setPanY(parseInt(e.target.value, 10))}
-                  className="mt-1 w-full accent-emerald-600"
-                />
-              </div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.max(1, Number((z - 0.2).toFixed(1))))}
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 bg-white text-lg font-bold text-gray-700 active:bg-gray-100 touch-manipulation"
+                aria-label="Reducir zoom"
+              >
+                -
+              </button>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.05"
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                className="h-6 w-full accent-emerald-600 touch-manipulation"
+              />
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.min(3, Number((z + 0.2).toFixed(1))))}
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 bg-white text-lg font-bold text-gray-700 active:bg-gray-100 touch-manipulation"
+                aria-label="Aumentar zoom"
+              >
+                +
+              </button>
             </div>
-          ) : null}
+          </div>
         </div>
 
         {/* Acciones */}
         <div className="mt-6 flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
-          <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={isProcessing}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            disabled={isProcessing}
+            className="min-h-[44px] touch-manipulation"
+          >
             Cancelar
           </Button>
           <Button
             type="button"
             variant="primary"
-            size="sm"
             onClick={handleApplyCrop}
             disabled={isProcessing || !imageDimensions}
+            className="min-h-[44px] px-5 font-bold touch-manipulation"
           >
             {isProcessing ? "Procesando..." : "Aplicar recorte"}
           </Button>

@@ -74,14 +74,39 @@ export function StandingMobileCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-xs text-gray-600">
-          <p>PJ: {row.played}</p>
-          <p>G: {row.won}</p>
-          <p>E: {row.drawn}</p>
-          <p>P: {row.lost}</p>
-          <p>GF: {row.goals_for}</p>
-          <p>GC: {row.goals_against}</p>
-          <p>DG: {row.goal_difference}</p>
+        <div className="grid grid-cols-4 gap-1.5 rounded-lg bg-gray-50 p-2.5 text-center text-xs text-gray-600">
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">PJ</span>
+            <span className="font-semibold text-gray-800">{row.played}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">G</span>
+            <span className="font-semibold text-gray-800">{row.won}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">E</span>
+            <span className="font-semibold text-gray-800">{row.drawn}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">P</span>
+            <span className="font-semibold text-gray-800">{row.lost}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">GF</span>
+            <span className="font-semibold text-gray-800">{row.goals_for}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">GC</span>
+            <span className="font-semibold text-gray-800">{row.goals_against}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase text-gray-400">DG</span>
+            <span className="font-semibold text-gray-800">{row.goal_difference}</span>
+          </div>
+          <div className="rounded bg-emerald-100/60 font-bold text-emerald-800">
+            <span className="block text-[10px] uppercase text-emerald-600">PTS</span>
+            <span className="font-bold">{row.points}</span>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -20,8 +20,11 @@ type PublicMatchCardProps = {
 
 function formatDateTime(date: string) {
   return new Intl.DateTimeFormat("es-MX", {
-    dateStyle: "full",
-    timeStyle: "short",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(date));
 }
 
@@ -49,24 +52,24 @@ export function PublicMatchCard({
         </div>
 
         {/* Enfrentamiento con logos */}
-        <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 pt-1">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {homeTeamLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={homeTeamLogo}
                 alt=""
-                className="h-8 w-8 rounded border border-gray-200 object-contain shrink-0"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded border border-gray-200 object-contain shrink-0"
               />
             ) : null}
-            <CardTitle className="text-sm font-semibold truncate text-gray-900">
+            <CardTitle className="text-xs sm:text-sm font-semibold truncate text-gray-900">
               {homeTeamName}
             </CardTitle>
           </div>
 
-          <div className="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-center min-w-[58px]">
+          <div className="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-center min-w-[50px] sm:min-w-[58px]">
             {status === "completed" || status === "in_progress" ? (
-              <span className="text-base font-bold tracking-tight text-gray-900">
+              <span className="text-sm sm:text-base font-bold tracking-tight text-gray-900">
                 {homeScore} – {awayScore}
               </span>
             ) : (
@@ -75,7 +78,7 @@ export function PublicMatchCard({
           </div>
 
           <div className="flex items-center justify-end gap-2 flex-1 min-w-0 text-right">
-            <CardTitle className="text-sm font-semibold truncate text-gray-900">
+            <CardTitle className="text-xs sm:text-sm font-semibold truncate text-gray-900">
               {awayTeamName}
             </CardTitle>
             {awayTeamLogo ? (
@@ -83,7 +86,7 @@ export function PublicMatchCard({
               <img
                 src={awayTeamLogo}
                 alt=""
-                className="h-8 w-8 rounded border border-gray-200 object-contain shrink-0"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded border border-gray-200 object-contain shrink-0"
               />
             ) : null}
           </div>
@@ -103,7 +106,9 @@ export function PublicMatchCard({
         ) : null}
         {detailHref ? (
           <div className="pt-2">
-            <TextLink href={detailHref}>Ver detalle del partido <ArrowRight className="h-4 w-4" aria-hidden /></TextLink>
+            <TextLink href={detailHref} className="inline-flex min-h-[44px] items-center gap-1.5 touch-manipulation">
+              Ver detalle del partido <ArrowRight className="h-4 w-4" aria-hidden />
+            </TextLink>
           </div>
         ) : null}
       </CardContent>

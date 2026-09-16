@@ -14,9 +14,16 @@ export function CookieBanner() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      if (!readCookieConsent()) setVisible(true);
+      const needsConsent = !readCookieConsent();
+      if (needsConsent) {
+        setVisible(true);
+        window.dispatchEvent(new CustomEvent("futpro:cookie-banner-change", { detail: { open: true } }));
+      }
     }, 0);
-    const reopen = () => setVisible(true);
+    const reopen = () => {
+      setVisible(true);
+      window.dispatchEvent(new CustomEvent("futpro:cookie-banner-change", { detail: { open: true } }));
+    };
     window.addEventListener(COOKIE_SETTINGS_EVENT, reopen);
     return () => {
       window.clearTimeout(timer);
@@ -27,6 +34,7 @@ export function CookieBanner() {
   const decide = useCallback((optional: boolean) => {
     writeCookieConsent(optional);
     setVisible(false);
+    window.dispatchEvent(new CustomEvent("futpro:cookie-banner-change", { detail: { open: false } }));
   }, []);
 
   if (!visible) return null;
@@ -36,7 +44,7 @@ export function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Aviso de cookies"
-      className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 sm:px-6 sm:pb-6"
+      className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:px-6 sm:pb-6"
     >
       <div className="mx-auto max-w-3xl rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl shadow-gray-900/10">
         <div className="flex items-start gap-3">
@@ -62,14 +70,14 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={() => decide(false)}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+            className="flex min-h-[44px] items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-gray-400 active:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 touch-manipulation"
           >
             Solo necesarias
           </button>
           <button
             type="button"
             onClick={() => decide(true)}
-            className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 active:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 touch-manipulation"
           >
             Aceptar todas
           </button>

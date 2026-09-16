@@ -4,9 +4,71 @@
   --font-sans: var(--font-sans);
 }
 
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+html,
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: #f9fafb;
   color: #111827;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
+
+/* Touch enhancements & remove tap highlight gray box on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Evitar zoom intrusivo en iOS Safari al enfocar inputs */
+@media screen and (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Utilidades para Safe Area (iPhone con notch / Dynamic Island / Barra inferior Android) */
+.safe-area-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-area-pl {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.safe-area-pr {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.safe-area-bottom {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-area-mb {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Ocultar scrollbar en scroll horizontal móvil */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
