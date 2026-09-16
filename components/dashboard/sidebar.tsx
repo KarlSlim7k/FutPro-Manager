@@ -20,7 +20,7 @@ export function DashboardSidebar({ role = "viewer" }: DashboardSidebarProps) {
   const roleLabel = getRoleDisplayName(role);
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col md:min-h-screen md:border-r md:border-gray-800 md:bg-gray-950 md:text-gray-100">
+    <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col md:border-r md:border-gray-800 md:bg-gray-950 md:text-gray-100">
       <div className="px-6 py-8">
         <Eyebrow className="tracking-[0.18em] text-emerald-400">
           FutPro Manager
