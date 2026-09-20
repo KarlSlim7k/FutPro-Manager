@@ -1,14 +1,26 @@
 # Plan UX/UI y Conversión Pública FutPro Manager
 
-## Diagnóstico Breve
+> **Estado de Ejecución:** ✅ **Completado al 100%** (Fases 1 a 5 ejecutadas, validadas y superadas con estética deportiva oscura glassmorphism, PWA instalable, Modo Cancha y OpenGraph dinámico).
 
-- La landing actual está en `app/page.tsx`; ya tiene hero, CTAs y una card de “Plataforma SaaS”, pero el CTA principal actual prioriza “Iniciar sesión”, “Crear cuenta” apunta a `/login` sin abrir registro y todavía aparece copy interno tipo “MVP”. La landing tiene **4 CTAs** activos: “Iniciar sesión”, “Crear cuenta”, un anchor interno `#sistema` (“Conocer el sistema”) y “Consultar Liga Municipal Perote”; el plan de cambio debe contemplar los 4.
-- No existe ruta `/register`; el flujo real de registro está dentro de `components/auth/login-form.tsx` como modo interno `login/register`. `LoginForm` no acepta props; siempre arranca en modo `login`. `app/login/page.tsx` tampoco lee `searchParams`; ambos archivos deben modificarse para soportar `/login?mode=register`.
-- Las vistas públicas bajo `/liga/[slug]` ya funcionan con Supabase/RLS y tienen metadata básica, pero OpenGraph/Twitter aún son mínimos y no hay imagen OG ni `metadataBase`.
-- Las páginas públicas de detalle de partido, equipo y jugador no tienen breadcrumbs. El detalle de jugador es el punto más débil visualmente: JSX comprimido, estados crudos, poca jerarquía y links incompletos.
-- No existe `app/liga/[slug]/teams/page.tsx` (el directorio `app/liga/[slug]/teams/` sí existe con su subruta `[teamSlug]`); los equipos son descubribles desde standings o partidos, pero no desde una lista pública dedicada. Solo se necesita crear el archivo `page.tsx`, no el directorio.
+## Resumen de Fases Ejecutadas
 
-## Fase 1: Quick Wins de Conversión y Copy
+| Fase | Alcance | Estado | Evidencia en Repositorio |
+|---|---|---|---|
+| **Fase 1** | Quick Wins de Conversión y Copy | ✅ Completado | Landing comercial en `app/page.tsx`, soporte para `/login?mode=register`, eliminación de copy interno MVP. |
+| **Fase 2** | Estructura Visual y Producto | ✅ Completado | Secciones de producto con animaciones reveal, contadores numéricos animados y FAQ interactivo. |
+| **Fase 3** | Navegación, Breadcrumbs y Equipos | ✅ Completado | Componente `PublicBreadcrumbs`, tab y ruta dedicada `/liga/[slug]/teams/page.tsx`, directorio público. |
+| **Fase 4** | Consistencia en Detalles | ✅ Completado | Rediseño visual de detalle de partido, plantilla de equipo y ficha deportiva de jugador. |
+| **Fase 5** | Responsive, PWA y Modo Cancha | ✅ Completado | Manifest PWA, iconos maskable, BottomNav por rol, dual layout en standings y controles táctiles de cancha. |
+
+---
+
+## Diagnóstico Inicial (Superado)
+
+- La landing original de `app/page.tsx` fue reestructurada: hero comercial, CTAs orientados a conversión, estadísticas en vivo y prueba social.
+- Se implementó el soporte para `/login?mode=register` y un formulario interactivo completo con selector de perfil y medidor de seguridad de contraseña.
+- Se crearon tarjetas dinámicas OpenGraph con `next/og` en servidor (1200x630) para portada, ligas, partidos, estadísticas, clubes y jugadores.
+- Se añadieron `PublicBreadcrumbs` y la ruta dedicada `app/liga/[slug]/teams/page.tsx`.
+- Se implementó la experiencia móvil completa con BottomNav adaptativa y controles táctiles de Modo Cancha.
 
 **Objetivo**
 

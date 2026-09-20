@@ -41,6 +41,12 @@ function buildCards(
   ];
 }
 
+function getPastDateIso(daysAgo: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString();
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -266,7 +272,7 @@ export default async function DashboardPage() {
 
     // Métricas globales de plataforma (solo super_admin): conteos exactos con RLS mediante.
     if (isSuperAdmin) {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const sevenDaysAgo = getPastDateIso(7);
       const [
         { count: totalUsers },
         { count: totalLeagues },

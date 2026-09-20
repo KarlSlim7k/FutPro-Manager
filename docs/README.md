@@ -1,35 +1,87 @@
-# Índice de Documentación Técnica · FutPro Manager
+# Centro de Documentación · FutPro Manager
 
-Bienvenido al centro de documentación técnica, arquitectura y control de calidad de **FutPro Manager**. Aquí encontrarás la referencia completa del sistema organizada por áreas de responsabilidad.
+Bienvenido al centro de documentación técnica, arquitectura, guías de usuario y control de calidad de **FutPro Manager**. Toda la documentación del proyecto está organizada en subcarpetas especializadas por área de responsabilidad.
 
 ---
 
-## 1. Arquitectura, Datos e Infraestructura
+## Estructura de la Documentación
+
+```txt
+docs/
+├── README.md           ← Este índice central
+├── user-guide/         ← Guías para usuarios finales (por rol y portal público)
+├── developer/          ← Guía de onboarding para desarrolladores
+├── architecture/       ← Referencia técnica: sistema, datos e infraestructura
+├── guidelines/         ← Sistema de diseño y estándares de código
+├── planning/           ← Planificación, estado del producto, roadmap y plan de mejoras
+├── prompts/            ← Catálogo de prompts, agentes de IA y contexto del sistema
+└── qa/                 ← Reportes de aseguramiento de calidad y seguridad
+```
+
+---
+
+## 0. Guías para Usuarios Finales (`user-guide/`)
+
+Documentación funcional en lenguaje no técnico para operar la plataforma según el rol asignado:
+
+* **[Índice y glosario](./user-guide/README.md)**: mapa de roles, glosario de términos y estados del sistema.
+* **[Primeros pasos](./user-guide/PRIMEROS_PASOS.md)**: registro con validaciones de seguridad, inicio de sesión, perfil, roles e instalación PWA en móviles.
+* **[Portal público](./user-guide/PORTAL_PUBLICO.md)**: guía para aficionados (explorador de ligas, tabla, estadísticas avanzadas, calendario y perfiles).
+* **[Administrador de liga](./user-guide/GUIA_ADMIN_LIGA.md)**: operación completa de una liga (temporadas, clubes, sedes, árbitros, auditoría y recálculo).
+* **[Equipos](./user-guide/GUIA_EQUIPOS.md)**: gestión institucional (`team_admin`) y deportiva (`coach`) de club, staff, escudo, plantilla y eventos.
+* **[Árbitros](./user-guide/GUIA_ARBITRAJE.md)**: designaciones, captura de resultados, Modo Cancha para celular, eventos y emisión de cédula oficial.
+* **[Administrador de plataforma](./user-guide/GUIA_ADMIN_PLATAFORMA.md)**: consola global de administración (`super_admin`): cuentas, storage, avisos masivos, contacto, purga de auditoría y ciclo de vida de ligas.
+
+---
+
+## 1. Guía para Desarrolladores (`developer/`)
+
+* **[DEVELOPER_GUIDE.md](./developer/DEVELOPER_GUIDE.md)**: onboarding técnico — setup local, variables de entorno, estructura del repositorio, mapa de módulos del dashboard, patrones clave (Server Actions, RBAC fail-closed, auditoría SQL y de aplicación), comandos de verificación y despliegue.
+
+---
+
+## 2. Arquitectura, Datos e Infraestructura (`architecture/`)
 
 Documentos base para comprender la estructura del proyecto, el esquema de datos y las políticas de seguridad:
 
-* **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Arquitectura general del sistema, separación de capas (Server Components, Client Components, Server Actions), flujo de datos y dependencias clave.
-* **[DATABASE.md](./DATABASE.md)**: Esquema de base de datos relacional en PostgreSQL/Supabase, claves foráneas, triggers de recálculo y políticas RLS principales.
-* **[INFRASTRUCTURE.md](./INFRASTRUCTURE.md)**: Plataformas de despliegue (Vercel + Supabase), servicios en la nube y configuración de variables de entorno.
-* **[ROLES_AND_PERMISSIONS.md](./ROLES_AND_PERMISSIONS.md)**: Matriz completa de autorización RBAC (superadmin, league_admin, team_admin, referee, viewer), permisos por módulo y seguridad en base de datos.
-* **[STORAGE_SETUP.md](./STORAGE_SETUP.md)**: Configuración del bucket `league-media`, políticas de subida, límites de tamaño y aislamiento de archivos por liga.
-* **[DESIGN.md](./DESIGN.md)**: Sistema de diseño, paleta de colores, tipografía, glassmorphism, componentes base y lineamientos UX/UI para móvil y escritorio.
-* **[RULES.md](./RULES.md)**: Reglas de codificación, convenciones de nomenclatura, buenas prácticas de desarrollo y estándares de calidad.
+* **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)**: Arquitectura general del sistema, separación de capas (Server Components, Client Components, Server Actions), flujo de datos y dependencias clave.
+* **[DATABASE.md](./architecture/DATABASE.md)**: Esquema de base de datos relacional en PostgreSQL/Supabase, claves foráneas, triggers de recálculo, funciones de seguridad y RPCs de administración.
+* **[INFRASTRUCTURE.md](./architecture/INFRASTRUCTURE.md)**: Plataformas de despliegue (Vercel + Supabase), servicios en la nube y configuración de variables de entorno.
+* **[ROLES_AND_PERMISSIONS.md](./architecture/ROLES_AND_PERMISSIONS.md)**: Matriz completa de autorización RBAC (super_admin, league_admin, team_admin, coach, referee, viewer), permisos por módulo y seguridad en base de datos.
+* **[STORAGE_SETUP.md](./architecture/STORAGE_SETUP.md)**: Configuración del bucket `league-media`, políticas de subida, límites de tamaño, optimización de avatares y aislamiento de archivos.
 
 ---
 
-## 2. Planificación, Estado y Producto
+## 3. Sistema de Diseño y Estándares (`guidelines/`)
+
+Lineamientos visuales y de codificación que todo contribuidor debe seguir:
+
+* **[DESIGN.md](./guidelines/DESIGN.md)**: Sistema de diseño, paleta de colores deportiva oscura, tipografía Inter, glassmorphism, componentes base y lineamientos UX/UI para móvil y escritorio.
+* **[RULES.md](./guidelines/RULES.md)**: Reglas de codificación, convenciones de nomenclatura, buenas prácticas de desarrollo y estándares de calidad.
+
+---
+
+## 4. Planificación, Estado y Producto (`planning/`)
 
 Documentos de seguimiento del desarrollo y visión del producto:
 
-* **[IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md)**: Estado detallado de implementación módulo por módulo (completado, parcial o pendiente).
-* **[ROADMAP.md](./ROADMAP.md)**: Hoja de ruta estratégica de versiones, etapas de lanzamiento (MVP, Fase 2, SaaS multi-liga) y backlog priorizado.
-* **[PLAN_UX_UI.md](./PLAN_UX_UI.md)**: Plan de trabajo de diseño visual, optimización de conversión de landing pública y consistencia responsive.
-* **[AI_CONTEXT.md](./AI_CONTEXT.md)**: Guía rápida y contexto condensado del proyecto para asistentes y agentes de inteligencia artificial.
+* **[IMPLEMENTATION_STATUS.md](./planning/IMPLEMENTATION_STATUS.md)**: Estado detallado de implementación módulo por módulo (completado, parcial o pendiente).
+* **[ROADMAP.md](./planning/ROADMAP.md)**: Hoja de ruta estratégica de fases de desarrollo (Fases 0 a 6 completadas, Fase 7 próxima) y backlog priorizado.
+* **[IMPROVEMENT_PLAN.md](./planning/IMPROVEMENT_PLAN.md)**: Plan de mejoras priorizado (P0–P3) con criterios de aceptación, decisiones abiertas y secuencia sugerida.
+* **[PLAN_UX_UI.md](./planning/PLAN_UX_UI.md)**: Plan de trabajo de diseño visual, optimización de conversión de landing pública, experiencia móvil PWA y consistencia de interfaz.
 
 ---
 
-## 3. Informes de Aseguramiento de Calidad y Seguridad (QA)
+## 5. Prompts y Contexto para Agentes de IA (`prompts/`)
+
+Recursos para desarrollo asistido por modelos de lenguaje e inteligencia artificial:
+
+* **[Catálogo de Prompts y Agentes](./prompts/README.md)**: Inventario de los 8 prompts (`create-*`), 7 agentes especializados (`solution-architect`, `supabase-expert`, etc.), 4 instrucciones técnicas y flujo de trabajo sugerido.
+* **[AI_CONTEXT.md](./prompts/AI_CONTEXT.md)**: Guía rápida y contexto condensado del modelo de datos, prioridades y reglas de negocio para asistentes de IA.
+
+---
+
+## 6. Informes de Aseguramiento de Calidad y Seguridad (`qa/`)
 
 Reportes de pruebas manuales, auditorías y validaciones de despliegue ubicados en [`docs/qa/`](./qa):
 

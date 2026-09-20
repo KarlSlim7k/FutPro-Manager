@@ -35,10 +35,10 @@
 
 ## Reglas de documentación
 
-- Actualizar `IMPLEMENTATION_STATUS.md` cuando se agregue o cambie un módulo.
-- Actualizar `DATABASE.md` solo si cambia el modelo de datos.
-- Actualizar `DESIGN.md` si se agrega un patrón UI reutilizable.
-- Actualizar `ROADMAP.md` cuando cambien fases o prioridades.
+- Actualizar `docs/planning/IMPLEMENTATION_STATUS.md` cuando se agregue o cambie un módulo.
+- Actualizar `docs/architecture/DATABASE.md` solo si cambia el modelo de datos.
+- Actualizar `docs/guidelines/DESIGN.md` si se agrega un patrón UI reutilizable.
+- Actualizar `docs/planning/ROADMAP.md` cuando cambien fases o prioridades.
 - No marcar algo como implementado sin evidencia en rutas/componentes/lógica real.
 
 ## Reglas para agentes IA / Codex

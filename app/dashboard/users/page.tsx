@@ -143,7 +143,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   }
 
   // Conteos por rol: con RPC usamos una segunda llamada ligera; con fallback, perfiles visibles.
-  let countsByRole = new Map<AppRole, number>();
+  const countsByRole = new Map<AppRole, number>();
   if (!usingFallback) {
     for (const role of VALID_ROLES) {
       const { users: roleUsers } = await listUsersViaRpcAction({ role, limit: 500 });

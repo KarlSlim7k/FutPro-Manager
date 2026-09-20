@@ -72,7 +72,7 @@ FutPro Manager usa una arquitectura web full-stack sobre Next.js (App Router) y 
 ## UI Architecture
 
 - Se priorizan componentes reutilizables y consistencia visual.
-- Patrones documentados en `docs/DESIGN.md`.
+- Patrones documentados en `docs/guidelines/DESIGN.md`.
 - Enfoque mobile-first con layouts adaptativos.
 - Uso recurrente de cards, headers de página/sección, empty states y links de acción textual.
 

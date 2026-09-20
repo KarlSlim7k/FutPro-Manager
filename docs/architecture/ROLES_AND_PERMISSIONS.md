@@ -19,18 +19,19 @@
 
 | Recurso                                    | Lectura pública                           | Lectura autenticada                | Escritura                                                                |
 | ------------------------------------------ | ----------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------ |
-| profiles                                   | No                                        | Dueño + super_admin                | Dueño (campos básicos) + super_admin                                     |
+| profiles                                   | No                                        | Dueño + super_admin                | Dueño (datos básicos) + super_admin (global_role, is_suspended con guardrail) |
 | leagues                                    | Sí (si liga activa/pública)               | Miembros de liga                   | Creador al insertar; admin de liga/super_admin al actualizar             |
 | league_members                             | No                                        | Miembros de liga                   | league_admin/super_admin                                                 |
 | seasons, teams, venues, matches, standings | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin                                                 |
 | team_members                               | No                                        | Integrantes y miembros autorizados | team_admin/league_admin/super_admin                                      |
 | match_officials                            | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin                                                 |
 | referee_availabilities                     | No                                        | Árbitro dueño + league_admin/super_admin | Árbitro miembro de la liga o admin de la liga                            |
-| user_notifications                         | No                                        | Dueño de la notificación (`user_id`)      | Dueño para update/delete; actor/admin al despachar alertas               |
+| user_notifications                         | No                                        | Dueño de la notificación (`user_id`)      | Dueño para marcar leída/borrar; super_admin al emitir broadcast          |
+| contact_messages                           | No                                        | Solo super_admin                   | Inserción pública anon (formulario de contacto); purga super_admin       |
 | players, player_team_registrations         | Parcial (players y registrations en ligas públicas activas) | Miembros de liga                   | league_admin, team_admin y coach según alcance                           |
 | match_events                               | Sí (si liga activa/pública)               | Miembros de liga                   | league_admin/super_admin, referee permitido, team_admin/coach del equipo (solo si su equipo participa en el partido) |
-| media_uploads                              | No                                        | Miembros de liga                   | Propietario de upload o admin de liga                                    |
-| audit_logs                                 | No                                        | league_admin de la liga            | Insert por actor autenticado; lectura total super_admin                  |
+| media_uploads                              | No                                        | Miembros de liga                   | Propietario de upload o admin de liga (super_admin para storage global)   |
+| audit_logs                                 | No                                        | league_admin de la liga            | Insert por actor autenticado/trigger; lectura total y purga super_admin    |
 | subscription_plans                         | Sí (planes activos)                       | Sí                                 | super_admin                                                              |
 | league_subscriptions                       | No                                        | Miembros de liga                   | super_admin                                                              |
 
@@ -345,6 +346,38 @@ El rol `referee` (árbitro oficial) alcanza una cobertura operativa del 100% de 
 - **Administración Institucional y de Clubes:** Sin acceso a edición de ligas, temporadas, equipos, escudos, sedes ni miembros de liga.
 - **Gestión de Plantillas y Jugadores:** Sin permisos para crear jugadores o inscribir deportistas a equipos (`canManagePlayers = false`, `canManageRegistrations = false`).
 - **Auditoría y Standings:** Sin acceso a la vista de auditoría de liga ni recálculo manual de la tabla general.
+
+---
+
+## Consola de Plataforma: super_admin (100%)
+
+### Descripción
+El rol `super_admin` cuenta con facultades globales transversales a todas las ligas de la plataforma mediante interfaces protegidas y funciones de base de datos con `SECURITY DEFINER`. Su operación está respaldada por guardrails de seguridad estrictos (imposibilidad de autodegradarse, suspensión protegida de cuentas y registro de auditoría obligatorio).
+
+### Capacidades Globales Implementadas
+1. **Directorio y Administración de Cuentas (`/dashboard/users`):**
+   - Exploración de todos los perfiles de la plataforma con búsqueda en servidor y visualización de emails de `auth.users` y fecha de último acceso.
+   - Modificación de rol global (`admin_set_global_role`) con protección contra degradación del último super administrador.
+   - Promoción segura a `super_admin` (`admin_assign_super_admin`) que exige confirmación explícita mediante frase de seguridad.
+   - Suspensión y reactivación de cuentas (`admin_set_user_suspension`): los usuarios suspendidos (`is_suspended = true`) son expulsados de inmediato del dashboard con cierre de sesión en `proxy.ts` y redirección a `/login?suspended=1`.
+2. **Consola de Almacenamiento (`/dashboard/storage`):**
+   - Estadísticas agregadas de volumen ocupado (KB/MB/GB) y recuento de objetos por bucket (`admin_storage_stats`).
+   - Explorador de archivos del bucket `league-media` con buscador por prefijo (`admin_list_storage_objects`).
+   - Eliminación física permanente de recursos huérfanos o inapropiados (`admin_delete_storage_object`) con auditoría obligatoria `storage.object_deleted`.
+3. **Avisos Masivos / Broadcast (`/dashboard/notifications/broadcast`):**
+   - Despacho de notificaciones in-app a toda la base de usuarios o segmentadas por rol global.
+   - Vista previa en tiempo real del aviso y procesamiento seguro en lotes de 200 inserciones con auditoría `notification.broadcast`.
+4. **Bandeja de Contacto y Prospectos (`/dashboard/contact-messages`):**
+   - Recepción y consulta de mensajes enviados desde el formulario público de la landing.
+   - Conteo de mensajes y herramienta de purga por retención (`admin_purge_contact_messages`).
+5. **Moderación de Ligas (`/dashboard/leagues/admin`):**
+   - Control del ciclo de vida de todas las ligas de la plataforma (`draft`, `active`, `inactive`, `archived`) e indicador `is_public` con auditoría `league.status_updated`.
+6. **Auditoría Global y Retención (`/dashboard/audit`):**
+   - Consolidado multi-liga de toda la actividad de la plataforma con filtros y exportación completa a CSV.
+   - Purga global de logs antiguos por retención configurable (90, 180 o 365 días) vía RPC `admin_purge_audit_logs`.
+7. **Métricas de Plataforma (`/dashboard`):**
+   - Widget dedicado con recuentos globales de nuevos usuarios, ligas, clubes, futbolistas y partidos disputados en los últimos 7 días.
+
 
 
 

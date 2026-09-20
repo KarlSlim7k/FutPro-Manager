@@ -60,21 +60,37 @@ Toda la documentación técnica, manuales de arquitectura y reportes de aseguram
 
 ### Estructura documental:
 
-1. **Arquitectura, Datos e Infraestructura:**
-   - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — Arquitectura de capas, Server Components y Server Actions.
-   - [`docs/DATABASE.md`](./docs/DATABASE.md) — Modelo entidad-relación y políticas de seguridad PostgreSQL.
-   - [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md) — Infraestructura de Vercel + Supabase.
-   - [`docs/ROLES_AND_PERMISSIONS.md`](./docs/ROLES_AND_PERMISSIONS.md) — Matriz RBAC completa del sistema.
-   - [`docs/STORAGE_SETUP.md`](./docs/STORAGE_SETUP.md) — Configuración del bucket de medios `league-media`.
-   - [`docs/DESIGN.md`](./docs/DESIGN.md) & [`docs/RULES.md`](./docs/RULES.md) — Sistema de diseño y estándares de código.
+0. **Para usuarios finales** (`docs/user-guide/`):
+   - [`docs/user-guide/README.md`](./docs/user-guide/README.md) — Guías de uso por rol, glosario y portal público.
+   - [`docs/user-guide/PRIMEROS_PASOS.md`](./docs/user-guide/PRIMEROS_PASOS.md) — Registro, perfil y primeros pasos.
+   - [`docs/user-guide/GUIA_ADMIN_LIGA.md`](./docs/user-guide/GUIA_ADMIN_LIGA.md) — Operación de liga.
+   - [`docs/user-guide/GUIA_EQUIPOS.md`](./docs/user-guide/GUIA_EQUIPOS.md), [`GUIA_ARBITRAJE.md`](./docs/user-guide/GUIA_ARBITRAJE.md) y [`GUIA_ADMIN_PLATAFORMA.md`](./docs/user-guide/GUIA_ADMIN_PLATAFORMA.md) — Guías por rol.
 
-2. **Planificación y Producto:**
-   - [`docs/IMPLEMENTATION_STATUS.md`](./docs/IMPLEMENTATION_STATUS.md) — Estado real de módulos implementados.
-   - [`docs/ROADMAP.md`](./docs/ROADMAP.md) — Hoja de ruta estratégica pre-MVP y post-MVP.
-   - [`docs/PLAN_UX_UI.md`](./docs/PLAN_UX_UI.md) — Plan integral de experiencia de usuario e interfaz.
-   - [`docs/AI_CONTEXT.md`](./docs/AI_CONTEXT.md) — Resumen ejecutivo para contextos de desarrollo asistido por IA.
+0b. **Para desarrolladores** (`docs/developer/`):
+   - [`docs/developer/DEVELOPER_GUIDE.md`](./docs/developer/DEVELOPER_GUIDE.md) — Onboarding técnico: setup, estructura, patrones y calidad.
 
-3. **Aseguramiento de Calidad y Seguridad (QA):**
+1. **Arquitectura, Datos e Infraestructura** (`docs/architecture/`):
+   - [`docs/architecture/ARCHITECTURE.md`](./docs/architecture/ARCHITECTURE.md) — Arquitectura de capas, Server Components y Server Actions.
+   - [`docs/architecture/DATABASE.md`](./docs/architecture/DATABASE.md) — Modelo entidad-relación y políticas de seguridad PostgreSQL.
+   - [`docs/architecture/INFRASTRUCTURE.md`](./docs/architecture/INFRASTRUCTURE.md) — Infraestructura de Vercel + Supabase.
+   - [`docs/architecture/ROLES_AND_PERMISSIONS.md`](./docs/architecture/ROLES_AND_PERMISSIONS.md) — Matriz RBAC completa del sistema.
+   - [`docs/architecture/STORAGE_SETUP.md`](./docs/architecture/STORAGE_SETUP.md) — Configuración del bucket de medios `league-media`.
+
+2. **Sistema de Diseño y Estándares** (`docs/guidelines/`):
+   - [`docs/guidelines/DESIGN.md`](./docs/guidelines/DESIGN.md) — Sistema de diseño y lineamientos UX/UI.
+   - [`docs/guidelines/RULES.md`](./docs/guidelines/RULES.md) — Reglas de codificación y estándares de calidad.
+
+3. **Planificación y Producto** (`docs/planning/`):
+   - [`docs/planning/IMPLEMENTATION_STATUS.md`](./docs/planning/IMPLEMENTATION_STATUS.md) — Estado real de módulos implementados.
+   - [`docs/planning/ROADMAP.md`](./docs/planning/ROADMAP.md) — Hoja de ruta estratégica pre-MVP y post-MVP.
+   - [`docs/planning/IMPROVEMENT_PLAN.md`](./docs/planning/IMPROVEMENT_PLAN.md) — Plan de mejoras y futuras implementaciones priorizado.
+   - [`docs/planning/PLAN_UX_UI.md`](./docs/planning/PLAN_UX_UI.md) — Plan integral de experiencia de usuario e interfaz.
+
+4. **Prompts y Asistencia de IA** (`docs/prompts/`):
+   - [`docs/prompts/README.md`](./docs/prompts/README.md) — Catálogo de prompts, agentes e instrucciones de desarrollo.
+   - [`docs/prompts/AI_CONTEXT.md`](./docs/prompts/AI_CONTEXT.md) — Resumen ejecutivo para contextos de desarrollo asistido por IA.
+
+5. **Aseguramiento de Calidad y Seguridad (QA)** (`docs/qa/`):
    - [`docs/qa/QA_SECURITY_AUDIT.md`](./docs/qa/QA_SECURITY_AUDIT.md) — Auditoría de seguridad técnica y mitigaciones.
    - [`docs/qa/QA_RELEASE_CANDIDATE.md`](./docs/qa/QA_RELEASE_CANDIDATE.md) — Checklist consolidado pre-MVP.
    - Reportes especializados en [`docs/qa/`](./docs/qa) (*Audit Logs, Standings, Media, UI/UX, Permisos*).
