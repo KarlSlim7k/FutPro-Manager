@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
+import { verifyTeamCreationLimit } from "@/lib/billing/plan-limits";
 import { createClient } from "@/lib/supabase/server";
 import { TEAM_STATUS_VALUES, type TeamStatus } from "@/types/database";
 
@@ -164,6 +165,15 @@ export async function createTeamAction(
       values,
       fieldErrors: {},
       formError: "No tienes permisos para crear equipos en esta liga.",
+    };
+  }
+
+  const planLimitCheck = await verifyTeamCreationLimit(supabase, league.id);
+  if (!planLimitCheck.allowed) {
+    return {
+      values,
+      fieldErrors: {},
+      formError: planLimitCheck.message ?? "Límite de equipos alcanzado en tu plan.",
     };
   }
 

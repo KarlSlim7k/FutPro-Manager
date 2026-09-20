@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { CreatePlanForm } from "@/components/subscriptions/create-plan-form";
 import { PlanToggleButton } from "@/components/subscriptions/plan-toggle-button";
 import { AssignSubscriptionForm } from "@/components/subscriptions/assign-subscription-form";
+import { SaasMetricsCard } from "@/components/dashboard/super-admin/saas-metrics-card";
+import { calculateSaaSMetrics, type SubscriptionMetricRecord } from "@/lib/billing/mrr-metrics";
 
 export default async function SubscriptionsPage() {
   const supabase = await createClient();
@@ -42,24 +44,40 @@ export default async function SubscriptionsPage() {
     supabase
       .from("league_subscriptions")
       .select("id, league_id, plan_id, status, created_at")
-      .in("status", ["trialing", "active", "past_due"])
       .order("created_at", { ascending: false }),
   ]);
 
   const planList = plans ?? [];
   const leagueList = leagues ?? [];
-  const activeSubs = subscriptions ?? [];
+  const allSubs = subscriptions ?? [];
+  const activeSubs = allSubs.filter((s) => ["trialing", "active", "past_due"].includes(s.status));
   const subByLeague = new Map(activeSubs.map((s) => [s.league_id as string, s]));
   const planById = new Map(planList.map((p) => [p.id as string, p]));
+
+  const metricRecords: SubscriptionMetricRecord[] = allSubs.map((s) => {
+    const plan = planById.get(s.plan_id);
+    return {
+      id: s.id,
+      status: s.status as any,
+      planName: plan?.name ?? "Plan General",
+      planSlug: plan?.slug ?? "general",
+      priceMonthly: Number(plan?.price_monthly ?? 0),
+      createdAt: s.created_at,
+    };
+  });
+
+  const saasMetrics = calculateSaaSMetrics(metricRecords);
 
   return (
     <section className="space-y-6">
       <PageHeader
         backHref="/dashboard"
         backLabel="Volver al panel"
-        title="Suscripciones"
-        description="Planes comerciales y asignación por liga (solo super_admin)."
+        title="Suscripciones y Negocio SaaS"
+        description="Métricas de negocio (MRR, ARR, churn) y administración de planes comerciales (solo super_admin)."
       />
+
+      <SaasMetricsCard metrics={saasMetrics} />
 
       <Card>
         <CardHeader>
