@@ -37,6 +37,7 @@ Documentación funcional en lenguaje no técnico para operar la plataforma segú
 ## 1. Guía para Desarrolladores (`developer/`)
 
 * **[DEVELOPER_GUIDE.md](./developer/DEVELOPER_GUIDE.md)**: onboarding técnico — setup local, variables de entorno, estructura del repositorio, mapa de módulos del dashboard, patrones clave (Server Actions, RBAC fail-closed, auditoría SQL y de aplicación), comandos de verificación y despliegue.
+* **[MODULO_TUTORIALES_IMPLEMENTATION.md](./developer/MODULO_TUTORIALES_IMPLEMENTATION.md)**: guía paso a paso para implementar el módulo Tutoriales (fases, archivos, errores comunes y verificación).
 
 ---
 
@@ -49,6 +50,7 @@ Documentos base para comprender la estructura del proyecto, el esquema de datos 
 * **[INFRASTRUCTURE.md](./architecture/INFRASTRUCTURE.md)**: Plataformas de despliegue (Vercel + Supabase), servicios en la nube y configuración de variables de entorno.
 * **[ROLES_AND_PERMISSIONS.md](./architecture/ROLES_AND_PERMISSIONS.md)**: Matriz completa de autorización RBAC (super_admin, league_admin, team_admin, coach, referee, viewer), permisos por módulo y seguridad en base de datos.
 * **[STORAGE_SETUP.md](./architecture/STORAGE_SETUP.md)**: Configuración del bucket `league-media`, políticas de subida, límites de tamaño, optimización de avatares y aislamiento de archivos.
+* **[MODULO_TUTORIALES_ARCHITECTURE.md](./architecture/MODULO_TUTORIALES_ARCHITECTURE.md)**: Arquitectura del módulo Tutoriales (schema, RLS, Storage, rutas, componentes y mapa de lectura para IA).
 
 ---
 
@@ -58,6 +60,7 @@ Lineamientos visuales y de codificación que todo contribuidor debe seguir:
 
 * **[DESIGN.md](./guidelines/DESIGN.md)**: Sistema de diseño, paleta de colores deportiva oscura, tipografía Inter, glassmorphism, componentes base y lineamientos UX/UI para móvil y escritorio.
 * **[RULES.md](./guidelines/RULES.md)**: Reglas de codificación, convenciones de nomenclatura, buenas prácticas de desarrollo y estándares de calidad.
+* **[MODULO_TUTORIALES_CONTENT_GUIDE.md](./guidelines/MODULO_TUTORIALES_CONTENT_GUIDE.md)**: Estándares de redacción de tutoriales (pasos, FAQ, gifs/videos) para redactores y agentes IA.
 
 ---
 
@@ -69,6 +72,7 @@ Documentos de seguimiento del desarrollo y visión del producto:
 * **[ROADMAP.md](./planning/ROADMAP.md)**: Hoja de ruta estratégica de fases de desarrollo (Fases 0 a 6 completadas, Fase 7 próxima) y backlog priorizado.
 * **[IMPROVEMENT_PLAN.md](./planning/IMPROVEMENT_PLAN.md)**: Plan de mejoras priorizado (P0–P3) con criterios de aceptación, decisiones abiertas y secuencia sugerida.
 * **[PLAN_UX_UI.md](./planning/PLAN_UX_UI.md)**: Plan de trabajo de diseño visual, optimización de conversión de landing pública, experiencia móvil PWA y consistencia de interfaz.
+* **[MODULO_TUTORIALES_SPEC.md](./planning/MODULO_TUTORIALES_SPEC.md)**: SPEC funcional del módulo Tutoriales por rol (alcance MVP, tutoriales semilla, visibilidad y criterios de aceptación).
 
 ---
 
@@ -77,6 +81,7 @@ Documentos de seguimiento del desarrollo y visión del producto:
 Recursos para desarrollo asistido por modelos de lenguaje e inteligencia artificial:
 
 * **[Catálogo de Prompts y Agentes](./prompts/README.md)**: Inventario de los 8 prompts (`create-*`), 7 agentes especializados (`solution-architect`, `supabase-expert`, etc.), 4 instrucciones técnicas y flujo de trabajo sugerido.
+* **[MODULO_TUTORIALES_PROMPTS.md](./prompts/MODULO_TUTORIALES_PROMPTS.md)**: Prompts copy-paste para agentes IA + mapa de dónde buscar cada cosa del módulo Tutoriales.
 * **[AI_CONTEXT.md](./prompts/AI_CONTEXT.md)**: Guía rápida y contexto condensado del modelo de datos, prioridades y reglas de negocio para asistentes de IA.
 
 ---
@@ -95,3 +100,4 @@ Reportes de pruebas manuales, auditorías y validaciones de despliegue ubicados 
 * **[QA_STANDINGS_HARDENING.md](./qa/QA_STANDINGS_HARDENING.md)**: Pruebas de robustez y disparadores de recálculo de tabla de posiciones.
 * **[QA_STANDINGS_RESULTS.md](./qa/QA_STANDINGS_RESULTS.md)**: Validación de consistencia matemática entre resultados de partidos y posiciones.
 * **[QA_UI_UX_PRE_MVP.md](./qa/QA_UI_UX_PRE_MVP.md)**: Auditoría de usabilidad, contraste, semántica y accesibilidad visual.
+* **[MODULO_TUTORIALES_QA_CHECKLIST.md](./qa/MODULO_TUTORIALES_QA_CHECKLIST.md)**: Checklist de QA del módulo Tutoriales (roles, filtros, media, seguridad).
