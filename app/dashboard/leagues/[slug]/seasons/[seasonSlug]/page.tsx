@@ -1,9 +1,12 @@
+import Link from "next/link";
+import { Sparkles, ShieldAlert } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { createClient } from "@/lib/supabase/server";
+import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import type { League, Season } from "@/types/database";
 
 type LeagueSummary = Pick<League, "id" | "name" | "slug">;
@@ -77,6 +80,12 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
 
   const season = seasonData as SeasonDetail;
 
+  const permissions = await getLeaguePermissions({
+    supabase,
+    userId: user.id,
+    leagueId: league.id,
+  });
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -87,6 +96,26 @@ export default async function SeasonDetailPage({ params }: SeasonDetailPageProps
           <>
             Liga: <span className="font-medium text-gray-900">{league.name}</span>
           </>
+        }
+        action={
+          permissions.canManageLeague ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/dashboard/leagues/${league.slug}/seasons/${season.slug}/discipline`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-950/30 px-3 py-1.5 text-xs font-medium text-red-300 transition-colors hover:bg-red-900/40 hover:text-white"
+              >
+                <ShieldAlert className="h-4 w-4" />
+                Control Disciplinario
+              </Link>
+              <Link
+                href={`/dashboard/leagues/${league.slug}/seasons/${season.slug}/fixtures`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-800/40 hover:text-white"
+              >
+                <Sparkles className="h-4 w-4" />
+                Generar Calendario
+              </Link>
+            </div>
+          ) : undefined
         }
       />
 

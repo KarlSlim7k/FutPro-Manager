@@ -100,6 +100,15 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         }
         action={
           <ToolbarActions>
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/tactics`}>
+              Pizarra táctica
+            </TextLink>
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/callups`}>
+              Convocatoria
+            </TextLink>
+            <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/cooperacha`}>
+              Cooperacha
+            </TextLink>
             <TextLink href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/roster`}>
               Ver plantilla
             </TextLink>
@@ -260,10 +269,33 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Estadísticas</CardTitle>
+            <CardTitle>Convocatorias de juego</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Módulo en preparación.</p>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Prepara la nómina de citados para el fin de semana y compártela a WhatsApp.
+            </p>
+            <TextLink
+              href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/callups`}
+            >
+              Gestionar convocatoria
+            </TextLink>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Cooperacha y Finanzas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Control de pagos semanales de arbitraje, cuotas y cooperachas de jugadores.
+            </p>
+            <TextLink
+              href={`/dashboard/leagues/${league.slug}/teams/${team.slug}/cooperacha`}
+            >
+              Control de cooperacha
+            </TextLink>
           </CardContent>
         </Card>
       </div>

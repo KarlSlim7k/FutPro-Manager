@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
 import { RefereeAvailabilityManager } from "@/components/referees/referee-availability-manager";
+import { RefereePayoutSummary } from "@/components/referees/referee-payout-summary";
+import { calculateRefereeEarnings } from "@/lib/referees/referee-fees";
 import { createClient } from "@/lib/supabase/server";
 import type { League, MatchStatus, RefereeAvailability } from "@/types/database";
 
@@ -160,6 +162,19 @@ export default async function MatchesHubPage() {
   if (error) throw error;
   const leagues = (data ?? []) as LeagueItem[];
 
+  const earningsSummary = calculateRefereeEarnings({
+    assignments: assignedMatches.map((m) => ({
+      matchId: m.id,
+      roundName: m.roundName,
+      scheduledAt: m.scheduledAt,
+      status: m.status,
+      role: "head_referee",
+      homeTeamName: m.homeTeamName,
+      awayTeamName: m.awayTeamName,
+      isPaid: m.status === "completed",
+    })),
+  });
+
   return (
     <section className="space-y-8">
       <PageHeader
@@ -169,9 +184,12 @@ export default async function MatchesHubPage() {
         backLabel="Dashboard"
       />
 
-      {/* Sección Mis partidos asignados (para árbitros con designaciones) */}
+      {/* Sección Mis partidos asignados y liquidación arbitral */}
       {assignedMatches.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <RefereePayoutSummary summary={earningsSummary} />
+
+          <div className="space-y-4">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
               Mis partidos asignados
@@ -248,7 +266,8 @@ export default async function MatchesHubPage() {
             ))}
           </div>
         </div>
-      ) : null}
+      </div>
+    ) : null}
 
       {/* Sección Disponibilidad arbitral (si es árbitro o admin de alguna liga) */}
       {refereeLeagues.length > 0 ? (
