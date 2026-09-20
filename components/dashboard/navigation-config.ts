@@ -12,6 +12,7 @@ import {
   Megaphone,
   Sliders,
   Activity,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 
@@ -55,6 +56,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
           { label: "Tipos", href: "/dashboard/types", icon: Sliders },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
         all: [
@@ -71,6 +73,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Suscripciones", href: "/dashboard/subscriptions", icon: CreditCard },
           { label: "Tipos", href: "/dashboard/types", icon: Sliders },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
       };
@@ -86,6 +89,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         drawer: [
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Auditoría", href: "/dashboard/audit", icon: Shield },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
         all: [
@@ -95,6 +99,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Auditoría", href: "/dashboard/audit", icon: Shield },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
       };
@@ -110,6 +115,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         drawer: [
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
         ],
         all: [
           { label: "Panel de control", href: "/dashboard", icon: Home, exact: true },
@@ -117,6 +123,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Todos los partidos", href: "/dashboard/matches", icon: Activity },
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
       };
@@ -131,6 +138,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         ],
         drawer: [
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
         all: [
@@ -139,6 +147,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Partidos", href: "/dashboard/matches", icon: Calendar },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
           { label: "Ligas", href: "/dashboard/leagues", icon: Trophy },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
       };
@@ -153,6 +162,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
         ],
         drawer: [
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
         all: [
@@ -161,6 +171,7 @@ export function getNavigationForRole(role: UserDashboardRole): RoleNavigationCon
           { label: "Partidos", href: "/dashboard/matches", icon: Calendar },
           { label: "Equipos", href: "/dashboard/teams", icon: Users },
           { label: "Jugadores", href: "/dashboard/players", icon: Users },
+          { label: "Tutoriales", href: "/dashboard/ayuda", icon: BookOpen },
           { label: "Mi perfil", href: "/dashboard/profile", icon: User },
         ],
       };

@@ -308,3 +308,43 @@ export interface UserNotification {
   created_at: string;
 }
 
+export type TutorialMediaType = "gif" | "video" | "image";
+
+export interface TutorialFaqItem {
+  q: string;
+  a: string;
+}
+
+export interface Tutorial {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  target_roles: AppRole[];
+  tags: string[];
+  estimated_minutes: number;
+  sort_order: number;
+  is_published: boolean;
+  related_route: string | null;
+  faq: TutorialFaqItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TutorialStep {
+  id: string;
+  tutorial_id: string;
+  step_order: number;
+  title: string;
+  body_md: string;
+  media_path: string | null;
+  media_type: TutorialMediaType | null;
+  faq: TutorialFaqItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TutorialWithSteps extends Tutorial {
+  steps: TutorialStep[];
+}
+

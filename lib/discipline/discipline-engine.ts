@@ -108,7 +108,7 @@ export function calculateSeasonDiscipline({
     let isSuspended = reg.status === "suspended" || player?.status === "suspended";
     let suspensionReason: string | undefined = isSuspended ? "Suspensión administrativa activa" : undefined;
     let matchesToServe = 0;
-    let matchesServed = 0;
+    const matchesServed = 0;
 
     // Check card triggers
     pEvents.forEach((ev) => {

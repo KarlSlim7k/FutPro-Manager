@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TextLink } from "@/components/ui/text-link";
 import { MATCH_OFFICIAL_ROLE_LABELS, type MatchOfficialRole } from "@/types/database";
 
 export interface OfficialItem {
@@ -50,8 +51,11 @@ export function RefereeAssignmentCard({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Cuerpo arbitral</CardTitle>
+        <TextLink href="/dashboard/ayuda/liga-asignar-arbitro" className="text-xs font-normal">
+          Guía
+        </TextLink>
       </CardHeader>
       <CardContent className="space-y-4">
         {hasOfficialsList ? (

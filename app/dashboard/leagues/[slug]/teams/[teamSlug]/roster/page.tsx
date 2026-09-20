@@ -260,6 +260,11 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
             <span className="font-medium text-gray-900">{team.name}</span> por temporada.
           </>
         }
+        action={
+          <TextLink href="/dashboard/ayuda/equipo-gestionar-roster" className="text-xs">
+            Guía de plantilla
+          </TextLink>
+        }
       />
 
       <Card>

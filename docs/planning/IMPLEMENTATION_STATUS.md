@@ -142,18 +142,29 @@ FutPro Manager es una plataforma SaaS multi-tenant para la administración y seg
   - Triggers SQL automáticos en PostgreSQL (`trg_auto_audit_log`) en tablas clave (`matches`, `match_events`, `match_officials`, `team_members`, `player_team_registrations`).
   - Filtros por acción, entidad, actor y fechas con búsqueda textual y exportación a CSV.
 
+### 14. Módulo Tutoriales por Rol (MVP)
+- **Estado:** Implementado al 100%.
+- **Evidencia en repo:**
+  - Schema & Migraciones: `supabase/migrations/20260920160000_tutorials.sql` (tablas `tutorials` + `tutorial_steps`, índices GIN, triggers `set_updated_at`, RLS select autenticado + escritura admin, policy storage `tutorials/%`).
+  - Semilla: `supabase/migrations/20260920161000_tutorials_seed.sql` (12 tutoriales semilla con pasos y FAQ redactados de guías reales).
+  - Tipos: `types/database.ts` (`Tutorial`, `TutorialStep`, `TutorialWithSteps`, `TutorialFaqItem`).
+  - Lógica y Seguridad: `lib/tutorials/roles.ts`, `lib/tutorials/queries.ts`, `lib/tutorials/queries.test.ts` (23 tests vitest).
+  - Rutas: `app/dashboard/ayuda/page.tsx` (lista con searchParams y filtros reactivos), `app/dashboard/ayuda/[slug]/page.tsx` (detalle con fail-closed `notFound()`), `app/dashboard/ayuda/actions.ts`.
+  - Componentes: `components/help/TutorialCard.tsx`, `components/help/TutorialFilters.tsx` ("use client"), `components/help/TutorialStepView.tsx` (Markdown sanitizado JSX puro, next/image, video mp4), `components/help/TutorialFaq.tsx` (acordeón accesible).
+  - Integración Nav & Contextual: Enlace en `components/dashboard/navigation-config.ts` para todos los roles; accesos contextuales en `RefereeAssignmentCard` y `roster/page.tsx`.
+
 ---
 
 ## Cobertura de Roles Operativos
 
 | Rol | Cobertura | Alcance y Capacidades Operativas |
 |---|---|---|
-| **`super_admin`** | 100% | Consola global completa: usuarios, roles, suspensiones, storage, avisos masivos, contacto, purga de auditoría y ciclo de vida de ligas. |
-| **`league_admin`** | 100% | Gestión integral de liga: temporadas, clubes, sedes, partidos, designación de ternas arbitrales, miembros, auditoría y recálculo de tabla. |
-| **`team_admin`** | 100% | Gestión de club: escudo, datos, staff (con protección de último admin), plantilla de jugadores y eventos de sus partidos. |
-| **`coach`** | 100% | Operación deportiva: fichas de jugadores, inscripciones, dorsales y eventos de los partidos de su club. Controles administrativos bloqueados. |
-| **`referee`** | 100% | Operación arbitral: designaciones en terna, calendario de disponibilidad, hubs de partidos, Modo Cancha táctil, captura de resultados/eventos y cédula oficial. |
-| **`viewer`** | 100% | Consulta informativa en dashboard sin permisos de mutación. |
+| **`super_admin`** | 100% | Consola global completa: usuarios, roles, suspensiones, storage, avisos masivos, contacto, purga de auditoría, ciclo de vida de ligas y tutoriales globales. |
+| **`league_admin`** | 100% | Gestión integral de liga: temporadas, clubes, sedes, partidos, designación de ternas arbitrales, miembros, auditoría, recálculo de tabla y tutoriales administrativos y de roles subordinados. |
+| **`team_admin`** | 100% | Gestión de club: escudo, datos, staff (con protección de último admin), plantilla de jugadores, eventos y tutoriales de administración de equipo y coach. |
+| **`coach`** | 100% | Operación deportiva: fichas de jugadores, inscripciones, dorsales, eventos de los partidos de su club y tutoriales de convocatoria y captura deportiva. |
+| **`referee`** | 100% | Operación arbitral: designaciones en terna, calendario de disponibilidad, hubs de partidos, Modo Cancha táctil, captura de resultados/eventos, cédula oficial y tutoriales arbitrales. |
+| **`viewer`** | 100% | Consulta informativa en dashboard sin permisos de mutación y tutoriales de exploración pública general. |
 
 ---
 
@@ -170,12 +181,10 @@ FutPro Manager es una plataforma SaaS multi-tenant para la administración y seg
 - **Fecha:** 2026-09-20
 - **Branch:** `main`
 - **Estado de suites:**
-  - Vitest: **80/80 tests en verde (100% passing)**.
+  - Vitest: **160/160 tests en verde (100% passing across 27 suites)**.
   - ESLint: **0 errores**.
-  - TypeScript: Compilación limpia sin errores de tipos.
+  - TypeScript: Compilación limpia sin errores de tipos (`npm run build` exitoso).
 - **Hitos completados en este ciclo:**
-  - Consola global de `super_admin` completada al 100% con 6 nuevos módulos y RPCs seguras.
-  - Cierre operativo del rol `referee` al 100% con Modo Cancha, terna arbitral completa y cédula digital.
-  - Experiencia móvil PWA e instalación en pantalla de inicio con navegación inferior por roles.
-  - Rediseño visual deportivo de alto impacto con glassmorphism, registro interactivo y OpenGraph dinámico.
-  - Reorganización total de la documentación técnica en subcarpetas temáticas especializadas con nuevo directorio `docs/prompts/`.
+  - Implementación completa del Módulo Tutoriales por Rol (Fases 0 a 6).
+  - RLS fail-closed y aislamiento seguro por roles en la base de datos y server actions.
+  - 12 tutoriales iniciales con contenido preciso derivado de las guías de usuario reales.
