@@ -407,6 +407,7 @@ export default async function PublicMatchDetailPage({ params }: PublicMatchDetai
               homeTeamId={match.home_team_id}
               awayTeamId={match.away_team_id}
               leagueSlug={league.slug}
+              matchId={match.id}
             />
           </div>
         </div>

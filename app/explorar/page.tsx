@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Compass, Plus, Trophy } from "lucide-react";
 import { PublicFooter } from "@/components/public/public-footer";
+import { FavoriteTeamsBar } from "@/components/favorites/favorite-teams-bar";
 import {
   LeagueSearchExplorer,
   type LeagueExplorerItem,
@@ -123,6 +124,11 @@ export default async function ExploreLeaguesPage({ searchParams }: SearchProps) 
               <span>Registrar mi liga</span>
             </Link>
           </div>
+        </div>
+
+        {/* Barra de equipos favoritos del usuario */}
+        <div className="animate-enter-fade-up">
+          <FavoriteTeamsBar />
         </div>
 
         {/* Explorador reactivo de ligas */}

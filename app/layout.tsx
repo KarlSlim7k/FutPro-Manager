@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { CookieBanner } from "@/components/privacy/cookie-banner";
+import { GlobalSearchModal } from "@/components/search/global-search-modal";
 import "./globals.css";
 
 const inter = Inter({
@@ -63,7 +64,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={inter.variable}>
-      <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>{children}<CookieBanner /></body>
+      <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
+        {children}
+        <CookieBanner />
+        <GlobalSearchModal />
+      </body>
     </html>
   );
 }

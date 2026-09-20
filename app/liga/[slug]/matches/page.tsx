@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { Calendar, Download } from "lucide-react";
 import { MatchSeasonSelector } from "@/components/matches/match-season-selector";
 import { PublicMatchCard } from "@/components/public/public-match-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -215,18 +216,29 @@ export default async function LeagueMatchesPublicPage({ params, searchParams }: 
                   </select>
                 </div>
               </div>
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="submit"
-                  className="rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-emerald-950/40 transition"
-                >
-                  Aplicar filtros
-                </button>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-emerald-950/40 transition"
+                  >
+                    Aplicar filtros
+                  </button>
+                  <a
+                    href={`/liga/${league.slug}/matches?seasonId=${selectedSeason.id}`}
+                    className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium text-gray-300 hover:bg-white/10 hover:text-white transition"
+                  >
+                    Limpiar
+                  </a>
+                </div>
                 <a
-                  href={`/liga/${league.slug}/matches?seasonId=${selectedSeason.id}`}
-                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium text-gray-300 hover:bg-white/10 hover:text-white transition"
+                  href={`/liga/${league.slug}/calendar.ics?seasonId=${selectedSeason.id}`}
+                  download
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-400 transition"
+                  title="Sincronizar partidos con tu app de calendario favorita"
                 >
-                  Limpiar
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>Descargar Calendario (.ics)</span>
                 </a>
               </div>
             </form>

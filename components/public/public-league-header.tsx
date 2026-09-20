@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PublicShareButton } from "@/components/public/public-share-button";
+import { GlobalSearchTrigger } from "@/components/search/global-search-trigger";
 import type { League } from "@/types/database";
 
 type PublicLeagueHeaderProps = {
@@ -19,7 +20,10 @@ export function PublicLeagueHeader({ league }: PublicLeagueHeaderProps) {
             <ArrowLeft className="h-3.5 w-3.5 transition group-hover:-translate-x-0.5" aria-hidden />
             <span>Explorar ligas</span>
           </Link>
-          <PublicShareButton title={league.name} />
+          <div className="flex items-center gap-2">
+            <GlobalSearchTrigger variant="button" />
+            <PublicShareButton title={league.name} />
+          </div>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 pt-1">

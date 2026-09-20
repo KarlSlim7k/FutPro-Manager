@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { Radio, Sparkles } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { EventIcon, getMatchEventVisual } from "@/components/ui/event-icon";
@@ -23,6 +25,7 @@ type PublicMatchEventsProps = {
   homeTeamId?: string;
   awayTeamId?: string;
   leagueSlug: string;
+  matchId?: string;
 };
 
 type EventSummary = {
@@ -104,32 +107,86 @@ export function PublicMatchEvents({
   homeTeamId,
   awayTeamId,
   leagueSlug,
+  matchId,
 }: PublicMatchEventsProps) {
+  const [eventsList, setEventsList] = useState<MatchEventItem[]>(events);
   const [activeFilter, setActiveFilter] = useState<EventFilter>("all");
+  const [liveAlert, setLiveAlert] = useState<string | null>(null);
+
+  useEffect(() => {
+    setEventsList(events);
+  }, [events]);
+
+  useEffect(() => {
+    if (!matchId) return;
+    const supabase = createClient();
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel(`live_events_${matchId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "match_events",
+          filter: `match_id=eq.${matchId}`,
+        },
+        (payload: { eventType: string; new: Record<string, unknown>; old?: Record<string, unknown> }) => {
+          if (payload.eventType === "INSERT") {
+            const newEv = payload.new as unknown as MatchEventItem;
+            setEventsList((prev) => {
+              if (prev.some((e) => e.id === newEv.id)) return prev;
+              const next = [...prev, newEv];
+              return next.sort((a, b) => (b.minute ?? 0) - (a.minute ?? 0));
+            });
+            const eventTypeLabel = formatEventType(newEv.event_type);
+            setLiveAlert(`⚡ ¡Incidencia en vivo: ${eventTypeLabel} (${newEv.minute}')!`);
+            setTimeout(() => setLiveAlert(null), 5000);
+          } else if (payload.eventType === "DELETE") {
+            const oldId = (payload.old as { id?: string } | undefined)?.id;
+            if (oldId) {
+              setEventsList((prev) => prev.filter((e) => e.id !== oldId));
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [matchId]);
 
   const teamsMap = useMemo(() => new Map(teams.map((team) => [team.id, team])), [teams]);
   const playersMap = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
 
-  const summary = useMemo(() => buildSummary(events), [events]);
+  const summary = useMemo(() => buildSummary(eventsList), [eventsList]);
 
   const filteredEvents = useMemo(
-    () => events.filter((event) => matchesFilter(event, activeFilter)),
-    [events, activeFilter]
+    () => eventsList.filter((event) => matchesFilter(event, activeFilter)),
+    [eventsList, activeFilter]
   );
 
   const activeFilterLabel = filterOptions.find((option) => option.key === activeFilter)?.label ?? "Todos";
 
-  if (events.length === 0) {
+  if (eventsList.length === 0) {
     return (
       <EmptyState
         title="Sin eventos registrados"
-        description="Cuando se registren goles, tarjetas o sustituciones, aparecerán aquí."
+        description="Cuando se registren goles, tarjetas o sustituciones en la cédula, aparecerán aquí en vivo."
       />
     );
   }
 
   return (
     <section className="space-y-5" aria-label="Eventos públicos del partido">
+      {liveAlert && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-300 shadow-lg animate-bounce">
+          <Radio className="h-4 w-4 animate-pulse text-emerald-400" />
+          <span>{liveAlert}</span>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
         {[
           { label: "Total", value: summary.total },

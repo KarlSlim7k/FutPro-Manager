@@ -17,6 +17,7 @@ export function PublicNav({ leagueSlug }: PublicNavProps) {
     { label: "Estadísticas", href: `/liga/${leagueSlug}/stats` },
     { label: "Partidos", href: `/liga/${leagueSlug}/matches` },
     { label: "Equipos", href: `/liga/${leagueSlug}/teams` },
+    { label: "Quiniela", href: `/liga/${leagueSlug}/quiniela` },
   ];
 
   return (

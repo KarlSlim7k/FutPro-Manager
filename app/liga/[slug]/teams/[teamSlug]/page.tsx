@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
+import { Calendar } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/status-badge";
@@ -8,6 +9,9 @@ import { PublicLeagueHeader } from "@/components/public/public-league-header";
 import { PublicNav } from "@/components/public/public-nav";
 import { PublicBreadcrumbs } from "@/components/public/public-breadcrumbs";
 import { PublicMatchCard } from "@/components/public/public-match-card";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { SocialShareButtons } from "@/components/social/social-share-buttons";
+import { formatTeamShareText } from "@/lib/social/share-formatter";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getPublicLeagueBySlug } from "@/lib/leagues/get-public-league";
 import type {
@@ -212,8 +216,40 @@ export default async function PublicTeamDetailPage({ params, searchParams }: Pub
         />
 
         <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl text-white">
-          <div className="border-b border-white/10 pb-3">
-            <h2 className="text-xl font-bold text-white">{team.name}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div>
+              <h2 className="text-xl font-bold text-white sm:text-2xl">{team.name}</h2>
+              <p className="text-xs text-gray-400 mt-0.5">{league.name}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <FavoriteButton
+                team={{
+                  id: team.id,
+                  name: team.name,
+                  slug: team.slug,
+                  leagueSlug: league.slug,
+                  leagueName: league.name,
+                  logoUrl: team.logo_url,
+                }}
+              />
+              <a
+                href={`/liga/${league.slug}/teams/${team.slug}/calendar.ics`}
+                download
+                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition"
+                title="Sincronizar calendario del equipo a tu teléfono (.ics)"
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                <span>Calendario (.ics)</span>
+              </a>
+              <SocialShareButtons
+                variant="compact"
+                title={team.name}
+                shareText={formatTeamShareText({
+                  teamName: team.name,
+                  leagueName: league.name,
+                })}
+              />
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 pt-4">
             <div>

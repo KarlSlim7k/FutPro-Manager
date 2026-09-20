@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
+import { GlobalSearchTrigger } from "@/components/search/global-search-trigger";
 import type { UserNotification } from "@/types/database";
 
 interface DashboardHeaderProps {
@@ -65,7 +66,8 @@ export function DashboardHeader({
           </div>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <GlobalSearchTrigger className="hidden md:inline-flex" />
           <NotificationBell notifications={notifications} />
           {error ? (
             <p className="text-xs text-red-600 sm:text-sm">{error}</p>
