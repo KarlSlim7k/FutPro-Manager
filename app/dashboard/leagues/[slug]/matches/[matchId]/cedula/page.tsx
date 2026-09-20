@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TextLink } from "@/components/ui/text-link";
 import { PrintCedulaButton } from "@/components/matches/print-cedula-button";
 import { MobileCedulaTabs } from "@/components/matches/mobile-cedula-tabs";
+import { CedulaSignaturesSection } from "@/components/matches/cedula-signatures-section";
 import type { League, Match, Season, Team, Venue, Profile, PlayerTeamRegistration, Player, MatchEvent } from "@/types/database";
 
 interface MatchCedulaPageProps {
@@ -431,50 +432,16 @@ export default async function MatchCedulaPage({ params }: MatchCedulaPageProps) 
             <div className="h-14 border-b border-dashed border-gray-300"></div>
           </div>
 
-          {/* Sección de Firmas Formales */}
-          <div className="pt-8 space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center text-xs">
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
-                  {headRefName ?? "Árbitro Central"}
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">Árbitro Central</span>
-              </div>
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
-                  {firstAstName ?? "Primer Asistente"}
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">Primer Asistente</span>
-              </div>
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
-                  {secondAstName ?? "Segundo Asistente"}
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">Segundo Asistente</span>
-              </div>
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900 truncate">
-                  {fourthOffName ?? "Cuarto Oficial"}
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">Cuarto Oficial</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-8 text-center text-xs max-w-xl mx-auto pt-2">
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
-                  Capitán / Delegado
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">{homeTeam.name}</span>
-              </div>
-              <div>
-                <div className="border-t border-gray-800 pt-1 font-bold text-gray-900">
-                  Capitán / Delegado
-                </div>
-                <span className="text-[10px] text-gray-500 uppercase">{awayTeam.name}</span>
-              </div>
-            </div>
-          </div>
+          {/* Sección de Firmas Formales y Digitales */}
+          <CedulaSignaturesSection
+            headRefName={headRefName}
+            firstAstName={firstAstName}
+            secondAstName={secondAstName}
+            fourthOffName={fourthOffName}
+            homeTeamName={homeTeam.name}
+            awayTeamName={awayTeam.name}
+            matchId={match.id}
+          />
         </div>
       </div>
     </div>

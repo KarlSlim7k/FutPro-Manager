@@ -12,6 +12,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { ToolbarActions } from "@/components/ui/toolbar-actions";
 import { MatchShareCard } from "@/components/social/match-share-card";
+import { OfflineStatusBanner } from "@/components/offline/offline-status-banner";
+import { PlayerQrScanner } from "@/components/referees/player-qr-scanner";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaguePermissions } from "@/lib/permissions/league-permissions";
 import { canOfficiateMatch } from "@/lib/permissions/match-permissions";
@@ -365,6 +367,8 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   return (
     <section className="space-y-6">
+      <OfflineStatusBanner leagueSlug={league.slug} matchId={match.id} />
+
       <PageHeader
         backHref={`/dashboard/leagues/${league.slug}/matches`}
         backLabel="Volver a partidos"
@@ -402,6 +406,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/cedula`}>
               <span className="inline-flex items-center gap-1.5"><FileText className="h-4 w-4" aria-hidden /> Cédula oficial</span>
             </TextLink>
+            <PlayerQrScanner />
           </ToolbarActions>
         }
       />
@@ -421,9 +426,10 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-blue-900">
-              Tienes la designación oficial para este partido. Puedes capturar el resultado técnico, registrar eventos disciplinarios e incidencias, y emitir o imprimir la cédula oficial del partido.
+              Tienes la designación oficial para este partido. Puedes validar credenciales de jugadores con código QR, capturar el resultado técnico, registrar eventos disciplinarios e incidencias, y emitir la cédula oficial.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1 text-sm">
+              <PlayerQrScanner />
               {match.status !== "cancelled" ? (
                 <TextLink href={`/dashboard/leagues/${league.slug}/matches/${match.id}/result`}>
                   Capturar resultado

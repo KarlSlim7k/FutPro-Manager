@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { CreateMatchEventForm } from "@/components/matches/create-match-event-form";
 import { MatchEventCard } from "@/components/matches/match-event-card";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import { OfflineStatusBanner } from "@/components/offline/offline-status-banner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -241,6 +242,8 @@ export default async function MatchEventsPage({ params }: MatchEventsPageProps) 
 
   return (
     <section className="space-y-6">
+      <OfflineStatusBanner leagueSlug={league.slug} matchId={match.id} />
+
       <PageHeader
         backHref={`/dashboard/leagues/${league.slug}/matches/${match.id}`}
         backLabel="Volver al detalle del partido"

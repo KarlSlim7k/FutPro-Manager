@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Upload } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { CreateTeamForm } from "@/components/teams/create-team-form";
 import { TeamCard } from "@/components/teams/team-card";
@@ -75,6 +77,17 @@ export default async function LeagueTeamsPage({ params }: LeagueTeamsPageProps) 
             Gestiona los equipos de{" "}
             <span className="font-medium text-gray-900">{league.name}</span>.
           </>
+        }
+        action={
+          permissions.canManageCatalog ? (
+            <Link
+              href={`/dashboard/leagues/${league.slug}/teams/import`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-800/40 hover:text-white"
+            >
+              <Upload className="h-4 w-4" />
+              Importar CSV
+            </Link>
+          ) : undefined
         }
       />
 

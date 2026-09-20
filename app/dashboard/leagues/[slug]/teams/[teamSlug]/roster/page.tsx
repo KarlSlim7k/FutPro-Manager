@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { QrCode } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -411,6 +412,16 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                       )}
                     </p>
                     <p>Fecha de registro: {formatDateTime(registration.registered_at)}</p>
+                    <div className="pt-1">
+                      <Link
+                        href={`/credencial/${registration.id}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-950/20 px-2.5 py-1 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-900/40 hover:text-white"
+                      >
+                        <QrCode className="h-3.5 w-3.5" />
+                        Credencial QR
+                      </Link>
+                    </div>
                     {canManageRoster ? (
                       <div className="border-t border-gray-100 pt-3">
                         <RosterItemActions
@@ -448,6 +459,9 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                     </th>
                     <th className="px-4 py-3">
                       <Eyebrow as="span">Estado jugador</Eyebrow>
+                    </th>
+                    <th className="px-4 py-3">
+                      <Eyebrow as="span">Credencial</Eyebrow>
                     </th>
                     {canManageRoster ? (
                       <th className="px-4 py-3">
@@ -492,6 +506,16 @@ export default async function TeamRosterPage({ params, searchParams }: TeamRoste
                         ) : (
                           "No disponible"
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/credencial/${registration.id}`}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 rounded border border-emerald-600/30 bg-emerald-950/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-900/40 hover:text-white"
+                        >
+                          <QrCode className="h-3.5 w-3.5" />
+                          QR
+                        </Link>
                       </td>
                       {canManageRoster ? (
                         <td className="px-4 py-3">
