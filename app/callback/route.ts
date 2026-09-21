@@ -147,9 +147,10 @@ async function bridgeSupabaseSession() {
     return;
   }
 
-  const token = new URL(linkData.properties.action_link).searchParams.get('token');
-  if (!token) {
-    console.error('[bridgeSupabaseSession] Missing token in action_link');
+  const tokenHash = linkData.properties.hashed_token;
+  const emailOtp = linkData.properties.email_otp;
+  if (!tokenHash && !emailOtp) {
+    console.error('[bridgeSupabaseSession] Missing token in action_link / linkData');
     return;
   }
 
@@ -168,11 +169,22 @@ async function bridgeSupabaseSession() {
     },
   });
 
-  const { error: verifyError } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'magiclink',
-  });
+  let verifyError = null;
+  if (tokenHash) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: 'magiclink',
+    });
+    verifyError = error;
+  } else if (emailOtp) {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: emailOtp,
+      type: 'email',
+    });
+    verifyError = error;
+  }
+
   if (verifyError) {
     console.error('[bridgeSupabaseSession] Error verifying OTP:', verifyError);
     return;
