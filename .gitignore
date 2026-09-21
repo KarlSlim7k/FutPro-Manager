@@ -69,3 +69,6 @@ Thumbs.db
 .claude/
 .gemini/
 .github/
+.vercel
+opencode.json
+

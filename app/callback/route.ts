@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
 
   try {
     await bridgeSupabaseSession();
-  } catch {
+  } catch (err) {
+    console.error('[callback] Error in bridgeSupabaseSession:', err);
     // Fallback: el layout con auto-provisión cubre el caso sin sesión Supabase.
   }
 
@@ -28,15 +29,30 @@ export async function GET(request: NextRequest) {
 
 async function bridgeSupabaseSession() {
   const ctx = await getLogtoContext(logtoConfig, { fetchUserInfo: true });
-  if (!ctx.isAuthenticated || !ctx.claims?.sub) return;
+  console.log('[bridgeSupabaseSession] Logto context debug:', {
+    isAuthenticated: ctx.isAuthenticated,
+    claims: ctx.claims,
+    userInfo: ctx.userInfo,
+  });
+
+  if (!ctx.isAuthenticated || !ctx.claims?.sub) {
+    console.warn('[bridgeSupabaseSession] User not authenticated or missing sub claim');
+    return;
+  }
 
   const sub = ctx.claims.sub;
   const email =
     (ctx.claims.email as string | undefined) ??
     (ctx.userInfo as { email?: string } | undefined)?.email ??
     null;
+
   // Sin email no hay usuario sombra viable (magiclink lo exige).
-  if (!email) return;
+  if (!email) {
+    console.warn('[bridgeSupabaseSession] No email found in Logto claims or userInfo for sub:', sub);
+    return;
+  }
+
+  console.log('[bridgeSupabaseSession] Resolved email:', email, 'for sub:', sub);
 
   const name =
     (ctx.claims.name as string | undefined) ??
@@ -50,11 +66,15 @@ async function bridgeSupabaseSession() {
   const admin = createAdminClient();
 
   // 1) Profile existente por logto_sub.
-  const { data: existing } = await admin
+  const { data: existing, error: existingError } = await admin
     .from('profiles')
     .select('id, email')
     .eq('logto_sub', sub)
     .maybeSingle();
+
+  if (existingError) {
+    console.error('[bridgeSupabaseSession] Error querying existing profile:', existingError);
+  }
 
   let authUserId: string | null = null;
 
@@ -62,9 +82,11 @@ async function bridgeSupabaseSession() {
     const { data } = await admin.auth.admin.getUserById(existing.id);
     if (data?.user) {
       authUserId = data.user.id;
+      console.log('[bridgeSupabaseSession] Found existing auth user:', authUserId);
     } else {
       // Profile huérfano (creado por webhook con uuid aleatorio): lo recreamos
       // con el id del usuario sombra para que RLS (auth.uid()) siga valiendo.
+      console.log('[bridgeSupabaseSession] Cleaning orphan profile without auth user:', existing.id);
       await admin.from('profiles').delete().eq('id', existing.id);
     }
   }
@@ -72,23 +94,31 @@ async function bridgeSupabaseSession() {
   // 2) Sin usuario sombra: crearlo + profile con su mismo id.
   if (!authUserId) {
     // Reutilizar auth user por email si ya existe (ej. registrado antes).
-    const { data: listed } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const { data: listed, error: listError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    if (listError) {
+      console.error('[bridgeSupabaseSession] Error listing auth users:', listError);
+    }
     const byEmail = listed?.users?.find(
       (u) => u.email?.toLowerCase() === email.toLowerCase()
     );
     if (byEmail) {
       authUserId = byEmail.id;
+      console.log('[bridgeSupabaseSession] Reusing existing auth user by email:', authUserId);
     } else {
       const { data: created, error } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
         user_metadata: { logto_sub: sub, full_name: name },
       });
-      if (error || !created?.user) return;
+      if (error || !created?.user) {
+        console.error('[bridgeSupabaseSession] Error creating shadow auth user:', error);
+        return;
+      }
       authUserId = created.user.id;
+      console.log('[bridgeSupabaseSession] Created shadow auth user:', authUserId);
     }
 
-    await admin.from('profiles').upsert(
+    const { error: upsertError } = await admin.from('profiles').upsert(
       {
         id: authUserId,
         logto_sub: sub,
@@ -99,6 +129,9 @@ async function bridgeSupabaseSession() {
       },
       { onConflict: 'id' }
     );
+    if (upsertError) {
+      console.error('[bridgeSupabaseSession] Error upserting profile:', upsertError);
+    }
   } else if (existing && !existing.email) {
     await admin.from('profiles').update({ email }).eq('id', existing.id);
   }
@@ -109,10 +142,16 @@ async function bridgeSupabaseSession() {
     type: 'magiclink',
     email,
   });
-  if (linkError || !linkData?.properties?.action_link) return;
+  if (linkError || !linkData?.properties?.action_link) {
+    console.error('[bridgeSupabaseSession] Error generating magic link:', linkError);
+    return;
+  }
 
   const token = new URL(linkData.properties.action_link).searchParams.get('token');
-  if (!token) return;
+  if (!token) {
+    console.error('[bridgeSupabaseSession] Missing token in action_link');
+    return;
+  }
 
   const { supabaseUrl, supabasePublishableKey } = getSupabaseEnv();
   const cookieStore = await cookies();
@@ -134,5 +173,10 @@ async function bridgeSupabaseSession() {
     token,
     type: 'magiclink',
   });
-  if (verifyError) return;
+  if (verifyError) {
+    console.error('[bridgeSupabaseSession] Error verifying OTP:', verifyError);
+    return;
+  }
+
+  console.log('[bridgeSupabaseSession] Successfully established Supabase session for:', email);
 }
