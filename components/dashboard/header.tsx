@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { logtoSignOut } from "@/app/logto-actions";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import Link from "next/link";
@@ -40,8 +41,14 @@ export function DashboardHeader({
       return;
     }
 
-    router.replace("/login");
-    router.refresh();
+    // Cerrar también la sesión Logto (si no, el proxy te devuelve al dashboard).
+    try {
+      await logtoSignOut();
+      return;
+    } catch {
+      router.replace("/login");
+      router.refresh();
+    }
   };
 
   const nameToShow = displayName || userLabel;
