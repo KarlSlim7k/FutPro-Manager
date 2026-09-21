@@ -20,8 +20,42 @@ export default async function DashboardLayout({
   }
 
   if (identity.source === "logto" && !identity.profileId) {
-    // Sesión Logto válida pero sin profile (webhook pendiente) → forzar login
-    // para evitar dashboard vacío. Fase 3: onboarding que lo cree inline.
+    // Auto-provisión inline (respaldo si el webhook aún no creó el profile):
+    // evita el loop /dashboard <-> /login para usuarios Google/SMS nuevos.
+    try {
+      const admin = createAdminClient();
+      const { data: created } = await admin
+        .from("profiles")
+        .insert({
+          logto_sub: identity.logtoSub,
+          email: identity.email,
+          global_role: "viewer",
+        })
+        .select("id")
+        .single();
+      if (created?.id) {
+        identity.profileId = created.id;
+      }
+    } catch {
+      // Si el insert falla (ej. duplicado por carrera con webhook), re-leer.
+      try {
+        const admin = createAdminClient();
+        const { data: retry } = await admin
+          .from("profiles")
+          .select("id")
+          .eq("logto_sub", identity.logtoSub)
+          .maybeSingle();
+        if (retry?.id) {
+          identity.profileId = retry.id;
+        }
+      } catch {
+        // cae al redirect de abajo
+      }
+    }
+  }
+
+  if (identity.source === "logto" && !identity.profileId) {
+    // Sesión Logto válida pero sin profile (webhook + insert fallaron).
     redirect("/login");
   }
 
