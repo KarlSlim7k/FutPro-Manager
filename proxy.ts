@@ -55,11 +55,28 @@ export async function proxy(request: NextRequest) {
 
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
   const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
+  const hasBridgedParam = request.nextUrl.searchParams.get("bridged") === "1";
 
   if (!isAuthenticated && isDashboardRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Auto-puente Logto -> Supabase: si el usuario está autenticado en Logto pero no
+  // tiene sesión activa de Supabase (ej. cookies de Supabase aún no emitidas o expiradas),
+  // redirigir al endpoint de auto-puente para emitir las cookies de sesión de inmediato.
+  if (!user && logtoAuthenticated && isDashboardRoute) {
+    if (hasBridgedParam) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.delete("bridged");
+      return NextResponse.redirect(redirectUrl);
+    }
+    const bridgeUrl = request.nextUrl.clone();
+    bridgeUrl.pathname = "/api/auth/bridge-session";
+    bridgeUrl.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(bridgeUrl);
   }
 
   // Bloqueo de usuarios suspendidos: solo consulta ligera al perfil en rutas del dashboard.
