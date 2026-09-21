@@ -81,6 +81,11 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
   }
 
   // 2) Sin usuario sombra: reutilizar por email o crearlo
+  const cookieStore = await cookies();
+  const rawRole = cookieStore.get('futpro_role_preference')?.value;
+  const validRoles = ['league_admin', 'team_admin', 'referee', 'viewer'];
+  const preferredRole = (rawRole && validRoles.includes(rawRole)) ? rawRole : null;
+
   if (!authUserId) {
     const { data: listed, error: listError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listError) {
@@ -96,7 +101,11 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
       const { data: created, error } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
-        user_metadata: { logto_sub: sub, full_name: name },
+        user_metadata: {
+          logto_sub: sub,
+          full_name: name,
+          ...(preferredRole ? { role_preference: preferredRole } : {}),
+        },
       });
       if (error || !created?.user) {
         console.error('[bridgeSupabaseSession] Error creating shadow auth user:', error);
@@ -106,6 +115,7 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
       console.log('[bridgeSupabaseSession] Created shadow auth user:', authUserId);
     }
 
+    const initialRole = preferredRole ?? 'viewer';
     const { error: upsertError } = await admin.from('profiles').upsert(
       {
         id: authUserId,
@@ -114,14 +124,30 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
         full_name: name,
         display_name: name,
         avatar_url: avatar,
+        global_role: initialRole,
       },
       { onConflict: 'id' }
     );
     if (upsertError) {
       console.error('[bridgeSupabaseSession] Error upserting profile:', upsertError);
     }
-  } else if (existing && !existing.email) {
-    await admin.from('profiles').update({ email }).eq('id', existing.id);
+  } else if (existing) {
+    const updates: Record<string, unknown> = {};
+    if (!existing.email) updates.email = email;
+    // Si era viewer y explícitamente se registró con un rol superior, actualizarlo:
+    if (existing.global_role === 'viewer' && preferredRole && preferredRole !== 'viewer') {
+      updates.global_role = preferredRole;
+    }
+    if (Object.keys(updates).length > 0) {
+      await admin.from('profiles').update(updates).eq('id', existing.id);
+    }
+  }
+
+  // Limpiar la cookie de preferencia una vez procesada
+  if (rawRole) {
+    try {
+      cookieStore.delete('futpro_role_preference');
+    } catch {}
   }
 
   // 3) Generar magiclink y verificar token_hash
@@ -142,7 +168,6 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
   }
 
   const { supabaseUrl, supabasePublishableKey } = getSupabaseEnv();
-  const cookieStore = await cookies();
   const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll() {

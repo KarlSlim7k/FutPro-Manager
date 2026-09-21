@@ -101,14 +101,27 @@ export default async function DashboardLayout({
       .limit(1),
   ]);
 
+  // Si el usuario se registró con email/password y tiene role_preference pero su perfil quedó en viewer:
+  if (profileData?.global_role === "viewer" && identity.source === "supabase") {
+    try {
+      const userRes = await supabase.auth.getUser();
+      const metaRole = userRes.data.user?.user_metadata?.role_preference;
+      if (metaRole && ["league_admin", "team_admin", "referee"].includes(metaRole)) {
+        const admin = createAdminClient();
+        await admin.from("profiles").update({ global_role: metaRole }).eq("id", profileId);
+        profileData.global_role = metaRole;
+      }
+    } catch {}
+  }
+
   let userRole: UserDashboardRole = "viewer";
   if (profileData?.global_role === "super_admin") {
     userRole = "super_admin";
-  } else if (leagueMembers?.some((m) => m.role === "league_admin")) {
+  } else if (profileData?.global_role === "league_admin" || leagueMembers?.some((m) => m.role === "league_admin")) {
     userRole = "league_admin";
-  } else if ((refereeMatches && refereeMatches.length > 0) || leagueMembers?.some((m) => m.role === "referee")) {
+  } else if ((refereeMatches && refereeMatches.length > 0) || profileData?.global_role === "referee" || leagueMembers?.some((m) => m.role === "referee")) {
     userRole = "referee";
-  } else if (teamMembers?.some((m) => m.role === "team_admin" || m.role === "coach")) {
+  } else if (profileData?.global_role === "team_admin" || teamMembers?.some((m) => m.role === "team_admin" || m.role === "coach")) {
     userRole = "team_staff";
   }
 

@@ -13,7 +13,6 @@ import {
   Zap,
 } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
-import { LogtoSignInButton } from "@/components/auth/logto-buttons";
 import { createClient } from "@/lib/supabase/server";
 import { getLogtoContext } from "@logto/next/server-actions";
 import { logtoConfig } from "@/app/logto";
@@ -224,12 +223,6 @@ export default async function LoginPage({
               <div className="absolute inset-x-8 -top-px h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
 
               <LoginForm initialMode={initialMode} suspendedNotice={suspended === "1"} />
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <p className="mb-2 text-center text-xs text-gray-500">
-                  ¿Sin correo? Usa tu cuenta social
-                </p>
-                <LogtoSignInButton />
-              </div>
             </div>
           </section>
         </div>

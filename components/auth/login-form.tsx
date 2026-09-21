@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { LogtoSignInButton } from "./logto-buttons";
 import {
   calculatePasswordStrength,
   mapAuthError,
@@ -239,6 +240,14 @@ export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice
       }
 
       if (data.session) {
+        if (data.user) {
+          try {
+            await supabase
+              .from("profiles")
+              .update({ global_role: selectedRole })
+              .eq("id", data.user.id);
+          } catch {}
+        }
         router.replace("/dashboard");
         router.refresh();
         return;
@@ -393,6 +402,24 @@ export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Registro rápido con Google respetando el rol seleccionado */}
+            <div className="pt-2">
+              <LogtoSignInButton
+                rolePreference={selectedRole}
+                label={`Registrarse con Google como ${
+                  ROLE_OPTIONS.find((opt) => opt.id === selectedRole)?.label || "Usuario"
+                }`}
+              />
+              <div className="relative my-3.5 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <span className="relative bg-white px-2.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">
+                  o con correo y contraseña
+                </span>
               </div>
             </div>
           </div>
@@ -637,6 +664,21 @@ export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice
             </>
           )}
         </Button>
+
+        {/* Acceso social en Iniciar Sesión */}
+        {isLogin && (
+          <div className="pt-1">
+            <div className="relative my-3 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <span className="relative bg-white px-2.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">
+                o accede con
+              </span>
+            </div>
+            <LogtoSignInButton label="Iniciar sesión con Google" />
+          </div>
+        )}
 
         {/* Pie y acciones secundarias */}
         {isForgotPassword ? (
