@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import LogtoClient from "@logto/next/edge";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { logtoConfig } from "@/app/logto";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
@@ -34,10 +36,24 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Fase 1 Logto (coexistencia): si hay sesión Logto válida, tratar como autenticado.
+  let logtoAuthenticated = false;
+  try {
+    if (logtoConfig.appSecret && logtoConfig.cookieSecret) {
+      const logtoClient = new LogtoClient(logtoConfig);
+      const ctx = await logtoClient.getLogtoContext(request);
+      logtoAuthenticated = ctx.isAuthenticated;
+    }
+  } catch {
+    logtoAuthenticated = false;
+  }
+
+  const isAuthenticated = Boolean(user) || logtoAuthenticated;
+
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
   const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
 
-  if (!user && isDashboardRoute) {
+  if (!isAuthenticated && isDashboardRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
@@ -59,7 +75,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (user && isLoginRoute) {
+  if (isAuthenticated && isLoginRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);
