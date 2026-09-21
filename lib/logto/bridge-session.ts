@@ -59,7 +59,7 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
   // 1) Profile existente por logto_sub
   const { data: existing, error: existingError } = await admin
     .from('profiles')
-    .select('id, email, global_role')
+    .select('id, email, global_role, avatar_url, full_name, display_name')
     .eq('logto_sub', sub)
     .maybeSingle();
 
@@ -115,16 +115,30 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
       console.log('[bridgeSupabaseSession] Created shadow auth user:', authUserId);
     }
 
-    const initialRole = preferredRole ?? 'viewer';
+    const { data: profileByAuth } = await admin
+      .from('profiles')
+      .select('global_role, avatar_url, full_name, display_name')
+      .eq('id', authUserId)
+      .maybeSingle();
+
+    const roleToSet =
+      profileByAuth?.global_role && profileByAuth.global_role !== 'viewer'
+        ? profileByAuth.global_role
+        : (preferredRole ?? profileByAuth?.global_role ?? 'viewer');
+
+    const avatarToSet = profileByAuth?.avatar_url || avatar;
+    const nameToSet = profileByAuth?.full_name || name;
+    const displayToSet = profileByAuth?.display_name || nameToSet;
+
     const { error: upsertError } = await admin.from('profiles').upsert(
       {
         id: authUserId,
         logto_sub: sub,
         email,
-        full_name: name,
-        display_name: name,
-        avatar_url: avatar,
-        global_role: initialRole,
+        full_name: nameToSet,
+        display_name: displayToSet,
+        avatar_url: avatarToSet,
+        global_role: roleToSet,
       },
       { onConflict: 'id' }
     );
@@ -133,7 +147,10 @@ export async function bridgeSupabaseSession(): Promise<BridgeResult> {
     }
   } else if (existing) {
     const updates: Record<string, unknown> = {};
-    if (!existing.email) updates.email = email;
+    if (!existing.email && email) updates.email = email;
+    if (!existing.avatar_url && avatar) updates.avatar_url = avatar;
+    if (!existing.full_name && name) updates.full_name = name;
+    if (!existing.display_name && name) updates.display_name = name;
     // Si era viewer y explícitamente se registró con un rol superior, actualizarlo:
     if (existing.global_role === 'viewer' && preferredRole && preferredRole !== 'viewer') {
       updates.global_role = preferredRole;

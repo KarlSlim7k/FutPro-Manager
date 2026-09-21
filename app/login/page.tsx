@@ -20,8 +20,17 @@ import { logtoConfig } from "@/app/logto";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; suspended?: string }>;
+  searchParams: Promise<{
+    mode?: string;
+    suspended?: string;
+    signed_out?: string;
+    logout?: string;
+    error?: string;
+  }>;
 }) {
+  const { mode, suspended, signed_out, logout, error } = await searchParams;
+  const isSignedOut = Boolean(signed_out || logout);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,11 +46,10 @@ export default async function LoginPage({
     logtoAuthenticated = false;
   }
 
-  if (user || logtoAuthenticated) {
+  if ((user || logtoAuthenticated) && !isSignedOut) {
     redirect("/dashboard");
   }
 
-  const { mode, suspended } = await searchParams;
   const initialMode =
     mode === "register"
       ? "register"
@@ -222,7 +230,12 @@ export default async function LoginPage({
               {/* Micro línea decorativa superior */}
               <div className="absolute inset-x-8 -top-px h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
 
-              <LoginForm initialMode={initialMode} suspendedNotice={suspended === "1"} />
+              <LoginForm
+                initialMode={initialMode}
+                suspendedNotice={suspended === "1"}
+                signedOutNotice={isSignedOut}
+                authError={error}
+              />
             </div>
           </section>
         </div>

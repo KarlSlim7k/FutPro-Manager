@@ -72,9 +72,17 @@ type LoginFormProps = {
   initialMode?: AuthMode;
   onModeChange?: (mode: AuthMode) => void;
   suspendedNotice?: boolean;
+  signedOutNotice?: boolean;
+  authError?: string;
 };
 
-export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice }: LoginFormProps) {
+export function LoginForm({
+  initialMode = "login",
+  onModeChange,
+  suspendedNotice,
+  signedOutNotice,
+  authError,
+}: LoginFormProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
@@ -84,10 +92,24 @@ export function LoginForm({ initialMode = "login", onModeChange, suspendedNotice
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<RoleOption["id"]>("league_admin");
-  const [error, setError] = useState<string | null>(
-    suspendedNotice ? "Tu cuenta ha sido suspendida. Contacta al administrador de la plataforma." : null
+
+  const initialError = useMemo(() => {
+    if (suspendedNotice) {
+      return "Tu cuenta ha sido suspendida. Contacta al administrador de la plataforma.";
+    }
+    if (authError === "cancelled") {
+      return "Se canceló el inicio de sesión con Google.";
+    }
+    if (authError === "oauth_failed") {
+      return "No se pudo completar la autenticación con Google. Inténtalo nuevamente.";
+    }
+    return null;
+  }, [suspendedNotice, authError]);
+
+  const [error, setError] = useState<string | null>(initialError);
+  const [success, setSuccess] = useState<string | null>(
+    signedOutNotice ? "Has cerrado sesión correctamente." : null
   );
-  const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

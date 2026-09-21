@@ -12,13 +12,33 @@ import { bridgeSupabaseSession } from '@/lib/logto/bridge-session';
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  await handleSignIn(logtoConfig, searchParams);
+
+  // Si el proveedor OAuth devolvió error o el usuario canceló
+  const errorParam = searchParams.get('error');
+  if (errorParam) {
+    console.warn('[callback] OAuth provider error:', errorParam, searchParams.get('error_description'));
+    const code = errorParam === 'access_denied' ? 'cancelled' : 'oauth_failed';
+    redirect(`/login?error=${code}`);
+  }
+
+  try {
+    await handleSignIn(logtoConfig, searchParams);
+  } catch (err) {
+    if (err && typeof err === 'object' && 'digest' in err) {
+      throw err;
+    }
+    console.error('[callback] Error in handleSignIn:', err);
+    redirect('/login?error=oauth_failed');
+  }
 
   try {
     await bridgeSupabaseSession();
   } catch (err) {
+    if (err && typeof err === 'object' && 'digest' in err) {
+      throw err;
+    }
     console.error('[callback] Error in bridgeSupabaseSession:', err);
-    // Fallback: el layout con auto-provisión cubre el caso sin sesión Supabase.
+    // Fallback: el auto-puente en proxy.ts lo recuperará
   }
 
   redirect('/dashboard');
