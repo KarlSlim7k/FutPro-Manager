@@ -38,14 +38,17 @@ export async function proxy(request: NextRequest) {
 
   // Fase 1 Logto (coexistencia): si hay sesión Logto válida, tratar como autenticado.
   let logtoAuthenticated = false;
+  let logtoSub: string | null = null;
   try {
     if (logtoConfig.appSecret && logtoConfig.cookieSecret) {
       const logtoClient = new LogtoClient(logtoConfig);
       const ctx = await logtoClient.getLogtoContext(request);
       logtoAuthenticated = ctx.isAuthenticated;
+      logtoSub = ctx.claims?.sub ?? null;
     }
   } catch {
     logtoAuthenticated = false;
+    logtoSub = null;
   }
 
   const isAuthenticated = Boolean(user) || logtoAuthenticated;
@@ -72,6 +75,33 @@ export async function proxy(request: NextRequest) {
       redirectUrl.pathname = "/login";
       redirectUrl.searchParams.set("suspended", "1");
       return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Fase 2: mismo bloqueo para usuarios solo-Logto (lookup por logto_sub
+  // con service_role; sin signOut server-side, redirige a login).
+  if (!user && logtoAuthenticated && logtoSub && isDashboardRoute) {
+    try {
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (serviceRoleKey) {
+        const { createClient } = await import("@supabase/supabase-js");
+        const admin = createClient(supabaseUrl, serviceRoleKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const { data: logtoProfile } = await admin
+          .from("profiles")
+          .select("is_suspended")
+          .eq("logto_sub", logtoSub)
+          .maybeSingle();
+        if (logtoProfile?.is_suspended) {
+          const redirectUrl = request.nextUrl.clone();
+          redirectUrl.pathname = "/login";
+          redirectUrl.searchParams.set("suspended", "1");
+          return NextResponse.redirect(redirectUrl);
+        }
+      }
+    } catch {
+      // No bloquear por error de lookup; el layout revalida identidad.
     }
   }
 

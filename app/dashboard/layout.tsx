@@ -3,6 +3,8 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardMobileNav } from "@/components/dashboard/mobile-nav";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getVerifiedUser } from "@/lib/logto/get-verified-user";
 import type { UserDashboardRole } from "@/components/dashboard/navigation-config";
 import type { UserNotification } from "@/types/database";
 
@@ -11,14 +13,26 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const identity = await getVerifiedUser();
 
-  if (!user) {
+  if (identity.source === "anonymous") {
     redirect("/login");
   }
+
+  if (identity.source === "logto" && !identity.profileId) {
+    // Sesión Logto válida pero sin profile (webhook pendiente) → forzar login
+    // para evitar dashboard vacío. Fase 3: onboarding que lo cree inline.
+    redirect("/login");
+  }
+
+  const profileId =
+    identity.source === "supabase" ? identity.profileId : identity.profileId!;
+  const userEmail = identity.email;
+
+  // Usuarios Supabase: cliente anon (RLS). Usuarios Logto: admin (bypass RLS
+  // con checks manuales por profileId, hasta migrar RLS en Fase 2 completa).
+  const supabase =
+    identity.source === "supabase" ? await createClient() : createAdminClient();
 
   const [
     { data: profileData },
@@ -30,26 +44,26 @@ export default async function DashboardLayout({
     supabase
       .from("profiles")
       .select("global_role, display_name, avatar_url, full_name")
-      .eq("id", user.id)
+      .eq("id", profileId)
       .maybeSingle(),
     supabase
       .from("user_notifications")
       .select("id, user_id, league_id, type, title, message, link_url, read_at, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", profileId)
       .order("created_at", { ascending: false })
       .limit(20),
     supabase
       .from("league_members")
       .select("role")
-      .eq("profile_id", user.id),
+      .eq("profile_id", profileId),
     supabase
       .from("team_members")
       .select("role")
-      .eq("profile_id", user.id),
+      .eq("profile_id", profileId),
     supabase
       .from("matches")
       .select("id")
-      .eq("referee_id", user.id)
+      .eq("referee_id", profileId)
       .limit(1),
   ]);
 
@@ -66,7 +80,7 @@ export default async function DashboardLayout({
 
   const userDisplayName = profileData?.display_name || profileData?.full_name || null;
   const userAvatarUrl = profileData?.avatar_url ?? null;
-  const userLabel = user.email ?? "Usuario autenticado";
+  const userLabel = userEmail ?? "Usuario autenticado";
   const notifications = (notificationsData ?? []) as UserNotification[];
 
   return (
