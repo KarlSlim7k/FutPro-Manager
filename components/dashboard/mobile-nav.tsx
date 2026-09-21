@@ -12,8 +12,6 @@ import {
   type UserDashboardRole,
 } from "@/components/dashboard/navigation-config";
 import { createClient } from "@/lib/supabase/client";
-import { logtoSignOut } from "@/app/logto-actions";
-import { useRouter } from "next/navigation";
 
 interface DashboardMobileNavProps {
   role: UserDashboardRole;
@@ -29,7 +27,6 @@ export function DashboardMobileNav({
   avatarUrl,
 }: DashboardMobileNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -58,15 +55,14 @@ export function DashboardMobileNav({
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    // Cerrar también la sesión Logto (si no, el proxy te devuelve al dashboard).
     try {
-      await logtoSignOut();
+      const supabase = createClient();
+      await supabase.auth.signOut();
     } catch {
-      router.replace("/login");
-      router.refresh();
+      // Silenciar error local
     }
+    // Redirección completa a /api/auth/sign-out para revocar y destruir sesiones en Logto y Supabase
+    window.location.href = "/api/auth/sign-out";
   };
 
   const isMoreActive = drawer.some(

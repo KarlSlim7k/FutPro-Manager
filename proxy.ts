@@ -55,6 +55,9 @@ export async function proxy(request: NextRequest) {
 
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
   const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
+  const isSignedOut =
+    request.nextUrl.searchParams.has("signed_out") ||
+    request.nextUrl.searchParams.has("logout");
   const hasBridgedParam = request.nextUrl.searchParams.get("bridged") === "1";
 
   if (!isAuthenticated && isDashboardRoute) {
@@ -66,7 +69,8 @@ export async function proxy(request: NextRequest) {
   // Auto-puente Logto -> Supabase: si el usuario está autenticado en Logto pero no
   // tiene sesión activa de Supabase (ej. cookies de Supabase aún no emitidas o expiradas),
   // redirigir al endpoint de auto-puente para emitir las cookies de sesión de inmediato.
-  if (!user && logtoAuthenticated && isDashboardRoute) {
+  // Solo aplicar a navegaciones GET para no romper Server Actions ni peticiones POST.
+  if (!user && logtoAuthenticated && isDashboardRoute && request.method === "GET") {
     if (hasBridgedParam) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/login";
@@ -120,6 +124,10 @@ export async function proxy(request: NextRequest) {
     } catch {
       // No bloquear por error de lookup; el layout revalida identidad.
     }
+  }
+
+  if (isLoginRoute && isSignedOut) {
+    return response;
   }
 
   if (isAuthenticated && isLoginRoute) {

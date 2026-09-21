@@ -21,5 +21,24 @@ export async function logtoSignIn(rolePreference?: string) {
 }
 
 export async function logtoSignOut() {
-  await signOut(logtoConfig);
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  for (const c of allCookies) {
+    if (
+      c.name.startsWith('sb-') ||
+      c.name.startsWith('logto') ||
+      c.name === 'futpro_role_preference'
+    ) {
+      try {
+        cookieStore.set(c.name, '', {
+          path: '/',
+          maxAge: 0,
+          expires: new Date(0),
+        });
+        cookieStore.delete(c.name);
+      } catch {}
+    }
+  }
+  await signOut(logtoConfig, `${logtoConfig.baseUrl}/login?signed_out=1`);
 }
+

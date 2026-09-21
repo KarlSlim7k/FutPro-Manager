@@ -34,3 +34,8 @@ export async function GET(request: NextRequest) {
   const separator = target.includes('?') ? '&' : '?';
   redirect(`${target}${separator}bridged=1`);
 }
+
+export async function POST(request: NextRequest) {
+  return GET(request);
+}
+

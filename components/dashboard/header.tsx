@@ -1,9 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { logtoSignOut } from "@/app/logto-actions";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import Link from "next/link";
@@ -24,7 +22,6 @@ export function DashboardHeader({
   displayName,
   notifications = [],
 }: DashboardHeaderProps) {
-  const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,22 +30,14 @@ export function DashboardHeader({
     setError(null);
     setIsLoading(true);
 
-    const { error: signOutError } = await supabase.auth.signOut();
-
-    if (signOutError) {
-      setError("No se pudo cerrar sesión. Inténtalo nuevamente.");
-      setIsLoading(false);
-      return;
-    }
-
-    // Cerrar también la sesión Logto (si no, el proxy te devuelve al dashboard).
     try {
-      await logtoSignOut();
-      return;
+      await supabase.auth.signOut();
     } catch {
-      router.replace("/login");
-      router.refresh();
+      // Silenciar error del cliente
     }
+
+    // Redirección completa a /api/auth/sign-out para revocar y destruir sesiones en Logto y Supabase
+    window.location.href = "/api/auth/sign-out";
   };
 
   const nameToShow = displayName || userLabel;
