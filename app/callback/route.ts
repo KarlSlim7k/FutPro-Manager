@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 }
 
 async function bridgeSupabaseSession() {
-  const ctx = await getLogtoContext(logtoConfig);
+  const ctx = await getLogtoContext(logtoConfig, { fetchUserInfo: true });
   if (!ctx.isAuthenticated || !ctx.claims?.sub) return;
 
   const sub = ctx.claims.sub;

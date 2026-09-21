@@ -43,7 +43,7 @@ export async function getVerifiedUser(): Promise<VerifiedUser> {
     if (!logtoConfig.appSecret || !logtoConfig.cookieSecret) {
       return { source: "anonymous" };
     }
-    const ctx = await getLogtoContext(logtoConfig);
+    const ctx = await getLogtoContext(logtoConfig, { fetchUserInfo: true });
     if (!ctx.isAuthenticated || !ctx.claims?.sub) {
       return { source: "anonymous" };
     }
